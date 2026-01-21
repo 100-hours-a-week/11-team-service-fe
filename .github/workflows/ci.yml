@@ -146,8 +146,8 @@ jobs:
       - name: Upload dist to S3
         env:
           BUCKET: ${{ secrets.RELEASE_BUCKET }}
-          PREFIX: releases/${{ steps.meta.outputs.timestamp }}
+          PREFIX: releases/frontend
         run: |
           aws s3 cp dist/ \
-            s3://$BUCKET/$PREFIX/frontend/ \
+            s3://$BUCKET/$PREFIX/${{ steps.meta.outputs.timestamp }} \
             --recursive
