@@ -19,23 +19,47 @@ jobs:
       - name: Download artifact from CI
         uses: actions/download-artifact@v4
         with:
-          name: verified-fe-dist
+          name: fe-dist
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
           path: ./dist
 
-      - name: List dist
-        run: ls -la dist && find dist -maxdepth 3 -type f | head
+      - name: Prepare release name
+        id: meta
+        run: echo "release=$(date -u +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
 
-      - name: Deploy dist to Dev Server
+      # 새 릴리즈 디렉토리로 업로드
+      - name: Upload dist to new release dir
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.DEV_HOST }}
           username: ${{ secrets.DEV_USER }}
           key: ${{ secrets.DEV_SSH_KEY }}
           source: "dist/**"
-          target: "/home/ubuntu/frontend"
+          target: "/home/ubuntu/frontend/releases/${{ steps.meta.outputs.release }}"
           strip_components: 1
+
+      # current 링크를 원자적으로 교체 + 오래된 릴리즈 정리
+      - name: Activate release & cleanup
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.DEV_USER }}
+          key: ${{ secrets.DEV_SSH_KEY }}
+          script: |
+            set -e
+
+            BASE="/home/ubuntu/frontend"
+            RELEASE="${{ steps.meta.outputs.release }}"
+
+            mkdir -p "$BASE/releases"
+
+            # current -> releases/<release> (원자적 교체)
+            ln -sfn "$BASE/releases/$RELEASE" "$BASE/current"
+
+            # 최신 5개만 남기고 정리
+            cd "$BASE/releases"
+            ls -1dt */ | tail -n +6 | xargs -r rm -rf
 
       - name: Notify Discord - Success
         if: success()
