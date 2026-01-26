@@ -188,7 +188,7 @@ jobs:
       - name: Upload dist to S3
         env:
           BUCKET: ${{ secrets.RELEASE_BUCKET }}
-          PREFIX: snapshots/frontend
+          PREFIX: releases/frontend
         run: |
           aws s3 cp artifact/ \
             s3://$BUCKET/$PREFIX/${{ needs.build.outputs.version }} \

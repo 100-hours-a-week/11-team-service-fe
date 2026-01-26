@@ -32,7 +32,7 @@ jobs:
       - name: Download artifact from S3
         env:
           BUCKET: ${{ secrets.RELEASE_BUCKET }}
-          PREFIX: snapshots/frontend
+          PREFIX: releases/frontend
         run: |
           rm -rf ./dist
           mkdir -p ./dist
