@@ -139,7 +139,7 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: List dist
-        run: ls -la dist && find dist -maxdepth 2 -type f | head
+        run: ls -la artifact && find artifact -maxdepth 2 -type f | head
 
       - name: Upload dist to S3
         env:
@@ -183,7 +183,7 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: List dist
-        run: ls -la artifact && findartifact -maxdepth 2 -type f | head
+        run: ls -la artifact && find artifact -maxdepth 2 -type f | head
 
       - name: Upload dist to S3
         env:
