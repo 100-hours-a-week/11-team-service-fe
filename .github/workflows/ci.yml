@@ -129,7 +129,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.artifact_name }}
-          path: dist
+          path: artifact
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -138,14 +138,14 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: List dist
-        run: ls -la dist && find dist -maxdepth 2 -type f | head
+        run: ls -la artifact && find artifact -maxdepth 2 -type f | head
 
       - name: Upload dist to S3
         env:
           BUCKET: ${{ secrets.RELEASE_BUCKET }}
           PREFIX: snapshots/frontend
         run: |
-          aws s3 cp dist/ \
+          aws s3 cp artifact/ \
             s3://$BUCKET/$PREFIX/${{ needs.build.outputs.version }} \
             --recursive
 
@@ -173,7 +173,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.artifact_name }}
-          path: dist
+          path: artifact
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -182,7 +182,7 @@ jobs:
           aws-region: ap-northeast-2
 
       - name: List dist
-        run: ls -la dist && find dist -maxdepth 2 -type f | head
+        run: ls -la artifact && find artifact -maxdepth 2 -type f | head
 
       - name: Upload dist to S3
         env:
