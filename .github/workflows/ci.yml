@@ -16,6 +16,10 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    outputs:
+      artifact_name: ${{ steps.meta.outputs.artifact_name }}
+      build_dir: ${{ steps.meta.outputs.build_dir }}
+      version: ${{ steps.meta.outputs.version }}
 
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +27,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "lts/*"
+          node-version: "24"
           cache: "npm"
           cache-dependency-path: package-lock.json
 
@@ -33,12 +37,24 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Upload dist (temporary for downstream job)
+      - name: Set metadata (artifact name / dir / version)
+        id: meta
+        run: |
+          BUILD_DIR="dist"
+          VERSION=$(node -p "require('./package.json').version")
+          ARTIFACT_NAME="fe-${VERSION}-${GITHUB_SHA::7}"
+
+          echo "build_dir=$BUILD_DIR" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "artifact_name=$ARTIFACT_NAME" >> $GITHUB_OUTPUT
+
+      - name: Upload build output
         uses: actions/upload-artifact@v4
         with:
-          name: fe-dist
-          path: dist/**
+          name: ${{ steps.meta.outputs.artifact_name }}
+          path: ${{ steps.meta.outputs.build_dir }}/**
           retention-days: 1
+
 
   # ----------------------------
   # 2. Test
