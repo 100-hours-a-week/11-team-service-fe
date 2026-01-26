@@ -189,7 +189,7 @@ jobs:
           BUCKET: ${{ secrets.RELEASE_BUCKET }}
           PREFIX: snapshots/frontend
         run: |
-          aws s3 cp dist/ \
+          aws s3 cp artifact/ \
             s3://$BUCKET/$PREFIX/${{ needs.build.outputs.version }}/${{ steps.meta.outputs.timestamp }} \
             --recursive
 
