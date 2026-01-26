@@ -119,29 +119,6 @@ jobs:
   # ----------------------------
   # 4. Artifacts (develop)
   # ----------------------------
-  artifacts:
-    name: Upload Verified Artifact
-    runs-on: ubuntu-latest
-    needs: [build, test, static_analysis]
-    if: ${{ github.base_ref == 'develop' }}
-
-    steps:
-      - name: Download dist
-        uses: actions/download-artifact@v4
-        with:
-          name: fe-dist
-          path: dist
-
-      - name: Upload verified dist
-        uses: actions/upload-artifact@v4
-        with:
-          name: verified-fe-dist
-          path: dist/**
-          retention-days: 90
-
-  # ----------------------------
-  # 5. Main -> S3 Archive
-  # ----------------------------
   main_archive:
     name: Archive to S3
     runs-on: ubuntu-latest
@@ -149,15 +126,10 @@ jobs:
     if: github.base_ref == 'main'
 
     steps:
-      - name: Set meta
-        id: meta
-        run: |
-          echo "timestamp=$(TZ='Asia/Seoul' date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
-
       - name: Download dist
         uses: actions/download-artifact@v4
         with:
-          name: fe-dist
+          name: ${{ needs.build.outputs.artifact_name }}
           path: dist
 
       - name: Configure AWS credentials
@@ -172,8 +144,57 @@ jobs:
       - name: Upload dist to S3
         env:
           BUCKET: ${{ secrets.RELEASE_BUCKET }}
-          PREFIX: releases/frontend
+          PREFIX: snapshots/frontend
         run: |
           aws s3 cp dist/ \
-            s3://$BUCKET/$PREFIX/${{ steps.meta.outputs.timestamp }} \
+            s3://$BUCKET/$PREFIX/${{ needs.build.outputs.version }} \
+            --recursive
+
+          # latest 폴더에 덮어쓰기 (최신 스냅샷)
+          aws s3 cp artifact/ \
+            s3://$BUCKET/$PREFIX/latest/ \
+            --recursive
+
+  # ----------------------------
+  # 5. Main -> S3 Archive
+  # ----------------------------
+  snapshot_archive:
+    name: Archive to S3
+    runs-on: ubuntu-latest
+    needs: [build, test, static_analysis]
+    if: github.base_ref == 'develop'
+
+    steps:
+      - name: Set meta
+        id: meta
+        run: |
+          echo "timestamp=$(TZ='Asia/Seoul' date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
+
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.artifact_name }}
+          path: dist
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ap-northeast-2
+
+      - name: List dist
+        run: ls -la dist && find dist -maxdepth 2 -type f | head
+
+      - name: Upload dist to S3
+        env:
+          BUCKET: ${{ secrets.RELEASE_BUCKET }}
+          PREFIX: snapshots/frontend
+        run: |
+          aws s3 cp dist/ \
+            s3://$BUCKET/$PREFIX/${{ needs.build.outputs.version }}/${{ steps.meta.outputs.timestamp }} \
+            --recursive
+
+          # latest 폴더에 덮어쓰기 (최신 스냅샷)
+          aws s3 cp artifact/ \
+            s3://$BUCKET/$PREFIX/latest/ \
             --recursive
