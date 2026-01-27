@@ -117,7 +117,7 @@ jobs:
         run: npm run format:check
 
   # ----------------------------
-  # 4. Main -> S3 Archive (develop)
+  # 4. develop -> S3 Archive (develop)
   # ----------------------------
   snapshot_archive:
     name: Archive to S3
