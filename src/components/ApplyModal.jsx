@@ -5,8 +5,6 @@ import { X, Upload, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle }) => {
-    if (!isOpen) return null;
-
     const [resume, setResume] = useState(null);
     const [portfolio, setPortfolio] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -15,6 +13,9 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle }) => {
 
     const resumeInputRef = useRef(null);
     const portfolioInputRef = useRef(null);
+
+    // Early return AFTER hooks
+    if (!isOpen) return null;
 
     const handleFileChange = (e, type) => {
         const file = e.target.files[0];

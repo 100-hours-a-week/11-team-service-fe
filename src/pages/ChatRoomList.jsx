@@ -4,6 +4,13 @@ import client from '../api/client';
 import { ChevronLeft, Bell, Search, Filter, Lock } from 'lucide-react';
 import ScoreCheckModal from '../components/ScoreCheckModal';
 
+// Mock Rooms Data
+const MOCK_ROOMS = [
+    { id: 1, title: '토스 1차 서류 합격 목표', goal: '서류', current: 2, max: 5, host: 'suhoSin', cutline: 60, condition: '무관' },
+    { id: 2, title: '프론트엔드 면접 대비방', goal: '면접', current: 5, max: 5, host: 'devLee', cutline: 70, condition: 'CS 지식' },
+    { id: 3, title: '자소서 피드백 하실 분', goal: '서류', current: 1, max: 4, host: 'junior', cutline: 50, condition: '무관' },
+];
+
 const ChatRoomList = () => {
     const { id } = useParams(); // Job Posting ID
     const navigate = useNavigate();
@@ -14,13 +21,6 @@ const ChatRoomList = () => {
     const [jobInfo, setJobInfo] = useState({ title: '', company: '' });
     const [showScoreModal, setShowScoreModal] = useState(false);
     const [myScore, setMyScore] = useState(null);
-
-    // Mock Rooms Data
-    const MOCK_ROOMS = [
-        { id: 1, title: '토스 1차 서류 합격 목표', goal: '서류', current: 2, max: 5, host: 'suhoSin', cutline: 60, condition: '무관' },
-        { id: 2, title: '프론트엔드 면접 대비방', goal: '면접', current: 5, max: 5, host: 'devLee', cutline: 70, condition: 'CS 지식' },
-        { id: 3, title: '자소서 피드백 하실 분', goal: '서류', current: 1, max: 4, host: 'junior', cutline: 50, condition: '무관' },
-    ];
 
     useEffect(() => {
         // Fetch Job Info (Mock or minimal fetch)
