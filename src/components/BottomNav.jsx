@@ -10,33 +10,7 @@ const BottomNav = () => {
     // Resume: 이력관리
     // Chat: 채팅방
     // My Page: 마이페이지
-    const navItems = [
-        { name: '커뮤니티', path: '/community', icon: MessageSquare }, // Placeholder path
-        { name: '이력관리', path: '/resume', icon: FileText },     // Placeholder path
-        { name: '채팅방', path: '/', icon: MessageCircle },      // Main feature (Job/Chat context) seems to be the dashboard default for now or a specific chat tab. User said "Main screen shows job list", but bottom nav has "Chat". Assuming Dashboard is the entry, but maybe one of these tabs IS the dashboard. 
-        // Logic check: User said "Main screen is job list" and provided bottom nav items. 
-        // Usually "Community" or "Chat" might be separate. 
-        // Let's assume the current Dashboard (Job List) is the main entry. 
-        // However, the user listed "Community, Resume, Chat, MyPage". 
-        // Where is "Job List"? 
-        // "공고 리스트" is described as the "Main Area". 
-        // Maybe "Community" or "Chat" is the active tab? 
-        // Or maybe "Home" is missing from the list?
-        // User said: "하단바는 커뮤니티 이력관리 채팅방 마이페이지가 아이콘으로 들어가 있는거야"
-        // And "메인화면에 채용공고 목록 이렇게 보여야돼".
-        // This suggests one of these tabs IS the Job List, OR the Job List is a separate page not in the bottom nav (less likely for main screen).
-        // Let's assume "커뮤니티" (Community) might be the default Home/Job List for now, or I'll add a "Home" if typical.
-        // Wait, "채용 공고" (Job Posting) usually fits "Community" or is its own thing. 
-        // Let's look at the image. The image header says "채용공고" (Job Posting).
-        // If the bottom nav has only 4 items, and none are "Home" or "Job", maybe "Community" IS the main feed?
-        // OR the user missed "Home". 
-        // Let's map "채팅방" to a chat feature.
-        // Let's map the current Dashboard to one of these or keep it as "/" and highlight one of them?
-        // Actually, looking at the image (if I could see it conceptually), usually the first tab is Home.
-        // Let's put the Dashboard at "/" and maybe map it to "커뮤니티" or just keep "/" as the first item.
-        // Let's use "커뮤니티" as the label for "/" for now.
-        { name: '마이페이지', path: '/mypage', icon: User },
-    ];
+
 
     // Re-evaluating: The user said "Main screen" has job list. 
     // And "Bottom bar has Community, Resume, Chat, MyPage".

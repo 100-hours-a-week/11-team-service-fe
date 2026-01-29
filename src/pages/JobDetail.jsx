@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import { ChevronLeft, Share2, Building, Briefcase, Calendar, CheckCircle } from 'lucide-react';
+import ApplyModal from '../components/ApplyModal';
 
 const JobDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [job, setJob] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showApplyModal, setShowApplyModal] = useState(false);
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -114,13 +116,32 @@ const JobDetail = () => {
                 )}
 
                 {/* 3. AI Summary */}
-                <section>
+                <section className="mb-24">
                     <div className="mb-2 text-sm font-bold text-gray-900">AI공고 요약</div>
                     <div className="bg-gray-200 rounded-xl p-5 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap min-h-[150px]">
                         {job.aiSummary || "AI 요약 정보가 없습니다."}
                     </div>
                 </section>
             </div>
+
+            {/* Bottom Apply Button (Fixed) - Only for Open Jobs */}
+            {!isClosed && (
+                <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 pb-10 z-[100]">
+                    <button
+                        onClick={() => setShowApplyModal(true)}
+                        className="w-full bg-gray-900 text-white font-bold py-3.5 rounded-xl text-sm hover:bg-black transition-colors shadow-lg"
+                    >
+                        지원하기
+                    </button>
+                </div>
+            )}
+
+            <ApplyModal
+                isOpen={showApplyModal}
+                onClose={() => setShowApplyModal(false)}
+                jobPostingId={id}
+                jobTitle={job.jobTitle}
+            />
         </div>
     );
 };

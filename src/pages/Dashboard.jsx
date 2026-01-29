@@ -27,7 +27,7 @@ const Dashboard = () => {
             }
         });
         if (node) observer.current.observe(node);
-    }, [loading, hasMore, cursor]);
+    }, [loading, hasMore, cursor, fetchJobs]);
 
     // Initial load
     useEffect(() => {
@@ -36,7 +36,8 @@ const Dashboard = () => {
         setCursor(null);
         setHasMore(true);
         fetchJobs(null, true);
-    }, [onlyOpen]); // Refetch when filter changes (keyword search usually requires a submit button or debounce, but let's debounce later if needed)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [onlyOpen]);
 
     // Search handler
     const handleSearch = (e) => {
@@ -48,7 +49,7 @@ const Dashboard = () => {
         }
     };
 
-    const fetchJobs = async (currentCursor, isReset = false) => {
+    const fetchJobs = useCallback(async (currentCursor, isReset = false) => {
         try {
             setLoading(true);
 
@@ -91,7 +92,7 @@ const Dashboard = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [keyword, onlyOpen]);
 
     return (
         <div className="bg-gray-50 min-h-screen pb-24">

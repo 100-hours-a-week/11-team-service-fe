@@ -6,6 +6,7 @@ import AuthCallback from '../pages/AuthCallback';
 import Dashboard from '../pages/Dashboard';
 import JobDetail from '../pages/JobDetail';
 import JobAnalysis from '../pages/JobAnalysis';
+import ChatRoomList from '../pages/ChatRoomList';
 
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
@@ -34,6 +35,7 @@ const AppRoutes = () => {
             }>
                 <Route index element={<Dashboard />} />
                 <Route path="jobs/:id" element={<JobDetail />} />
+                <Route path="jobs/:id/chat" element={<ChatRoomList />} />
                 <Route path="analysis" element={<JobAnalysis />} />
             </Route>
 
