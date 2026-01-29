@@ -116,46 +116,7 @@ jobs:
         run: npm run format:check
 
   # ----------------------------
-  # 4. Artifacts (develop)
-  # ----------------------------
-  main_archive:
-    name: Archive to S3
-    runs-on: ubuntu-latest
-    needs: [build, test]
-    if: github.base_ref == 'main'
-
-    steps:
-      - name: Download dist
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ needs.build.outputs.artifact_name }}
-          path: artifact
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ap-northeast-2
-
-      - name: List dist
-        run: ls -la artifact && find artifact -maxdepth 2 -type f | head
-
-      - name: Upload dist to S3
-        env:
-          BUCKET: ${{ secrets.RELEASE_BUCKET }}
-          PREFIX: snapshots/frontend
-        run: |
-          aws s3 cp artifact/ \
-            s3://$BUCKET/$PREFIX/${{ needs.build.outputs.version }} \
-            --recursive
-
-          # latest 폴더에 덮어쓰기 (최신 스냅샷)
-          aws s3 cp artifact/ \
-            s3://$BUCKET/$PREFIX/latest/ \
-            --recursive
-
-  # ----------------------------
-  # 5. Main -> S3 Archive
+  # 4. develop -> S3 Archive (develop)
   # ----------------------------
   snapshot_archive:
     name: Archive to S3
@@ -191,6 +152,45 @@ jobs:
         run: |
           aws s3 cp artifact/ \
             s3://$BUCKET/$PREFIX/${{ needs.build.outputs.version }}/${{ steps.meta.outputs.timestamp }} \
+            --recursive
+
+          # latest 폴더에 덮어쓰기 (최신 스냅샷)
+          aws s3 cp artifact/ \
+            s3://$BUCKET/$PREFIX/latest/ \
+            --recursive
+
+  # ----------------------------
+  # 5. Main -> S3 Archive (main)
+  # ----------------------------
+  main_archive:
+    name: Archive to S3
+    runs-on: ubuntu-latest
+    needs: [build, test]
+    if: github.base_ref == 'main'
+
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.artifact_name }}
+          path: artifact
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ap-northeast-2
+
+      - name: List dist
+        run: ls -la artifact && find artifact -maxdepth 2 -type f | head
+
+      - name: Upload dist to S3
+        env:
+          BUCKET: ${{ secrets.RELEASE_BUCKET }}
+          PREFIX: releases/frontend
+        run: |
+          aws s3 cp artifact/ \
+            s3://$BUCKET/$PREFIX/${{ needs.build.outputs.version }} \
             --recursive
 
           # latest 폴더에 덮어쓰기 (최신 스냅샷)
