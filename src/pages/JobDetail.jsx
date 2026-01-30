@@ -9,14 +9,14 @@ import {
   Calendar,
   CheckCircle,
 } from "lucide-react";
-import ApplyModal from "../components/ApplyModal";
+
 
 const JobDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showApplyModal, setShowApplyModal] = useState(false);
+
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -150,23 +150,7 @@ const JobDetail = () => {
       </div>
 
       {/* Bottom Apply Button (Fixed) - Only for Open Jobs */}
-      {!isClosed && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 pb-10 z-[100]">
-          <button
-            onClick={() => setShowApplyModal(true)}
-            className="w-full bg-gray-900 text-white font-bold py-3.5 rounded-xl text-sm hover:bg-black transition-colors shadow-lg"
-          >
-            지원하기
-          </button>
-        </div>
-      )}
 
-      <ApplyModal
-        isOpen={showApplyModal}
-        onClose={() => setShowApplyModal(false)}
-        jobPostingId={id}
-        jobTitle={job.jobTitle}
-      />
     </div>
   );
 };

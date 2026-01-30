@@ -84,7 +84,7 @@ const BottomNav = () => {
   if (shouldHide) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 pb-safe z-50">
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-gray-200 pb-safe z-50">
       <div className="flex justify-around items-center h-16">
         {trueNavItems.map((item) => {
           const Icon = item.icon;
