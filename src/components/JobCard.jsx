@@ -29,9 +29,9 @@ const JobCard = ({ job }) => {
             <span className="text-sm text-gray-500 font-medium">{title}</span>
           </div>
         </div>
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col items-end shrink-0">
           <span
-            className={`text-lg font-bold ${isClosed ? "text-gray-400" : "text-gray-900"}`}
+            className={`text-lg font-bold whitespace-nowrap ${isClosed ? "text-gray-400" : "text-gray-900"}`}
           >
             {isClosed ? "마감" : "진행"}
           </span>

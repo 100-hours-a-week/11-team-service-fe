@@ -98,7 +98,7 @@ const BottomNav = () => {
               key={item.path}
               to={item.path}
               className={clsx(
-                "flex flex-col items-center justify-center w-full h-full space-y-1",
+                "flex flex-col items-center justify-center w-full h-full",
                 isActive
                   ? "text-gray-900 font-bold"
                   : "text-gray-400 hover:text-gray-600",
@@ -110,7 +110,6 @@ const BottomNav = () => {
                   isActive ? "fill-gray-900" : "stroke-current",
                 )}
               />
-              <span className="text-[10px] font-medium">{item.name}</span>
             </Link>
           );
         })}
