@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import client from "../api/client";
-import { X, Upload, FileText, CheckCircle, AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle } from "lucide-react";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -9,29 +9,26 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
   const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [helperText, setHelperText] = useState(""); // For file size warning
+  const [helperText, setHelperText] = useState("");
   const [success, setSuccess] = useState(false);
 
   const resumeInputRef = useRef(null);
   const portfolioInputRef = useRef(null);
 
-  // Early return AFTER hooks
   if (!isOpen) return null;
 
   const handleFileChange = (e, type) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
     setError("");
     setHelperText("");
 
-    // 1. Check Format (PDF only)
     if (file.type !== "application/pdf") {
       setError("PDF 형식으로 업로드해주세요.");
       return;
     }
 
-    // 2. Check Size (10MB)
     if (file.size > MAX_FILE_SIZE) {
       setHelperText(
         "파일의 용량이 10MB를 초과했습니다. 10MB 이하의 파일을 등록해 주세요.",
@@ -39,11 +36,8 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
       return;
     }
 
-    if (type === "RESUME") {
-      setResume(file);
-    } else {
-      setPortfolio(file);
-    }
+    if (type === "RESUME") setResume(file);
+    else setPortfolio(file);
   };
 
   const handleSubmit = async () => {
@@ -52,44 +46,39 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
     setLoading(true);
     setError("");
 
-    const formData = new FormData();
-    formData.append("jobPostingId", jobPostingId);
-    formData.append("resume", resume);
-    if (portfolio) {
-      formData.append("portfolio", portfolio);
-    }
-
     try {
-      await client.post("/api/v1/applications", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      const formData = new FormData();
+      formData.append("jobPostingId", jobPostingId);
+      formData.append("resume", resume);
+      if (portfolio) formData.append("portfolio", portfolio);
+
+      const response = await client.post("/api/v1/applications", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      // alert("지원서가 성공적으로 제출되었습니다."); // Removed
+
       setSuccess(true);
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(response.data.data); // applicationId 라고 가정
     } catch (err) {
       console.error(err);
-      const errorMessage =
-        err.response?.data?.message || "업로드에 실패하였습니다";
-      setError(errorMessage);
-      setLoading(false);
 
-      // 만약 이미 지원한 경우라면 부모 상태를 갱신하여 AI 평가 중임을 보여줌
-      if (err.response?.status === 409 && onSuccess) {
-        onSuccess();
+      // 409 (이미 지원) 처리: 백엔드가 applicationId를 내려주면 여기서 넘길 수 있음
+      if (err?.response?.status === 409) {
+        const existingId = err?.response?.data?.data;
+        if (existingId && onSuccess) onSuccess(existingId);
+        // existingId가 없으면 일단 에러 메시지만 보여줌
       }
+
+      const errorMessage =
+        err?.response?.data?.message || "업로드에 실패하였습니다";
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Helper to trigger hidden input
   const triggerFileArgs = (ref) => {
-    ref.current.click();
+    ref.current?.click();
   };
-
-  // Reset state when closing (if needed, but component unmounts usually or strictly controlled)
-  // But here we rely on parent to unmount or we should reset 'success' if we reuse the modal.
-  // Assuming simple modal usage.
 
   return (
     <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4 animate-fade-in">
@@ -115,14 +104,12 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
           </div>
         ) : (
           <>
-            {/* Header */}
             <div className="p-6 pb-2">
               <h2 className="text-lg font-bold text-gray-900">지원하기</h2>
               <p className="text-xs text-gray-500 mt-1">{jobTitle}</p>
             </div>
 
             <div className="p-6 pt-4 space-y-6">
-              {/* Resume Section */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-bold text-gray-900">
@@ -151,7 +138,6 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
                 </div>
               </div>
 
-              {/* Portfolio Section */}
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="text-sm font-bold text-gray-900">
@@ -182,7 +168,6 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
                 </div>
               </div>
 
-              {/* Helper Text / Error Message */}
               <div className="min-h-[20px]">
                 {helperText && (
                   <p className="text-red-500 text-xs flex items-center">
@@ -199,7 +184,6 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
               </div>
             </div>
 
-            {/* Footer Buttons */}
             <div className="p-6 pt-0 flex space-x-3">
               <button
                 onClick={onClose}
@@ -210,12 +194,11 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
               <button
                 onClick={handleSubmit}
                 disabled={!resume || !!error || loading}
-                className={`flex-1 font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center
-                                ${
-                                  !resume || !!error || loading
-                                    ? "bg-gray-300 text-white cursor-not-allowed"
-                                    : "bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200"
-                                }`}
+                className={`flex-1 font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center ${
+                  !resume || !!error || loading
+                    ? "bg-gray-300 text-white cursor-not-allowed"
+                    : "bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200"
+                }`}
               >
                 {loading ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
