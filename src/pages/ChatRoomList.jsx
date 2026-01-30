@@ -69,7 +69,8 @@ const ChatRoomList = () => {
 
   // Check My Score API
   const checkMyScore = async (force = false) => {
-    if (!force && myScore !== null && !isEvaluating) return { score: myScore, applied: hasApplied };
+    if (!force && myScore !== null && !isEvaluating)
+      return { score: myScore, applied: hasApplied };
 
     try {
       setLoadingScore(true);
@@ -96,7 +97,11 @@ const ChatRoomList = () => {
         setMyScore(data.overallScore || 0);
         setHasApplied(true);
         setIsEvaluating(false);
-        return { score: data.overallScore || 0, applied: true, isEvaluating: false };
+        return {
+          score: data.overallScore || 0,
+          applied: true,
+          isEvaluating: false,
+        };
       }
     } catch (error) {
       // Handle the "AI is evaluating" state (202 Accepted) if axios is configured to throw on non-200
@@ -110,7 +115,11 @@ const ChatRoomList = () => {
       console.error("Failed to check score:", error);
       // 에러가 나더라도 이미 지원한 상태라면 상태를 유지함
       if (hasApplied) {
-        return { score: myScore || 0, applied: true, isEvaluating: isEvaluating };
+        return {
+          score: myScore || 0,
+          applied: true,
+          isEvaluating: isEvaluating,
+        };
       }
 
       setMyScore(null);
@@ -123,7 +132,11 @@ const ChatRoomList = () => {
   };
 
   const handleEnterRequest = async (room) => {
-    const { score, applied, isEvaluating: evaluatingNow } = await checkMyScore();
+    const {
+      score,
+      applied,
+      isEvaluating: evaluatingNow,
+    } = await checkMyScore();
 
     if (!applied) {
       setShowScoreModal(true);
@@ -136,7 +149,9 @@ const ChatRoomList = () => {
     }
 
     if (score < room.cutline) {
-      alert(`입장 조건을 충족하지 못했습니다. (내 점수: ${score}점 / 컷라인: ${room.cutline}점)`);
+      alert(
+        `입장 조건을 충족하지 못했습니다. (내 점수: ${score}점 / 컷라인: ${room.cutline}점)`,
+      );
       return;
     }
 
@@ -214,15 +229,26 @@ const ChatRoomList = () => {
             {rooms.map((room) => {
               const isClosed = room.current >= room.max;
               return (
-                <div key={room.id} className="border border-gray-200 rounded-2xl p-5 shadow-sm bg-white">
+                <div
+                  key={room.id}
+                  className="border border-gray-200 rounded-2xl p-5 shadow-sm bg-white"
+                >
                   <div className="flex items-start justify-between mb-3">
                     <span className="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded-md">
                       {room.goal}
                     </span>
                   </div>
-                  <h3 className="font-bold text-gray-900 text-base mb-1 truncate">{room.title}</h3>
+                  <h3 className="font-bold text-gray-900 text-base mb-1 truncate">
+                    {room.title}
+                  </h3>
                   <div className="flex items-center space-x-2 text-xs text-gray-500 mb-4 font-medium">
-                    <span className={isClosed ? "text-red-500 font-bold" : "text-gray-900 font-bold"}>
+                    <span
+                      className={
+                        isClosed
+                          ? "text-red-500 font-bold"
+                          : "text-gray-900 font-bold"
+                      }
+                    >
                       {room.current}/{room.max}
                     </span>
                     <span>•</span>
@@ -233,7 +259,9 @@ const ChatRoomList = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <div className="w-5 h-5 rounded-full bg-gray-200" />
-                      <span className="text-xs text-gray-600 font-medium">{room.host}</span>
+                      <span className="text-xs text-gray-600 font-medium">
+                        {room.host}
+                      </span>
                     </div>
                     <button
                       onClick={() => handleEnterRequest(room)}
@@ -261,21 +289,31 @@ const ChatRoomList = () => {
                 <div className="relative">
                   <div className="w-20 h-20 border-4 border-gray-100 rounded-full mx-auto" />
                   <div className="absolute top-0 left-1/2 -translate-x-1/2">
-                    <Loader2 className="w-20 h-20 text-blue-500 animate-spin" style={{ strokeWidth: 1.5 }} />
+                    <Loader2
+                      className="w-20 h-20 text-blue-500 animate-spin"
+                      style={{ strokeWidth: 1.5 }}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-xl font-extrabold text-gray-900">AI가 서류를 분석하고 있어요</h3>
+                  <h3 className="text-xl font-extrabold text-gray-900">
+                    AI가 서류를 분석하고 있어요
+                  </h3>
                   <p className="text-gray-500 text-sm font-medium leading-relaxed">
-                    분석이 완료되면 알림을 보내드릴게요.<br />
+                    분석이 완료되면 알림을 보내드릴게요.
+                    <br />
                     잠시만 기다려 주세요!
                   </p>
                 </div>
               </div>
             ) : hasApplied ? (
               <div className="space-y-4">
-                <div className="text-5xl font-black text-gray-900 mb-2">{myScore}점</div>
-                <p className="text-gray-500 text-sm font-medium">내 지원 점수입니다.</p>
+                <div className="text-5xl font-black text-gray-900 mb-2">
+                  {myScore}점
+                </div>
+                <p className="text-gray-500 text-sm font-medium">
+                  내 지원 점수입니다.
+                </p>
                 <button
                   onClick={() => checkMyScore(true)}
                   className="text-xs text-gray-400 underline"
@@ -289,10 +327,12 @@ const ChatRoomList = () => {
                   <Search className="w-8 h-8 text-gray-300" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-gray-900">제출된 이력서가 없습니다</h3>
+                  <h3 className="text-lg font-bold text-gray-900">
+                    제출된 이력서가 없습니다
+                  </h3>
                   <p className="text-gray-400 text-xs leading-relaxed max-w-[200px] mx-auto">
-                    이력서를 업로드하시면 AI가 분석하여 <br />
-                    내 점수를 계산해 드립니다.
+                    이력서를 업로드하시면 AI가 분석하여 <br />내 점수를 계산해
+                    드립니다.
                   </p>
                 </div>
                 <button

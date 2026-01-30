@@ -10,13 +10,11 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-
 const JobDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -150,7 +148,6 @@ const JobDetail = () => {
       </div>
 
       {/* Bottom Apply Button (Fixed) - Only for Open Jobs */}
-
     </div>
   );
 };

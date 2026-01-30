@@ -70,7 +70,8 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
       if (onSuccess) onSuccess();
     } catch (err) {
       console.error(err);
-      const errorMessage = err.response?.data?.message || "업로드에 실패하였습니다";
+      const errorMessage =
+        err.response?.data?.message || "업로드에 실패하였습니다";
       setError(errorMessage);
       setLoading(false);
 
@@ -93,13 +94,14 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
   return (
     <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4 animate-fade-in">
       <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl relative animate-scale-in">
-
         {success ? (
           <div className="p-10 flex flex-col items-center justify-center text-center">
             <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-6 animate-bounce-subtle">
               <CheckCircle className="w-10 h-10 text-green-500" />
             </div>
-            <h2 className="text-2xl font-extrabold text-gray-900 mb-2">제출 완료!</h2>
+            <h2 className="text-2xl font-extrabold text-gray-900 mb-2">
+              제출 완료!
+            </h2>
             <p className="text-gray-500 text-sm font-medium leading-relaxed max-w-[200px]">
               지원서가 성공적으로 제출되었습니다. <br />
               이제 AI 평가가 시작됩니다.
@@ -155,7 +157,9 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
                   <label className="text-sm font-bold text-gray-900">
                     포트폴리오
                   </label>
-                  {portfolio && <CheckCircle className="w-4 h-4 text-green-500" />}
+                  {portfolio && (
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                  )}
                 </div>
 
                 <div className="flex items-center space-x-3">
@@ -207,10 +211,11 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
                 onClick={handleSubmit}
                 disabled={!resume || !!error || loading}
                 className={`flex-1 font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center
-                                ${!resume || !!error || loading
-                    ? "bg-gray-300 text-white cursor-not-allowed"
-                    : "bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200"
-                  }`}
+                                ${
+                                  !resume || !!error || loading
+                                    ? "bg-gray-300 text-white cursor-not-allowed"
+                                    : "bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200"
+                                }`}
               >
                 {loading ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
