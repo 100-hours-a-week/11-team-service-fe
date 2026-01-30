@@ -65,19 +65,19 @@ jobs:
             set -e
             echo "=== Frontend Deploy Start ==="
 
-            TARGET_DIR="/home/ubuntu/frontend"
-            BACKUP_DIR="/home/ubuntu/frontend_backup"
+            TARGET_DIR="/var/www/frontend"
+            BACKUP_DIR="/var/www/frontend_backup"
 
             # 백업 (롤백 대비)
-            rm -rf $BACKUP_DIR
+            sudo rm -rf $BACKUP_DIR
             if [ -d "$TARGET_DIR" ]; then
-              cp -r $TARGET_DIR $BACKUP_DIR
+              sudo cp -r $TARGET_DIR $BACKUP_DIR
               echo "Backup completed"
             fi
 
             # 기존 파일 제거
-            rm -rf $TARGET_DIR
-            mkdir -p $TARGET_DIR
+            sudo rm -rf $TARGET_DIR
+            sudo mkdir -p $TARGET_DIR
 
       # ----------------------------
       # 4. dist 업로드
@@ -89,7 +89,7 @@ jobs:
           username: ${{ secrets.DEV_USER }}
           key: ${{ secrets.DEV_SSH_KEY }}
           source: "dist/**"
-          target: "/home/ubuntu/frontend"
+          target: "/var/www/frontend"
           strip_components: 1
       
       # ----------------------------
@@ -140,11 +140,11 @@ jobs:
           username: ${{ secrets.DEV_USER }}
           key: ${{ secrets.DEV_SSH_KEY }}
           script: |
-            TARGET_DIR="/home/ubuntu/frontend"
-            BACKUP_DIR="/home/ubuntu/frontend_backup"
+            TARGET_DIR="/var/www/frontend"
+            BACKUP_DIR="/var/www/frontend_backup"
 
             if [ -d "$BACKUP_DIR" ]; then
-              rm -rf $TARGET_DIR
+              sudo rm -rf $TARGET_DIR
               mv $BACKUP_DIR $TARGET_DIR
               sudo systemctl reload nginx
               echo "Rollback completed"
