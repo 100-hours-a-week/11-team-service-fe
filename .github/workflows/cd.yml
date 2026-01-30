@@ -41,8 +41,8 @@ jobs:
           BUCKET: ${{ secrets.RELEASE_BUCKET }}
           PREFIX: releases/frontend
         run: |
-          sudo rm -rf ./dist
-          sudo mkdir -p ./dist
+          rm -rf ./dist
+          mkdir -p ./dist
 
           aws s3 cp "s3://$BUCKET/$PREFIX/latest/" ./dist/ --recursive
 
@@ -183,7 +183,7 @@ jobs:
 
 
   # ----------------------------
-  # 2. Main → Prod 서버 배포
+  # 2. Main -> Prod 서버 배포
   # ----------------------------
   deploy_prod:
     name: Deploy Frontend to Prod Server
