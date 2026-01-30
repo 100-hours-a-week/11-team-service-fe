@@ -41,8 +41,8 @@ jobs:
           BUCKET: ${{ secrets.RELEASE_BUCKET }}
           PREFIX: releases/frontend
         run: |
-          rm -rf ./dist
-          mkdir -p ./dist
+          sudo rm -rf ./dist
+          sudo mkdir -p ./dist
 
           aws s3 cp "s3://$BUCKET/$PREFIX/latest/" ./dist/ --recursive
 
@@ -80,6 +80,9 @@ jobs:
             # 기존 파일 제거
             sudo rm -rf $TARGET_DIR
             sudo mkdir -p $TARGET_DIR
+
+            sudo chown -R ubuntu:ubuntu $TARGET_DIR
+            sudo chmod -R 755 $TARGET_DIR
 
       # ----------------------------
       # 4. dist 업로드
@@ -214,7 +217,7 @@ jobs:
 
           echo "Downloaded from s3://$BUCKET/$PREFIX/latest/"
           ls -la ./dist | head
-          
+
       - name: Setup WireGuard
         uses: niklaskeerl/easy-wireguard-action@v2
         with:
@@ -244,6 +247,9 @@ jobs:
 
             sudo rm -rf $TARGET_DIR
             sudo mkdir -p $TARGET_DIR
+
+            sudo chown -R ubuntu:ubuntu $TARGET_DIR
+            sudo chmod -R 755 $TARGET_DIR
 
       # ----------------------------
       # 4. dist 업로드
