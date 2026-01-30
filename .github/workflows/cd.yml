@@ -47,7 +47,6 @@ jobs:
         id: meta
         run: echo "release=$(TZ='Asia/Seoul' date -u +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
       
-
       - name: Setup WireGuard
         uses: niklaskeerl/easy-wireguard-action@v2
         with:
