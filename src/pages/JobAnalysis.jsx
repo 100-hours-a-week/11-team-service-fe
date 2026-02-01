@@ -127,9 +127,7 @@ const JobAnalysis = () => {
           <ChevronLeft className="w-6 h-6 text-gray-900" />
         </button>
         <h1 className="font-bold text-gray-900 text-lg">공고 등록</h1>
-        <button className="p-2 -mr-2">
-          <Bell className="w-5 h-5 text-gray-900" />
-        </button>
+        <div className="w-10"></div>
       </div>
 
       <div className="p-5 flex-1 relative">
@@ -173,16 +171,14 @@ const JobAnalysis = () => {
         {result && (
           <div className="mt-8 pb-24 animate-fade-in-up">
             {/* Wrapper for the result fields */}
-            <div className="border border-red-400 rounded-2xl p-5 relative">
-              {/* Note: The red border is purely because the user screenshot had a red emphasis box, can remove if not needed for production */}
-
+            <div className="p-1 relative">
               <div className="grid grid-cols-2 gap-y-6 gap-x-4 mb-6">
                 {/* Company */}
                 <div>
                   <div className="text-xs text-gray-900 font-bold mb-1">
                     기업명
                   </div>
-                  <div className="bg-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+                  <div className="bg-gray-100 rounded-lg px-3 py-2 text-sm text-gray-700 font-medium break-words">
                     {result.companyName || "-"}
                   </div>
                 </div>
@@ -191,7 +187,7 @@ const JobAnalysis = () => {
                   <div className="text-xs text-gray-900 font-bold mb-1">
                     직무 명
                   </div>
-                  <div className="bg-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 font-medium truncate">
+                  <div className="bg-gray-100 rounded-lg px-3 py-2 text-sm text-gray-700 font-medium break-words">
                     {result.jobTitle || "-"}
                   </div>
                 </div>
@@ -201,8 +197,8 @@ const JobAnalysis = () => {
                   <div className="text-xs text-gray-900 font-bold mb-1">
                     주요 업무
                   </div>
-                  <div className="bg-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 font-medium h-full flex items-center">
-                    <span className="line-clamp-1">
+                  <div className="bg-gray-100 rounded-lg px-3 py-2 text-xs text-gray-700 font-medium h-full flex items-center">
+                    <span className="break-words w-full">
                       {result.mainTasks && result.mainTasks.length > 0
                         ? result.mainTasks.join(", ")
                         : "-"}
@@ -214,8 +210,8 @@ const JobAnalysis = () => {
                   <div className="text-xs text-gray-900 font-bold mb-1">
                     필요기술스택
                   </div>
-                  <div className="bg-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 font-medium h-full flex items-center">
-                    <span className="line-clamp-1">
+                  <div className="bg-gray-100 rounded-lg px-3 py-2 text-xs text-gray-700 font-medium h-full flex items-center">
+                    <span className="break-words w-full">
                       {result.skills && result.skills.length > 0
                         ? result.skills.join(", ")
                         : "-"}
@@ -224,20 +220,20 @@ const JobAnalysis = () => {
                 </div>
 
                 {/* Status */}
-                <div>
+                <div className="col-span-2">
                   <div className="text-xs text-gray-900 font-bold mb-1">
                     모집상태
                   </div>
-                  <div className="bg-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 font-medium">
+                  <div className="bg-gray-100 rounded-lg px-3 py-2 text-sm text-gray-700 font-medium">
                     {result.status === "OPEN" ? "모집중" : "마감"}
                   </div>
                 </div>
                 {/* Period */}
-                <div>
+                <div className="col-span-2">
                   <div className="text-xs text-gray-900 font-bold mb-1">
                     모집 기간
                   </div>
-                  <div className="bg-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 font-medium flex items-center h-full">
+                  <div className="bg-gray-100 rounded-lg px-3 py-2 text-xs text-gray-700 font-medium flex items-center h-full">
                     {(result.startDate || "YYYY.MM.DD").replaceAll("-", ".")}~
                     {(result.endDate || "YYYY.MM.DD").replaceAll("-", ".")}
                   </div>
@@ -249,7 +245,7 @@ const JobAnalysis = () => {
                 <div className="mb-2 text-xs font-bold text-gray-900">
                   AI공고 요약
                 </div>
-                <div className="bg-gray-200 rounded-xl p-4 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap min-h-[120px]">
+                <div className="bg-gray-100 rounded-xl p-4 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap break-all min-h-[120px]">
                   {result.aiSummary || "AI 요약 정보가 없습니다."}
                 </div>
               </section>

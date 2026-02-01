@@ -9,12 +9,22 @@ import {
   Calendar,
   CheckCircle,
 } from "lucide-react";
+import ApplyModal from "../components/ApplyModal";
+import EvaluationProgressModal from "../components/EvaluationProgressModal";
+import AiAnalysisReportModal from "../components/AiAnalysisReportModal";
 
 const JobDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Modal States
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [applicationId, setApplicationId] = useState(null);
+  const [analysisResult, setAnalysisResult] = useState(null);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -56,9 +66,7 @@ const JobDetail = () => {
           <ChevronLeft className="w-6 h-6 text-gray-900" />
         </button>
         <h1 className="font-bold text-gray-900 text-lg">채용공고 상세</h1>
-        <button className="p-2 -mr-2">
-          <Share2 className="w-5 h-5 text-gray-900" />
-        </button>
+        <div className="w-10"></div>
       </div>
 
       <div className="p-5">
@@ -136,18 +144,71 @@ const JobDetail = () => {
           </div>
         )}
 
+        {/* --- [TEMP] Preview Button for AI Analysis Modal --- */}
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => {
+              setAnalysisResult({
+                totalScore: 78,
+                oneLineReview:
+                  "기술 경험은 충분하나 현장 트러블슈팅 경험이 부족함",
+                competencyScores: [
+                  { name: "기술 역량", score: 80 },
+                  { name: "직무 적합성", score: 85 },
+                  { name: "실무 경험", score: 70 },
+                  { name: "성장 가능성", score: 90 },
+                ],
+                detailedFeedback:
+                  "해당 지원자는 기술 역량 부분에서 클라우드 관련 경험이...\n해당 지원자는 기술 역량 부분에서 클라우드 관련 경험이...\n해당 지원자는 기술 역량 부분에서 클라우드 관련 경험이...\n해당 지원자는 기술 역량 부분에서 클라우드 관련 경험이...",
+              });
+              setIsReportModalOpen(true);
+            }}
+            className="text-xs text-gray-400 underline"
+          >
+            [테스트용] AI 분석 리포트 미리보기
+          </button>
+        </div>
+
         {/* 3. AI Summary */}
         <section className="mb-24">
           <div className="mb-2 text-sm font-bold text-gray-900">
             AI공고 요약
           </div>
-          <div className="bg-gray-200 rounded-xl p-5 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap min-h-[150px]">
+          <div className="bg-gray-200 rounded-xl p-5 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap min-h-[150px] break-all">
             {job.aiSummary || "AI 요약 정보가 없습니다."}
           </div>
         </section>
       </div>
 
-      {/* Bottom Apply Button (Fixed) - Only for Open Jobs */}
+      {/* Custom Modals */}
+      <ApplyModal
+        isOpen={isApplyModalOpen}
+        onClose={() => setIsApplyModalOpen(false)}
+        jobPostingId={job.id}
+        jobTitle={job.jobTitle}
+        onSuccess={(appId) => {
+          setIsApplyModalOpen(false);
+          setApplicationId(appId);
+          setIsProgressModalOpen(true);
+        }}
+      />
+
+      <EvaluationProgressModal
+        isOpen={isProgressModalOpen}
+        onClose={() => setIsProgressModalOpen(false)}
+        applicationId={applicationId}
+        onAnalysisComplete={(data) => {
+          setIsProgressModalOpen(false);
+          setAnalysisResult(data);
+          setIsReportModalOpen(true);
+        }}
+      />
+
+      <AiAnalysisReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        result={analysisResult}
+      />
     </div>
   );
 };
