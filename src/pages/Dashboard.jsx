@@ -96,7 +96,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-24">
+    <div className="bg-white min-h-screen pb-24">
       {/* Header Section */}
       <div className="bg-white px-5 pt-12 pb-4 sticky top-0 z-20 border-b border-gray-100">
         <h1 className="text-xl font-bold text-gray-900 mb-4">채용공고</h1>
@@ -108,7 +108,7 @@ const Dashboard = () => {
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-3 py-3 bg-gray-100 border-none rounded-xl text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
+            className="block w-full pl-10 pr-3 py-3.5 bg-gray-50 border border-transparent focus:border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-100 transition-all font-medium"
             placeholder="기업명 또는 직무명 검색"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
@@ -124,7 +124,7 @@ const Dashboard = () => {
             className="flex items-center space-x-2 active:scale-95 transition-transform"
           >
             <div
-              className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${onlyOpen ? "bg-black border-black" : "border-gray-300"}`}
+              className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${onlyOpen ? "bg-[#101827] border-[#101827]" : "border-gray-300"}`}
             >
               {onlyOpen && <div className="w-2 h-2 bg-white rounded-full" />}
             </div>
@@ -138,7 +138,7 @@ const Dashboard = () => {
           {/* Register Button */}
           <button
             onClick={() => navigate("/analysis")} // Mapping "Job Registration" to Analysis for now as per previous logic, or separate page
-            className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-bold px-4 py-2 rounded-lg transition-colors"
+            className="bg-[#101827] hover:bg-[#1a263d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
           >
             공고 등록
           </button>

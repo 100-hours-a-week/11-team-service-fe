@@ -119,11 +119,19 @@ const JobAnalysis = () => {
     navigate(-1);
   };
 
+  const handleBackClick = () => {
+    if (result) {
+      setShowCancelModal(true);
+    } else {
+      navigate(-1);
+    }
+  };
+
   return (
     <div className="bg-white min-h-screen pb-safe relative flex flex-col">
       {/* Header */}
       <div className="sticky top-0 bg-white px-4 h-14 flex items-center justify-between z-10">
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2">
+        <button onClick={handleBackClick} className="p-2 -ml-2">
           <ChevronLeft className="w-6 h-6 text-gray-900" />
         </button>
         <h1 className="font-bold text-gray-900 text-lg">공고 등록</h1>
@@ -134,7 +142,7 @@ const JobAnalysis = () => {
         {/* 1. URL Input Section (Step 1) */}
         <div className="relative">
           <div
-            className={`bg-gray-200 rounded-xl p-1 flex items-center pr-2 ${error ? "border border-red-500" : ""}`}
+            className={`bg-gray-50 rounded-xl p-1 flex items-center pr-2 ${error ? "border border-red-500" : ""}`}
           >
             <input
               type="text"
@@ -151,12 +159,12 @@ const JobAnalysis = () => {
             />
             <button
               onClick={handleAnalyze}
-              disabled={!url || !!error || loading}
+              disabled={!url || !validateUrl(url) || loading}
               className={`text-xs font-bold px-4 py-2 rounded-lg whitespace-nowrap transition-colors flex-shrink-0
                                 ${
-                                  !url || !!error || loading
+                                  !url || !validateUrl(url) || loading
                                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                    : "bg-gray-400 text-white hover:bg-gray-500"
+                                    : "bg-[#101827] text-white hover:bg-[#1a263d]"
                                 }`}
             >
               {loading ? "분석중" : "등록"}
@@ -259,14 +267,14 @@ const JobAnalysis = () => {
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 pb-10 flex space-x-3 z-[100]">
           <button
             onClick={handleCancelClick}
-            className="flex-1 bg-gray-200 text-gray-700 font-bold py-3.5 rounded-xl text-sm hover:bg-gray-300 transition-colors"
+            className="flex-1 bg-[#F3F4F6] text-[#101827] font-bold py-3.5 rounded-xl text-sm hover:bg-gray-200 transition-colors"
           >
             취소
           </button>
           <button
             onClick={handleRegister}
             disabled={confirmLoading}
-            className={`flex-1 font-bold py-3.5 rounded-xl text-sm transition-colors text-white bg-gray-400 hover:bg-gray-500`}
+            className={`flex-1 font-bold py-3.5 rounded-xl text-sm transition-colors text-white bg-[#101827] hover:bg-[#1a263d]`}
           >
             {confirmLoading ? "저장중" : "등록"}
           </button>
@@ -291,7 +299,7 @@ const JobAnalysis = () => {
               </button>
               <button
                 onClick={handleCancelConfirm}
-                className="flex-1 bg-gray-400 text-white font-bold py-3 rounded-xl text-sm"
+                className="flex-1 bg-[#101827] text-white font-bold py-3 rounded-xl text-sm hover:bg-[#1a263d] transition-colors"
               >
                 확인
               </button>
@@ -315,7 +323,7 @@ const JobAnalysis = () => {
                   setRedirectTarget(null);
                 }
               }}
-              className="bg-gray-300 text-gray-700 font-bold py-3 px-10 rounded-xl text-sm hover:bg-gray-400 transition-colors"
+              className="bg-[#101827] text-white font-bold py-3 px-10 rounded-xl text-sm hover:bg-[#1a263d] transition-colors"
             >
               확인
             </button>

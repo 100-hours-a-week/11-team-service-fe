@@ -85,19 +85,18 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
       <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl relative animate-scale-in">
         {success ? (
           <div className="p-10 flex flex-col items-center justify-center text-center">
-            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-6 animate-bounce-subtle">
-              <CheckCircle className="w-10 h-10 text-green-500" />
+            <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-6 animate-bounce-subtle shadow-lg shadow-blue-100">
+              <CheckCircle className="w-10 h-10 text-[#101827]" />
             </div>
-            <h2 className="text-2xl font-extrabold text-gray-900 mb-2">
-              제출 완료!
+            <h2 className="text-xl font-extrabold text-[#101827] mb-2">
+              성공적으로 제출되었습니다!
             </h2>
             <p className="text-gray-500 text-sm font-medium leading-relaxed max-w-[200px]">
-              지원서가 성공적으로 제출되었습니다. <br />
               이제 AI 평가가 시작됩니다.
             </p>
             <button
               onClick={onClose}
-              className="w-full bg-gray-900 text-white font-bold py-4 rounded-2xl text-sm hover:bg-black transition-all shadow-lg shadow-green-100 mt-8 active:scale-[0.98]"
+              className="w-full bg-[#101827] text-white font-bold py-4 rounded-2xl text-sm hover:bg-[#1a263d] transition-all mt-8 active:scale-[0.98]"
             >
               확인
             </button>
@@ -115,7 +114,6 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
                   <label className="text-sm font-bold text-gray-900">
                     이력서 <span className="text-red-500">*</span>
                   </label>
-                  {resume && <CheckCircle className="w-4 h-4 text-green-500" />}
                 </div>
 
                 <div className="flex items-center space-x-3">
@@ -143,9 +141,6 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
                   <label className="text-sm font-bold text-gray-900">
                     포트폴리오
                   </label>
-                  {portfolio && (
-                    <CheckCircle className="w-4 h-4 text-green-500" />
-                  )}
                 </div>
 
                 <div className="flex items-center space-x-3">
@@ -187,17 +182,17 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
             <div className="p-6 pt-0 flex space-x-3">
               <button
                 onClick={onClose}
-                className="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl text-sm hover:bg-gray-300 transition-colors"
+                className="flex-1 bg-[#F3F4F6] text-[#101827] font-bold py-3.5 rounded-xl text-sm hover:bg-gray-200 transition-colors"
               >
                 취소
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={!resume || !!error || loading}
-                className={`flex-1 font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center ${
+                className={`flex-1 font-bold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center ${
                   !resume || !!error || loading
                     ? "bg-gray-300 text-white cursor-not-allowed"
-                    : "bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200"
+                    : "bg-[#101827] text-white hover:bg-[#1a263d]"
                 }`}
               >
                 {loading ? (
