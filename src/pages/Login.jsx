@@ -3,7 +3,7 @@ import { MessageCircle } from "lucide-react";
 const Login = () => {
   const handleLogin = () => {
     // Redirect to Backend Login Endpoint
-    window.location.href = "/api/v1/auth/kakao/login";
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/kakao/login`;
   };
 
   return (
