@@ -18,9 +18,9 @@ const Login = () => {
       <div className="w-full max-w-sm">
         <button
           onClick={handleLogin}
-          className="w-full flex items-center justify-center gap-3 bg-[#FEE500] hover:bg-[#FDD835] text-[#000000] font-medium py-4 px-6 rounded-xl transition-all shadow-sm active:scale-95"
+          className="w-full flex items-center justify-center gap-3 bg-[#FEE500] hover:bg-[#FDD835] text-[#3C1E1E] font-medium py-4 px-6 rounded-xl transition-all shadow-sm active:scale-95"
         >
-          <MessageCircle className="w-6 h-6 fill-black stroke-none" />
+          <MessageCircle className="w-6 h-6 fill-[#3C1E1E] stroke-none" />
           <span>카카오로 3초만에 시작하기</span>
         </button>
         <p className="mt-4 text-center text-sm text-gray-500">

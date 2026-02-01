@@ -8,6 +8,7 @@ import EvaluationProgressModal from "../components/EvaluationProgressModal";
 
 import JoinConfirmModal from "../components/JoinConfirmModal";
 import AnalysisResultModal from "../components/AnalysisResultModal";
+import ScoreReport from "../components/ScoreReport";
 
 const ChatRoomList = () => {
   const { id } = useParams(); // Job Posting ID
@@ -29,6 +30,7 @@ const ChatRoomList = () => {
   const [showJoinConfirmModal, setShowJoinConfirmModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  const [currentApplicationId, setCurrentApplicationId] = useState(null);
 
   // Mock Rooms Data
   const MOCK_ROOMS = [
@@ -83,7 +85,7 @@ const ChatRoomList = () => {
     checkMyScore(); // Initial check
   }, [id]);
 
-  // Polling Effect
+  // Polling Effect - Restored for Background Check
   useEffect(() => {
     let intervalId;
     if (isEvaluating) {
@@ -125,11 +127,13 @@ const ChatRoomList = () => {
       } else {
         setMyScore(data.overallScore || 0);
         setAnalysisData(data); // Store full data
+        if (data.jobApplicationId) {
+          setCurrentApplicationId(data.jobApplicationId);
+        }
         setHasApplied(true);
         setIsEvaluating(false);
         // Analysis Just Completed!
         if (isEvaluating) {
-          setShowEvaluationModal(false);
           setShowResultModal(true);
         }
         return {
@@ -163,9 +167,9 @@ const ChatRoomList = () => {
       setHasApplied(false);
       setIsEvaluating(false);
       // If error (not 202), stop evaluating
+      // If error (not 202), stop evaluating
       if (isEvaluating) {
-        setShowEvaluationModal(false);
-        // Optional: Show error in modal?
+        // setShowEvaluationModal(false); // No longer auto-showing
       }
 
       return { score: null, applied: false, isEvaluating: false };
@@ -187,6 +191,11 @@ const ChatRoomList = () => {
     }
 
     if (evaluatingNow) {
+      if (!currentApplicationId) {
+        // Fallback if we lost ID (e.g. refresh during analysis)
+        alert("AI 분석이 진행 중입니다. 잠시만 기다려주세요.");
+        return;
+      }
       setShowEvaluationModal(true);
       return;
     }
@@ -221,10 +230,13 @@ const ChatRoomList = () => {
     }
   };
 
-  const handleUploadSuccess = () => {
+  const handleUploadSuccess = (appId) => {
     setIsEvaluating(true);
     setHasApplied(true);
-    setActiveTab("SCORE");
+    setCurrentApplicationId(appId);
+    checkMyScore(true); // Force refresh state to 'Evaluating' (202)
+    // setShowEvaluationModal(true); // REMOVED: Do not auto-open
+    // activeTab remains same
   };
 
   return (
@@ -332,7 +344,7 @@ const ChatRoomList = () => {
           </div>
         ) : (
           /* Score Tab Content */
-          <div className="flex flex-col min-h-full bg-gray-50/50">
+          <div className="flex flex-col min-h-full bg-white">
             {loadingScore ? (
               <div className="flex flex-col items-center justify-center p-8 min-h-[400px]">
                 <div className="space-y-4 animate-pulse">
@@ -364,83 +376,10 @@ const ChatRoomList = () => {
                 </div>
               </div>
             ) : hasApplied && analysisData ? (
-              <div className="p-6 pb-24 space-y-6 animate-fade-in">
-                {/* Score Header */}
-                <div className="flex flex-col items-center mt-2 mb-4">
-                  <span className="text-sm font-bold text-gray-500 mb-2">
-                    종합 점수
-                  </span>
-                  <div className="relative">
-                    <span className="text-6xl font-black text-gray-900 tracking-tighter leading-none">
-                      {analysisData.overallScore || 0}
-                    </span>
-                    <span className="text-xl text-gray-400 font-bold ml-1">
-                      /100
-                    </span>
-                  </div>
-                </div>
-
-                {/* One Line Review */}
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                  <p className="text-gray-800 font-bold text-sm break-keep leading-snug text-center">
-                    {analysisData.oneLineReview ||
-                      "한 줄 평가는 분석 후 제공됩니다."}
-                  </p>
-                </div>
-
-                {/* Competency Scores */}
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 space-y-4">
-                  <h4 className="text-sm font-bold text-gray-900 mb-3">
-                    역량 분석
-                  </h4>
-                  {(analysisData.comparisonScores || []).map((item, idx) => (
-                    <div key={idx}>
-                      <div className="flex justify-between items-center mb-1.5">
-                        <span className="text-sm font-bold text-gray-700">
-                          {item.name}
-                        </span>
-                        <span className="text-xs text-gray-400 font-bold">
-                          {item.score}/100
-                        </span>
-                      </div>
-                      <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gray-900 rounded-full transition-all duration-1000 ease-out"
-                          style={{ width: `${item.score}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                  {(!analysisData.comparisonScores ||
-                    analysisData.comparisonScores.length === 0) && (
-                    <div className="text-center text-gray-400 text-xs py-2">
-                      상세 역량 점수가 없습니다.
-                    </div>
-                  )}
-                </div>
-
-                {/* Detailed Feedback */}
-                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                  <h4 className="text-sm font-bold text-gray-900 mb-3">
-                    상세 피드백
-                  </h4>
-                  <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap text-justify">
-                    {analysisData.feedbackDetail ||
-                      analysisData.aiSummary ||
-                      "상세 피드백이 없습니다."}
-                  </p>
-                </div>
-
-                {/* Refresh Button */}
-                <div className="text-center pt-2">
-                  <button
-                    onClick={() => checkMyScore(true)}
-                    className="text-xs text-gray-400 underline hover:text-gray-600"
-                  >
-                    결과 다시 불러오기
-                  </button>
-                </div>
-              </div>
+              <ScoreReport
+                data={analysisData}
+                onRetry={() => checkMyScore(true)}
+              />
             ) : (
               /* No Application State */
               <div className="flex flex-col items-center justify-center p-8 text-center min-h-[400px]">
@@ -459,7 +398,7 @@ const ChatRoomList = () => {
                   </div>
                   <button
                     onClick={() => setShowApplyModal(true)}
-                    className="px-8 py-4 bg-gray-900 text-white font-bold rounded-2xl text-base shadow-lg hover:bg-black transition-all active:scale-[0.98]"
+                    className="px-8 py-4 bg-[#101827] text-white font-bold rounded-2xl text-base shadow-lg hover:bg-[#1a263d] transition-all active:scale-[0.98]"
                   >
                     이력서 업로드
                   </button>
@@ -490,35 +429,16 @@ const ChatRoomList = () => {
 
       <EvaluationProgressModal
         isOpen={showEvaluationModal}
-        applicationId={hasApplied ? "me" : null} // Assuming we can pass 'me' or we need actual ID. But wait, EvaluationProgressModal takes applicationId to poll.
-        // In checkMyScore, we don't return ID. The modal uses applicationId to poll /api/v1/applications/{id}/analyses.
-        // Current implementation of checkMyScore fetches /job-postings/{id}/my-application.
-        // It seems EvaluationProgressModal logic might need adjustment or we use current logic.
-        // Wait, EvaluationProgressModal polls `/api/v1/applications/${applicationId}/analyses`.
-        // But we are in `ChatRoomList`. `id` is jobPostingId.
-        // `checkMyScore` polls inside `ChatRoomList` too! (lines 81-92).
-        // It seems we have DUPLICATE polling?
-        // `ChatRoomList` polls using `checkMyScore` (line 85).
-        // `EvaluationProgressModal` also polls if `applicationId` is passed?
-        // But in `ChatRoomList`, `showEvaluationModal` is just a UI blocker?
-        // Actually line 463 in original file: `<EvaluationProgressModal isOpen={showEvaluationModal} ... />`
-        // It didn't pass `applicationId`. properties were missing in original file view?
-        // Let's check Step 325 view... no effectively it wasn't passing appId.
-        // So EvaluationProgressModal wasn't polling?
-        // Ah, `EvaluationProgressModal` in Step 268/315 DOES check `if (isOpen && applicationId)`.
-        // If appId is missing, it does nothing?
-        // But `ChatRoomList` has its own polling `useEffect` (lines 81-92) that calls `checkMyScore`.
-
-        // So `ChatRoomList` detects completion via `checkMyScore`.
-        // `checkMyScore` updates `myScore` and `analysisData`.
-        // When `isEvaluating` becomes false (analysis done), `ChatRoomList` re-renders.
-        // But we need to catch the *transition* from evaluating to done to show the modal.
-
-        // Let's modify `checkMyScore` to show modal when done.
-
+        applicationId={currentApplicationId}
+        onAnalysisComplete={(data) => {
+          setAnalysisData(data);
+          setShowEvaluationModal(false);
+          setShowResultModal(true);
+          setMyScore(data.overallScore || 0);
+          setIsEvaluating(false);
+        }}
         onClose={() => {
           setShowEvaluationModal(false);
-          // Removed setActiveTab("SCORE")
         }}
       />
 

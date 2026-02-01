@@ -28,13 +28,13 @@ const JoinConfirmModal = ({ isOpen, onClose, onConfirm, roomTitle }) => {
         <div className="p-6 pt-2 flex space-x-3">
           <button
             onClick={onClose}
-            className="flex-1 bg-gray-100 text-gray-500 font-bold py-4 rounded-2xl text-sm hover:bg-gray-200 transition-all active:scale-[0.98]"
+            className="flex-1 bg-[#F3F4F6] text-[#101827] font-bold py-4 rounded-2xl text-sm hover:bg-gray-200 transition-all active:scale-[0.98]"
           >
             취소
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 bg-gray-900 text-white font-bold py-4 rounded-2xl text-sm hover:bg-black transition-all active:scale-[0.98] shadow-lg shadow-gray-200"
+            className="flex-1 bg-[#101827] text-white font-bold py-4 rounded-2xl text-sm hover:bg-[#1a263d] transition-all active:scale-[0.98] shadow-lg shadow-gray-200"
           >
             확인
           </button>

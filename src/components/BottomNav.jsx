@@ -100,14 +100,14 @@ const BottomNav = () => {
               className={clsx(
                 "flex flex-col items-center justify-center w-full h-full",
                 isActive
-                  ? "text-gray-900 font-bold"
+                  ? "text-[#101827] font-bold"
                   : "text-gray-400 hover:text-gray-600",
               )}
             >
               <Icon
                 className={clsx(
                   "w-6 h-6",
-                  isActive ? "fill-gray-900" : "stroke-current",
+                  isActive ? "fill-[#101827]" : "stroke-current",
                 )}
               />
             </Link>
