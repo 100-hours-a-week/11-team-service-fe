@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const client = axios.create({
-  baseURL: "http://localhost:8080", // Backend URL
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080", // Backend URL
   headers: {
     "Content-Type": "application/json",
   },
@@ -37,7 +37,7 @@ client.interceptors.response.use(
         }
 
         const { data } = await axios.post(
-          "http://localhost:8080/api/v1/auth/kakao/refresh",
+          `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"}/api/v1/auth/kakao/refresh`,
           {
             refreshToken,
           },
