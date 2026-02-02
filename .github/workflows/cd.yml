@@ -70,12 +70,14 @@ jobs:
             TARGET_DIR="/var/www/frontend"
             BACKUP_DIR="/var/www/frontend_backup"
 
+            # 백업 (롤백 대비)
             sudo rm -rf $BACKUP_DIR
             if [ -d "$TARGET_DIR" ]; then
               sudo cp -r $TARGET_DIR $BACKUP_DIR
               echo "Backup completed"
             fi
 
+            # 기존 파일 제거
             sudo rm -rf $TARGET_DIR
             sudo mkdir -p $TARGET_DIR
 

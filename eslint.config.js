@@ -1,29 +1,69 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, globalIgnores } from 'eslint/config'
+// eslint.config.js
+import js from "@eslint/js";
+import babelParser from "@babel/eslint-parser";
+import reactHooks from "eslint-plugin-react-hooks";
+import globals from "globals";
 
-export default defineConfig([
-  globalIgnores(['dist']),
+export default [
+  // 1) Lint 제외 대상
   {
-    files: ['**/*.{js,jsx}'],
-    extends: [
-      js.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
+    ignores: [
+      "**/dist/**",
+      "**/build/**",
+      "**/coverage/**",
+      "**/.vite/**",
+      "**/node_modules/**",
     ],
+  },
+
+  // 2) 기본 추천 규칙
+  js.configs.recommended,
+
+  // 3) App 코드(브라우저 + React Hooks)
+  {
+    files: ["**/*.{js,jsx}"],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+      parser: babelParser,
       parserOptions: {
-        ecmaVersion: 'latest',
-        ecmaFeatures: { jsx: true },
-        sourceType: 'module',
+        requireConfigFile: false,
+        babelOptions: {
+          presets: ["@babel/preset-react"],
+        },
+        ecmaVersion: "latest",
+        sourceType: "module",
+      },
+
+      // ✅ 브라우저 전역(window, document, localStorage, setTimeout, setInterval 등) 한 번에 주입
+      globals: {
+        ...globals.browser,
       },
     },
+    plugins: {
+      "react-hooks": reactHooks,
+    },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // React Hooks 규칙
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+
+      // 개발 편의
+      "no-unused-vars": "warn",
+      "no-console": "off",
     },
   },
-])
+
+  // 4) Node 환경 파일 (Vite/ESLint config 등)
+  {
+    files: [
+      "vite.config.*",
+      "eslint.config.*",
+      "postcss.config.*",
+      "tailwind.config.*",
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+];
