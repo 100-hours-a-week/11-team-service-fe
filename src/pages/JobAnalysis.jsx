@@ -31,9 +31,14 @@ const JobAnalysis = () => {
     setLoading(true);
 
     try {
+      // Normalize URL before sending to backend
+      const normalizedUrl = normalizeUrl(url);
+
       // POST to analyze (checks duplicate internally at backend or just extracts)
       // As per prompt: "ai를 통해 중복판별 기능 작동"
-      const response = await client.post("/api/v1/job-postings", { url });
+      const response = await client.post("/api/v1/job-postings", {
+        url: normalizedUrl,
+      });
       const data = response.data.data;
 
       if (data.isExisting || data.existing) {
@@ -56,11 +61,29 @@ const JobAnalysis = () => {
     }
   };
 
+  // Normalize URL by adding https:// if missing
+  const normalizeUrl = (input) => {
+    let normalized = input.trim();
+    // If no protocol, add https://
+    if (!/^https?:\/\//i.test(normalized)) {
+      normalized = "https://" + normalized;
+    }
+    return normalized;
+  };
+
   const validateUrl = (input) => {
-    // Simple regex or check
-    if (!input) return false;
-    if (!input.match(/^https?:\/\/.+\..+/)) return false;
-    if (input.includes(" ")) return false;
+    if (!input || !input.trim()) return false;
+
+    // Normalize first
+    const normalized = normalizeUrl(input);
+
+    // Check for valid domain pattern (must have at least one dot)
+    // Example: saramin.co.kr, www.saramin.co.kr, https://saramin.co.kr
+    if (!normalized.match(/^https?:\/\/[^\s]+\.[^\s]+/)) return false;
+
+    // No spaces allowed
+    if (normalized.includes(" ")) return false;
+
     return true;
   };
 
@@ -202,7 +225,7 @@ const JobAnalysis = () => {
 
                 {/* Main Tasks */}
                 <div className="col-span-1">
-                  <div className="text-xs text-gray-900 font-bold mb-1">
+                  <div className="mb-2 text-sm font-bold text-gray-700">
                     주요 업무
                   </div>
                   <div className="bg-gray-100 rounded-lg px-3 py-2 text-xs text-gray-700 font-medium h-full flex items-center">
@@ -215,7 +238,7 @@ const JobAnalysis = () => {
                 </div>
                 {/* Tech Stack */}
                 <div className="col-span-1">
-                  <div className="text-xs text-gray-900 font-bold mb-1">
+                  <div className="mb-2 text-sm font-bold text-gray-700">
                     필요기술스택
                   </div>
                   <div className="bg-gray-100 rounded-lg px-3 py-2 text-xs text-gray-700 font-medium h-full flex items-center">
@@ -229,7 +252,7 @@ const JobAnalysis = () => {
 
                 {/* Status */}
                 <div className="col-span-2">
-                  <div className="text-xs text-gray-900 font-bold mb-1">
+                  <div className="mb-2 text-sm font-bold text-gray-700">
                     모집상태
                   </div>
                   <div className="bg-gray-100 rounded-lg px-3 py-2 text-sm text-gray-700 font-medium">
@@ -238,7 +261,7 @@ const JobAnalysis = () => {
                 </div>
                 {/* Period */}
                 <div className="col-span-2">
-                  <div className="text-xs text-gray-900 font-bold mb-1">
+                  <div className="mb-2 text-sm font-bold text-gray-700">
                     모집 기간
                   </div>
                   <div className="bg-gray-100 rounded-lg px-3 py-2 text-xs text-gray-700 font-medium flex items-center h-full">
@@ -250,7 +273,7 @@ const JobAnalysis = () => {
 
               {/* AI Summary */}
               <section>
-                <div className="mb-2 text-xs font-bold text-gray-900">
+                <div className="mb-2 text-sm font-bold text-gray-700">
                   AI공고 요약
                 </div>
                 <div className="bg-gray-100 rounded-xl p-4 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap break-all min-h-[120px]">

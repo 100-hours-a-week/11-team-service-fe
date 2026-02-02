@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import client from "../api/client";
-import { ChevronLeft, Bell, Search, Filter, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  Bell,
+  Search,
+  Filter,
+  Loader2,
+  FileText,
+} from "lucide-react";
 import ScoreCheckModal from "../components/ScoreCheckModal";
 import ApplyModal from "../components/ApplyModal";
 import EvaluationProgressModal from "../components/EvaluationProgressModal";
@@ -385,7 +392,7 @@ const ChatRoomList = () => {
               <div className="flex flex-col items-center justify-center p-8 text-center min-h-[400px]">
                 <div className="space-y-6">
                   <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-2 shadow-sm border border-gray-100">
-                    <Search className="w-8 h-8 text-gray-300" />
+                    <FileText className="w-8 h-8 text-gray-300" />
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-lg font-bold text-gray-900">
