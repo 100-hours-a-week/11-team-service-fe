@@ -7,6 +7,8 @@ import Dashboard from "../pages/Dashboard";
 import JobDetail from "../pages/JobDetail";
 import JobAnalysis from "../pages/JobAnalysis";
 import ChatRoomList from "../pages/ChatRoomList";
+import MyChatRooms from "../pages/MyChatRooms";
+import ChatRoom from "../pages/ChatRoom";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -16,7 +18,7 @@ const ProtectedRoute = ({ children }) => {
       <div className="flex justify-center items-center h-screen">
         Loading...
       </div>
-    ); // Or a nice spinner
+    );
   }
 
   if (!isAuthenticated) {
@@ -44,6 +46,8 @@ const AppRoutes = () => {
         <Route path="jobs/:id" element={<JobDetail />} />
         <Route path="jobs/:id/chat" element={<ChatRoomList />} />
         <Route path="analysis" element={<JobAnalysis />} />
+        <Route path="chat" element={<MyChatRooms />} />
+        <Route path="chat/:chatRoomId" element={<ChatRoom />} />
       </Route>
 
       {/* Fallback */}
