@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode develop",
+    "local": "vite --mode dev-local",
     "build": "vite build",
     "lint": "eslint .",
     "format": "prettier --write .",
