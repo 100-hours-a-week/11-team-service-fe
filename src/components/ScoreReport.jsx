@@ -20,14 +20,14 @@ const ScoreReport = ({ data, onRetry, onClose }) => {
       <div className="p-6 pb-8 space-y-8">
         {/* Score Header */}
         <div className="flex flex-col items-center mt-6 mb-8">
-          <span className="text-base font-bold text-gray-500 mb-3 block">
+          <span className="text-lg font-bold text-gray-900 mb-3 block">
             종합 점수
           </span>
           <div className="relative flex items-end">
             <span className="text-7xl font-black text-[#101827] tracking-tighter leading-none">
               {data.overallScore || 0}
             </span>
-            <span className="text-2xl text-gray-300 font-bold mb-2 ml-2">
+            <span className="text-2xl text-gray-400 font-bold mb-2 ml-2">
               /100
             </span>
           </div>
@@ -42,23 +42,20 @@ const ScoreReport = ({ data, onRetry, onClose }) => {
 
         {/* Competency Scores */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between px-1">
+          <div className="px-1">
             <h4 className="text-lg font-bold text-gray-900">역량 분석</h4>
-            <span className="text-xs font-medium text-gray-400">
-              항목별 세부 점수
-            </span>
           </div>
 
           <div className="bg-[#F9FAFB] rounded-2xl border border-gray-100 p-5 space-y-5">
             {(data.comparisonScores || []).map((item, idx) => (
               <div key={idx} className="group">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900 transition-colors">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900 transition-colors flex-1 pr-3 break-words">
                     {item.name}
                   </span>
-                  <span className="text-sm font-extrabold text-[#101827]">
+                  <span className="text-sm font-extrabold text-[#101827] whitespace-nowrap">
                     {item.score}
-                    <span className="text-gray-300 text-xs font-normal ml-0.5">
+                    <span className="text-gray-400 text-xs font-normal ml-0.5">
                       /100
                     </span>
                   </span>

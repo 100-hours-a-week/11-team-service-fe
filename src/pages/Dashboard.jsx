@@ -51,14 +51,32 @@ const Dashboard = () => {
     }
   };
 
-  const fetchJobs = async (currentCursor, isReset = false) => {
+  // Handle keyword change and auto-reset when cleared
+  const handleKeywordChange = (e) => {
+    const newKeyword = e.target.value;
+    setKeyword(newKeyword);
+
+    // If user clears the search, automatically reset to show all jobs
+    if (newKeyword === "") {
+      setJobs([]);
+      setCursor(null);
+      setHasMore(true);
+      fetchJobs(null, true, ""); // Pass empty string directly
+    }
+  };
+
+  const fetchJobs = async (
+    currentCursor,
+    isReset = false,
+    searchKeyword = null,
+  ) => {
     try {
       setLoading(true);
 
       const params = {
         size: 20,
         cursor: currentCursor,
-        keyword: keyword,
+        keyword: searchKeyword !== null ? searchKeyword : keyword, // Use passed keyword or state
         status: onlyOpen ? "OPEN" : null, // Send 'OPEN' or nothing
       };
 
@@ -111,7 +129,7 @@ const Dashboard = () => {
             className="block w-full pl-10 pr-3 py-3.5 bg-gray-50 border border-transparent focus:border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-100 transition-all font-medium"
             placeholder="기업명 또는 직무명 검색"
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
+            onChange={handleKeywordChange}
             onKeyDown={handleSearch}
           />
         </div>

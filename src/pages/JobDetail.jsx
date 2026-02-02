@@ -74,17 +74,13 @@ const JobDetail = () => {
         <div className="grid grid-cols-2 gap-4 mb-8">
           {/* Row 1: Company & Job Title */}
           <div>
-            <div className="text-xs text-gray-500 mb-1.5 font-medium">
-              기업명
-            </div>
+            <div className="mb-2 text-sm font-bold text-gray-700">기업명</div>
             <div className="bg-[#F9FAFB] rounded-xl px-4 py-3.5 text-sm font-bold text-gray-900 border border-gray-100 flex items-center min-h-[52px]">
               <span className="w-full break-keep">{job.companyName}</span>
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-500 mb-1.5 font-medium">
-              직무명
-            </div>
+            <div className="mb-2 text-sm font-bold text-gray-700">직무명</div>
             <div className="bg-[#F9FAFB] rounded-xl px-4 py-3.5 text-sm font-bold text-gray-900 border border-gray-100 flex items-center min-h-[52px]">
               <span className="w-full break-keep">{job.jobTitle}</span>
             </div>
@@ -92,9 +88,7 @@ const JobDetail = () => {
 
           {/* Row 2: Status & Period */}
           <div>
-            <div className="text-xs text-gray-500 mb-1.5 font-medium">
-              모집상태
-            </div>
+            <div className="mb-2 text-sm font-bold text-gray-700">모집상태</div>
             <div
               className={`rounded-xl px-4 py-3.5 text-sm font-bold border flex items-center justify-center min-h-[52px]
                             ${!isClosed ? "bg-[#F9FAFB] text-gray-900 border-gray-100" : "bg-gray-100 text-gray-400 border-gray-200"}`}
@@ -103,7 +97,7 @@ const JobDetail = () => {
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-500 mb-1.5 font-medium">
+            <div className="mb-2 text-sm font-bold text-gray-700">
               모집 기간
             </div>
             <div className="bg-[#F9FAFB] rounded-xl px-3 py-3.5 text-[11px] font-bold text-gray-900 border border-gray-100 flex items-center justify-center min-h-[52px] text-center">
@@ -113,7 +107,7 @@ const JobDetail = () => {
 
           {/* Row 3: Main Tasks (Full Width) */}
           <div className="col-span-2">
-            <div className="text-xs text-gray-500 mb-1.5 font-medium">
+            <div className="mb-2 text-sm font-bold text-gray-700">
               주요 업무
             </div>
             <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed">
@@ -125,7 +119,7 @@ const JobDetail = () => {
 
           {/* Row 4: Tech Stack (Full Width) */}
           <div className="col-span-2">
-            <div className="text-xs text-gray-500 mb-1.5 font-medium">
+            <div className="mb-2 text-sm font-bold text-gray-700">
               필요기술스택
             </div>
             <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed">
@@ -152,7 +146,7 @@ const JobDetail = () => {
 
         {/* 3. AI Summary */}
         <section className="mb-24">
-          <div className="mb-2 text-sm font-bold text-gray-900">
+          <div className="mb-2 text-sm font-bold text-gray-700">
             AI공고 요약
           </div>
           <div className="bg-[#F9FAFB] rounded-xl p-6 text-sm text-gray-700 leading-loose whitespace-pre-wrap min-h-[150px] break-all border border-gray-100">
