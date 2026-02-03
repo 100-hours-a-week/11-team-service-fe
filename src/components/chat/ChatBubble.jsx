@@ -10,7 +10,7 @@ const formatTime = (dateStr) => {
   });
 };
 
-const ChatBubble = ({ message, isMe, showSender, showTime }) => {
+const ChatBubble = ({ message, isMe, showSender, showTime, onProfileClick }) => {
   // System message
   if (message.messageType === "SYSTEM") {
     return (
@@ -49,12 +49,16 @@ const ChatBubble = ({ message, isMe, showSender, showTime }) => {
     <div className="flex px-4 mb-1">
       <div className="max-w-[75%]">
         {showSender && (
-          <div className="flex items-center space-x-2 mb-1">
+          <button
+            type="button"
+            onClick={() => onProfileClick?.(message)}
+            className="flex items-center space-x-2 mb-1"
+          >
             <div className="w-6 h-6 rounded-full bg-gray-200 flex-shrink-0" />
             <span className="text-xs font-bold text-gray-700">
               {message.senderNickname}
             </span>
-          </div>
+          </button>
         )}
         <div className={`flex items-end space-x-1 ${showSender ? "ml-8" : "ml-8"}`}>
           <div className="bg-gray-100 text-gray-900 rounded-2xl rounded-tl-md px-3.5 py-2.5">

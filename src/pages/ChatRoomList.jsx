@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import client from "../api/client";
 import { getChatRoomsForJob } from "../api/chatApi";
-import { ChevronLeft, Bell, Filter, Loader2, Search } from "lucide-react";
 import {
   ChevronLeft,
   Bell,
