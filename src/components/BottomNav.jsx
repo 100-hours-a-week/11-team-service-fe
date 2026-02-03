@@ -1,9 +1,12 @@
-import { Link, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { MessageSquare, FileText, MessageCircle, User } from "lucide-react"; // Updated icons
 import clsx from "clsx";
+import { useAuth } from "../context/AuthContext";
 
 const BottomNav = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, showAuthModal } = useAuth();
 
   // Updated nav items as per requirement
   // Community: 커뮤니티
@@ -76,7 +79,7 @@ const BottomNav = () => {
   ];
 
   // Hide BottomNav on these paths
-  const hideOnPaths = ["/analysis", "/jobs"];
+  const hideOnPaths = ["/analysis", "/jobs", "/login"];
   const shouldHide = hideOnPaths.some((path) =>
     location.pathname.startsWith(path),
   );
@@ -94,9 +97,17 @@ const BottomNav = () => {
             (item.path !== "/" && location.pathname.startsWith(item.path));
 
           return (
-            <Link
+            <button
               key={item.path}
-              to={item.path}
+              onClick={(e) => {
+                const isPublicPath = item.path === "/";
+                if (!isPublicPath && !isAuthenticated) {
+                  e.preventDefault();
+                  showAuthModal("로그인이 필요합니다.");
+                  return;
+                }
+                navigate(item.path);
+              }}
               className={clsx(
                 "flex flex-col items-center justify-center w-full h-full",
                 isActive
@@ -110,7 +121,7 @@ const BottomNav = () => {
                   isActive ? "fill-[#101827]" : "stroke-current",
                 )}
               />
-            </Link>
+            </button>
           );
         })}
       </div>

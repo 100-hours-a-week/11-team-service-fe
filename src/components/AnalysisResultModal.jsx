@@ -5,7 +5,7 @@ const AnalysisResultModal = ({ isOpen, onClose, data }) => {
   if (!isOpen || !data) return null;
 
   return (
-    <div className="fixed inset-0 bg-white z-[300] overflow-y-auto animate-slide-up pb-safe">
+    <div className="absolute inset-0 bg-white z-[300] overflow-y-auto animate-slide-up pb-safe">
       <ScoreReport data={data} onClose={onClose} />
     </div>
   );
