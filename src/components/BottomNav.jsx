@@ -1,4 +1,4 @@
-import { useNavigate, useLocation, Link, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link} from "react-router-dom";
 import { MessageSquare, FileText, MessageCircle, User } from "lucide-react"; // Updated icons
 import clsx from "clsx";
 import { useAuth } from "../context/AuthContext";
