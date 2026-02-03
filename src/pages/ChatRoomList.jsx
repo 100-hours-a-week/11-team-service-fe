@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import client from "../api/client";
+import { getChatRoomsForJob } from "../api/chatApi";
 import {
   ChevronLeft,
   Bell,
@@ -12,24 +13,25 @@ import {
 import ScoreCheckModal from "../components/ScoreCheckModal";
 import ApplyModal from "../components/ApplyModal";
 import EvaluationProgressModal from "../components/EvaluationProgressModal";
-
 import JoinConfirmModal from "../components/JoinConfirmModal";
 import AnalysisResultModal from "../components/AnalysisResultModal";
 import ScoreReport from "../components/ScoreReport";
+import RoomCard from "../components/chat/RoomCard";
+import CreateRoomModal from "../components/chat/CreateRoomModal";
 
 const ChatRoomList = () => {
-  const { id } = useParams(); // Job Posting ID
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  // State
-  // State
-  const [activeTab, setActiveTab] = useState("LIST"); // LIST | SCORE
-  const [rooms, setRooms] = useState([]); // Mock rooms for now
+  const [activeTab, setActiveTab] = useState("LIST");
+  const [rooms, setRooms] = useState([]);
+  const [loadingRooms, setLoadingRooms] = useState(true);
   const [jobInfo, setJobInfo] = useState({ title: "", company: "" });
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [showApplyModal, setShowApplyModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [myScore, setMyScore] = useState(null);
-  const [analysisData, setAnalysisData] = useState(null); // Full Analysis Result
+  const [analysisData, setAnalysisData] = useState(null);
   const [hasApplied, setHasApplied] = useState(false);
   const [loadingScore, setLoadingScore] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
@@ -39,44 +41,25 @@ const ChatRoomList = () => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [currentApplicationId, setCurrentApplicationId] = useState(null);
 
-  // Mock Rooms Data
-  const MOCK_ROOMS = [
-    {
-      id: 1,
-      title: "토스 1차 서류 합격 목표",
-      goal: "서류",
-      current: 2,
-      max: 5,
-      host: "suhoSin",
-      cutline: 60,
-      condition: "무관",
-    },
-    {
-      id: 2,
-      title: "프론트엔드 면접 대비방",
-      goal: "면접",
-      current: 5,
-      max: 5,
-      host: "devLee",
-      cutline: 70,
-      condition: "CS 지식",
-    },
-    {
-      id: 3,
-      title: "자소서 피드백 하실 분",
-      goal: "서류",
-      current: 1,
-      max: 4,
-      host: "junior",
-      cutline: 50,
-      condition: "무관",
-    },
-  ];
+  const fetchRooms = async () => {
+    try {
+      setLoadingRooms(true);
+      const response = await getChatRoomsForJob(id, { size: 20 });
+      const data = response.data.data;
+      setRooms(data.chatRooms || []);
+      if (data.myScore !== undefined && data.myScore !== null) {
+        setMyScore(data.myScore);
+        setHasApplied(true);
+      }
+    } catch (e) {
+      console.error("Failed to fetch chat rooms:", e);
+    } finally {
+      setLoadingRooms(false);
+    }
+  };
 
   useEffect(() => {
-    // Fetch Job Info (Mock or minimal fetch)
     const fetchJobInfo = async () => {
-      // In real app, fetch job details here. For now mock title
       setJobInfo({ title: "정보 불러오는 중...", company: "" });
       try {
         const response = await client.get(`/api/v1/job-postings/${id}`);
@@ -88,11 +71,10 @@ const ChatRoomList = () => {
       }
     };
     fetchJobInfo();
-    setRooms(MOCK_ROOMS);
-    checkMyScore(); // Initial check
+    fetchRooms();
+    checkMyScore();
   }, [id]);
 
-  // Polling Effect - Restored for Background Check
   useEffect(() => {
     let intervalId;
     if (isEvaluating) {
@@ -103,7 +85,6 @@ const ChatRoomList = () => {
     return () => clearInterval(intervalId);
   }, [isEvaluating]);
 
-  // Check My Score API
   const checkMyScore = async (force = false) => {
     if (!force && myScore !== null && !isEvaluating)
       return { score: myScore, applied: hasApplied, isEvaluating: false };
@@ -114,7 +95,6 @@ const ChatRoomList = () => {
         `/api/v1/job-postings/${id}/my-application`,
       );
 
-      // Axios success block handles 2xx statuses
       if (response.status === 202) {
         setMyScore(0);
         setAnalysisData(null);
@@ -133,13 +113,12 @@ const ChatRoomList = () => {
         return { score: null, applied: false, isEvaluating: false };
       } else {
         setMyScore(data.overallScore || 0);
-        setAnalysisData(data); // Store full data
+        setAnalysisData(data);
         if (data.jobApplicationId) {
           setCurrentApplicationId(data.jobApplicationId);
         }
         setHasApplied(true);
         setIsEvaluating(false);
-        // Analysis Just Completed!
         if (isEvaluating) {
           setShowResultModal(true);
         }
@@ -150,7 +129,6 @@ const ChatRoomList = () => {
         };
       }
     } catch (error) {
-      // Handle the "AI is evaluating" state (202 Accepted) if axios is configured to throw on non-200
       if (error.response && error.response.status === 202) {
         setMyScore(0);
         setAnalysisData(null);
@@ -160,7 +138,6 @@ const ChatRoomList = () => {
       }
 
       console.error("Failed to check score:", error);
-      // 에러가 나더라도 이미 지원한 상태라면 상태를 유지함
       if (hasApplied) {
         return {
           score: myScore || 0,
@@ -173,19 +150,13 @@ const ChatRoomList = () => {
       setAnalysisData(null);
       setHasApplied(false);
       setIsEvaluating(false);
-      // If error (not 202), stop evaluating
-      // If error (not 202), stop evaluating
-      if (isEvaluating) {
-        // setShowEvaluationModal(false); // No longer auto-showing
-      }
-
       return { score: null, applied: false, isEvaluating: false };
     } finally {
       setLoadingScore(false);
     }
   };
 
-  const handleEnterRequest = async (room) => {
+  const handleJoinRequest = async (room) => {
     const {
       score,
       applied,
@@ -199,7 +170,6 @@ const ChatRoomList = () => {
 
     if (evaluatingNow) {
       if (!currentApplicationId) {
-        // Fallback if we lost ID (e.g. refresh during analysis)
         alert("AI 분석이 진행 중입니다. 잠시만 기다려주세요.");
         return;
       }
@@ -207,9 +177,9 @@ const ChatRoomList = () => {
       return;
     }
 
-    if (score < room.cutline) {
+    if (score < room.cutlineScore) {
       alert(
-        `입장 조건을 충족하지 못했습니다. (내 점수: ${score}점 / 컷라인: ${room.cutline}점)`,
+        `입장 조건을 충족하지 못했습니다. (내 점수: ${score}점 / 컷라인: ${room.cutlineScore}점)`,
       );
       return;
     }
@@ -218,20 +188,30 @@ const ChatRoomList = () => {
     setShowJoinConfirmModal(true);
   };
 
+  const handleEnterRoom = (room) => {
+    navigate(`/chat/${room.chatRoomId}`);
+  };
+
   const handleConfirmJoin = async () => {
     if (!selectedRoom) return;
 
     try {
-      await client.post(`/api/v1/chat-rooms/${selectedRoom.id}/members`);
-      alert("입장 신청이 완료되었습니다.");
+      await client.post(
+        `/api/v1/chat-rooms/${selectedRoom.chatRoomId}/members`,
+      );
       setShowJoinConfirmModal(false);
       setSelectedRoom(null);
+      navigate(`/chat/${selectedRoom.chatRoomId}`);
     } catch (err) {
       console.error("Failed to join chat room:", err);
+      const code = err.response?.data?.code;
+      if (code === "CHAT_ROOM_ALREADY_JOINED") {
+        setShowJoinConfirmModal(false);
+        navigate(`/chat/${selectedRoom.chatRoomId}`);
+        return;
+      }
       alert(err.response?.data?.message || "입장 신청에 실패했습니다.");
-      // Optional: Close modal on error too if needed
       if (err.response?.status !== 401) {
-        // Example condition
         setShowJoinConfirmModal(false);
       }
     }
@@ -241,14 +221,16 @@ const ChatRoomList = () => {
     setIsEvaluating(true);
     setHasApplied(true);
     setCurrentApplicationId(appId);
-    checkMyScore(true); // Force refresh state to 'Evaluating' (202)
-    // setShowEvaluationModal(true); // REMOVED: Do not auto-open
-    // activeTab remains same
+    checkMyScore(true);
+  };
+
+  const handleRoomCreated = () => {
+    fetchRooms();
   };
 
   return (
     <div className="bg-white min-h-screen pb-safe flex flex-col relative">
-      {/* Header (Top Bar) */}
+      {/* Header */}
       <div className="sticky top-0 bg-white z-10">
         <div className="flex items-center justify-between px-4 h-14 border-b border-gray-100">
           <div className="flex items-center">
@@ -260,7 +242,10 @@ const ChatRoomList = () => {
             </h1>
           </div>
           <div className="flex items-center space-x-1">
-            <button className="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-lg whitespace-nowrap">
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-lg whitespace-nowrap"
+            >
               채팅방 생성
             </button>
             <button className="p-2 -mr-2 text-gray-400">
@@ -284,7 +269,7 @@ const ChatRoomList = () => {
           <button
             onClick={() => {
               setActiveTab("SCORE");
-              checkMyScore(true); // Refresh when clicking tab
+              checkMyScore(true);
             }}
             className={`flex-1 py-3 text-sm font-bold border-b-2 transition-colors
               ${activeTab === "SCORE" ? "border-gray-900 text-gray-900" : "border-transparent text-gray-400"}`}
@@ -297,57 +282,33 @@ const ChatRoomList = () => {
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === "LIST" ? (
-          /* List Content */
           <div className="p-5 space-y-4">
-            {rooms.map((room) => {
-              const isClosed = room.current >= room.max;
-              return (
-                <div
-                  key={room.id}
-                  className="border border-gray-200 rounded-2xl p-5 shadow-sm bg-white"
+            {loadingRooms ? (
+              <div className="flex items-center justify-center min-h-[300px]">
+                <Loader2 className="w-8 h-8 text-gray-300 animate-spin" />
+              </div>
+            ) : rooms.length === 0 ? (
+              <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
+                <p className="text-gray-400 text-sm mb-4">
+                  아직 채팅방이 없습니다
+                </p>
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="px-6 py-3 bg-[#101827] text-white font-bold rounded-2xl text-sm"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <span className="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded-md">
-                      {room.goal}
-                    </span>
-                  </div>
-                  <h3 className="font-bold text-gray-900 text-base mb-1 truncate">
-                    {room.title}
-                  </h3>
-                  <div className="flex items-center space-x-2 text-xs text-gray-500 mb-4 font-medium">
-                    <span
-                      className={
-                        isClosed
-                          ? "text-red-500 font-bold"
-                          : "text-gray-900 font-bold"
-                      }
-                    >
-                      {room.current}/{room.max}
-                    </span>
-                    <span>•</span>
-                    <span className="bg-red-50 text-red-500 px-1.5 py-0.5 rounded font-bold border border-red-100">
-                      {room.cutline}점 이상 {room.condition}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-5 h-5 rounded-full bg-gray-200" />
-                      <span className="text-xs text-gray-600 font-medium">
-                        {room.host}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => handleEnterRequest(room)}
-                      disabled={isClosed}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors
-                        ${isClosed ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-white border border-red-500 text-red-500 hover:bg-red-50"}`}
-                    >
-                      {isClosed ? "마감" : "입장 신청"}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                  첫 채팅방 만들기
+                </button>
+              </div>
+            ) : (
+              rooms.map((room) => (
+                <RoomCard
+                  key={room.chatRoomId}
+                  room={room}
+                  onJoin={handleJoinRequest}
+                  onEnter={handleEnterRoom}
+                />
+              ))
+            )}
           </div>
         ) : (
           /* Score Tab Content */
@@ -388,7 +349,6 @@ const ChatRoomList = () => {
                 onRetry={() => checkMyScore(true)}
               />
             ) : (
-              /* No Application State */
               <div className="flex flex-col items-center justify-center p-8 text-center min-h-[400px]">
                 <div className="space-y-6">
                   <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-2 shadow-sm border border-gray-100">
@@ -456,13 +416,20 @@ const ChatRoomList = () => {
           setSelectedRoom(null);
         }}
         onConfirm={handleConfirmJoin}
-        roomTitle={selectedRoom?.title}
+        roomTitle={selectedRoom?.roomName}
       />
 
       <AnalysisResultModal
         isOpen={showResultModal}
         onClose={() => setShowResultModal(false)}
         data={analysisData}
+      />
+
+      <CreateRoomModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        jobMasterId={id}
+        onSuccess={handleRoomCreated}
       />
     </div>
   );

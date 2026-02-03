@@ -1,21 +1,34 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import client from "../api/client";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authModalConfig, setAuthModalConfig] = useState({
     isOpen: false,
     message: "",
   });
 
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    // Ensure token is a valid non-empty string and not the string "null" or "undefined"
-    const isValid = !!token && token !== "null" && token !== "undefined";
-    setIsAuthenticated(isValid);
-    setLoading(false);
+  const fetchUser = async () => {
+    try {
+      const response = await client.get("/api/v1/users/me");
+      setUser(response.data.data);
+    } catch (e) {
+      console.error("Failed to fetch user info:", e);
+    }
+  };
+
+useEffect(() => {
+  const token = localStorage.getItem("accessToken");
+  const isValid = !!token && token !== "null" && token !== "undefined";
+  setIsAuthenticated(isValid);
+  if (isValid) {
+    fetchUser();
+  }
+  setLoading(false);
 
     // Listen for global auth errors (from axios client)
     const handleAuthError = (event) => {
@@ -41,12 +54,14 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("refreshToken", refreshToken);
     setIsAuthenticated(true);
+    fetchUser();
   };
 
   const logout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     setIsAuthenticated(false);
+    setUser(null);
   };
 
   const showAuthModal = (message) => {
@@ -64,6 +79,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         isAuthenticated,
+        user,
         loading,
         login,
         logout,

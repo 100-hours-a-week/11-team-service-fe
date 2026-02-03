@@ -8,6 +8,8 @@ import Dashboard from "../pages/Dashboard";
 import JobDetail from "../pages/JobDetail";
 import JobAnalysis from "../pages/JobAnalysis";
 import ChatRoomList from "../pages/ChatRoomList";
+import MyChatRooms from "../pages/MyChatRooms";
+import ChatRoom from "../pages/ChatRoom";
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading, showAuthModal } = useAuth();
@@ -72,9 +74,15 @@ const AppRoutes = () => {
           path="chat"
           element={
             <ProtectedRoute>
-              <div className="p-8 text-center text-gray-500">
-                채팅방 페이지 (준비 중)
-              </div>
+              <MyChatRooms />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="chat/:chatRoomId"
+          element={
+            <ProtectedRoute>
+              <ChatRoom />
             </ProtectedRoute>
           }
         />
