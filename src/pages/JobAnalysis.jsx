@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import client from "../api/client";
 import { ChevronLeft, Bell } from "lucide-react";
+import JobAnalysisProgressModal from "../components/JobAnalysisProgressModal";
 
 const JobAnalysis = () => {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ const JobAnalysis = () => {
       if (data.isExisting || data.existing) {
         // Don't set inline 'error', only modal
         setModalError("이미 등록된 공고입니다.");
-        setRedirectTarget(`/jobs/${data.jobPostingId}`);
+        setRedirectTarget(`/jobs/${data.jobMasterId}`);
         setShowErrorModal(true);
         return;
       }
@@ -97,17 +98,17 @@ const JobAnalysis = () => {
     if (!result.jobPostingId) {
       alert(
         "Internal Error: JobPosting ID is missing in result: " +
-        JSON.stringify(result),
+          JSON.stringify(result),
       );
       return;
     }
 
     setConfirmLoading(true);
     try {
-      await client.patch(`/api/v1/job-postings/${result.jobPostingId}`, {
+      await client.patch(`/api/v1/job-postings/${result.jobMasterId}`, {
         registrationStatus: "CONFIRMED",
       });
-      navigate(`/jobs/${result.jobPostingId}`, { replace: true });
+      navigate(`/jobs/${result.jobMasterId}`, { replace: true });
     } catch (err) {
       console.error(err);
       if (err.response?.status === 409) {
@@ -132,9 +133,9 @@ const JobAnalysis = () => {
 
   const handleCancelConfirm = async () => {
     // AI 분석 후 생성된 Draft 상태의 공고가 있다면 삭제
-    if (result && result.jobPostingId) {
+    if (result && result.jobMasterId) {
       try {
-        await client.delete(`/api/v1/job-postings/${result.jobPostingId}`);
+        await client.delete(`/api/v1/job-postings/${result.jobMasterId}`);
       } catch (e) {
         console.error("Draft 삭제 실패:", e);
       }
@@ -177,17 +178,18 @@ const JobAnalysis = () => {
                 if (validateUrl(e.target.value)) setError("");
               }}
               disabled={!!result} // Keep input visually but disabled if analyzed? Spec says "URL 입력 영역은 유지된다... prefill... disabled 언급은 없음"
-            // Actually spec says "URL 분석 1회 이상 수행하여... 공고 정보가 표시된 상태에서도 URL 입력 영역은 유지된다... URL을 다시 등록하여 갱신할 수 있다."
-            // So DO NOT disable input.
+              // Actually spec says "URL 분석 1회 이상 수행하여... 공고 정보가 표시된 상태에서도 URL 입력 영역은 유지된다... URL을 다시 등록하여 갱신할 수 있다."
+              // So DO NOT disable input.
             />
             <button
               onClick={handleAnalyze}
               disabled={!url || !validateUrl(url) || loading}
               className={`text-xs font-bold px-4 py-2 rounded-lg whitespace-nowrap transition-colors flex-shrink-0
-                                ${!url || !validateUrl(url) || loading
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-[#101827] text-white hover:bg-[#1a263d]"
-                }`}
+                                ${
+                                  !url || !validateUrl(url) || loading
+                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                    : "bg-[#101827] text-white hover:bg-[#1a263d]"
+                                }`}
             >
               {loading ? "분석중" : "등록"}
             </button>
@@ -329,26 +331,33 @@ const JobAnalysis = () => {
 
       {/* Error (Analysis Fail) Modal */}
       {showErrorModal && (
-        <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-[300px] p-8 text-center shadow-xl animate-scale-in">
-            <p className="text-gray-900 mb-8 font-bold whitespace-pre-wrap text-base">
-              {modalError || "정보를 불러오는데 실패했습니다."}
-            </p>
-            <button
-              onClick={() => {
-                setShowErrorModal(false);
-                if (redirectTarget) {
-                  navigate(redirectTarget, { replace: true });
-                  setRedirectTarget(null);
-                }
-              }}
-              className="bg-[#101827] text-white font-bold py-3 px-10 rounded-xl text-sm hover:bg-[#1a263d] transition-colors"
-            >
-              확인
-            </button>
+        <div className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-[24px] w-full max-w-[320px] overflow-hidden shadow-2xl relative animate-scale-in">
+            <div className="p-8 pb-6 text-center">
+              <h2 className="text-xl font-extrabold text-gray-900 mb-4 whitespace-pre-wrap leading-tight">
+                {modalError || "정보를 불러오는데 실패했습니다."}
+              </h2>
+            </div>
+            <div className="p-6 pt-0">
+              <button
+                onClick={() => {
+                  setShowErrorModal(false);
+                  if (redirectTarget) {
+                    navigate(redirectTarget, { replace: true });
+                    setRedirectTarget(null);
+                  }
+                }}
+                className="w-full bg-[#101827] text-white font-bold py-4 rounded-2xl text-sm hover:bg-[#1a263d] transition-all active:scale-[0.98]"
+              >
+                확인
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Analysis Progress Modal */}
+      <JobAnalysisProgressModal isOpen={loading} />
     </div>
   );
 };

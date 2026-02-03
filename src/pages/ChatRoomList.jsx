@@ -247,7 +247,7 @@ const ChatRoomList = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen pb-safe flex flex-col">
+    <div className="bg-white min-h-screen pb-safe flex flex-col relative">
       {/* Header (Top Bar) */}
       <div className="sticky top-0 bg-white z-10">
         <div className="flex items-center justify-between px-4 h-14 border-b border-gray-100">
@@ -463,10 +463,6 @@ const ChatRoomList = () => {
         isOpen={showResultModal}
         onClose={() => setShowResultModal(false)}
         data={analysisData}
-        onGoToScore={() => {
-          setShowResultModal(false);
-          setActiveTab("SCORE");
-        }}
       />
     </div>
   );

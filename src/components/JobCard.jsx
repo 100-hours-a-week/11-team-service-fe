@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const JobCard = ({ job }) => {
   const navigate = useNavigate();
+  const { isAuthenticated, showAuthModal } = useAuth();
 
   // Mapping data
   const company = job.companyName || "회사명";
@@ -16,6 +18,10 @@ const JobCard = ({ job }) => {
   const isClosed = status !== "OPEN";
 
   const handleCardClick = () => {
+    if (!isAuthenticated) {
+      showAuthModal("로그인이 필요합니다.");
+      return;
+    }
     // Navigate to chatroom list for this job
     navigate(`/jobs/${job.jobMasterId || job.id}/chat`);
   };

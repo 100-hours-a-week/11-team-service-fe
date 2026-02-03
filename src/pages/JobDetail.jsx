@@ -30,7 +30,9 @@ const JobDetail = () => {
     const fetchDetail = async () => {
       try {
         const response = await client.get(`/api/v1/job-postings/${id}`);
-        setJob(response.data.data);
+        const data = response.data.data;
+        console.log("[JobDetail] Received Data:", data);
+        setJob(data);
       } catch (error) {
         console.error("Failed to fetch detail:", error);
       } finally {
@@ -127,18 +129,22 @@ const JobDetail = () => {
         </div>
 
         {/* 2. External Link Button */}
-        {job.sourceUrl && (
-          <div className="mb-8 text-right">
-            <a
-              href={job.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-[#101827] text-white font-bold px-6 py-3 rounded-xl text-sm hover:bg-[#1a263d] transition-colors"
-            >
-              공고 바로가기
-            </a>
-          </div>
-        )}
+        <div className="mb-10">
+          <a
+            href={job.sourceUrl || "#"}
+            onClick={(e) => {
+              if (!job.sourceUrl) {
+                e.preventDefault();
+                alert("공고 원본 링크가 없습니다.");
+              }
+            }}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full inline-flex items-center justify-center bg-[#101827] text-white font-bold px-6 py-4 rounded-xl text-sm hover:bg-[#1a263d] transition-all active:scale-[0.99]"
+          >
+            공고 바로가기
+          </a>
+        </div>
 
         {/* 3. AI Summary */}
         <section className="mb-28 mt-8">
@@ -155,7 +161,7 @@ const JobDetail = () => {
       <ApplyModal
         isOpen={isApplyModalOpen}
         onClose={() => setIsApplyModalOpen(false)}
-        jobPostingId={job.id}
+        jobPostingId={job.jobMasterId}
         jobTitle={job.jobTitle}
         onSuccess={(appId) => {
           setIsApplyModalOpen(false);

@@ -3,9 +3,11 @@ import client from "../api/client";
 import JobCard from "../components/JobCard";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, showAuthModal } = useAuth();
 
   // State
   const [jobs, setJobs] = useState([]);
@@ -155,7 +157,13 @@ const Dashboard = () => {
 
           {/* Register Button */}
           <button
-            onClick={() => navigate("/analysis")} // Mapping "Job Registration" to Analysis for now as per previous logic, or separate page
+            onClick={() => {
+              if (!isAuthenticated) {
+                showAuthModal();
+                return;
+              }
+              navigate("/analysis");
+            }}
             className="bg-[#101827] hover:bg-[#1a263d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
           >
             공고 등록
