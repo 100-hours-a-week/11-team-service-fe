@@ -116,7 +116,9 @@ const ChatInput = ({ onSendText, onSendFile, disabled }) => {
             adjustHeight();
           }}
           onKeyDown={handleKeyDown}
-          placeholder={selectedFile ? "파일을 전송합니다" : "메시지를 입력하세요"}
+          placeholder={
+            selectedFile ? "파일을 전송합니다" : "메시지를 입력하세요"
+          }
           disabled={disabled || selectedFile}
           rows={1}
           className="flex-1 resize-none bg-gray-100 rounded-2xl px-4 py-2.5 text-sm placeholder:text-gray-400 focus:outline-none disabled:opacity-50 max-h-24"

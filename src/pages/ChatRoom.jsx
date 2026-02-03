@@ -202,9 +202,7 @@ const ChatRoom = () => {
   };
 
   const handleKickMember = (memberId) => {
-    setMembers((prev) =>
-      prev.filter((m) => m.chatRoomMemberId !== memberId),
-    );
+    setMembers((prev) => prev.filter((m) => m.chatRoomMemberId !== memberId));
   };
 
   if (loadingRoom || loading) {

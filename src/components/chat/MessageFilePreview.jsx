@@ -60,9 +60,7 @@ const MessageFilePreview = ({ file, isMe }) => {
         >
           {file.fileName}
         </p>
-        <p
-          className={`text-xs ${isMe ? "text-white/60" : "text-gray-400"}`}
-        >
+        <p className={`text-xs ${isMe ? "text-white/60" : "text-gray-400"}`}>
           {formatFileSize(file.fileSize)}
         </p>
       </div>

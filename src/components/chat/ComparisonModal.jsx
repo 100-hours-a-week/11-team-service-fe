@@ -45,7 +45,9 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
           </div>
         ) : !data ? (
           <div className="py-16 text-center">
-            <p className="text-sm text-gray-400">비교 분석 결과를 불러올 수 없습니다</p>
+            <p className="text-sm text-gray-400">
+              비교 분석 결과를 불러올 수 없습니다
+            </p>
           </div>
         ) : (
           <div className="p-5 space-y-6">
@@ -59,9 +61,7 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
               </div>
               <span className="text-gray-300 text-2xl font-light">vs</span>
               <div className="text-center">
-                <p className="text-xs text-gray-400 mb-1">
-                  {member.nickname}
-                </p>
+                <p className="text-xs text-gray-400 mb-1">{member.nickname}</p>
                 <p className="text-3xl font-extrabold text-gray-900">
                   {data.targetScore ?? "-"}
                 </p>

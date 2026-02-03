@@ -78,7 +78,7 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="chat/:chatRoomId"
           element={
             <ProtectedRoute>
