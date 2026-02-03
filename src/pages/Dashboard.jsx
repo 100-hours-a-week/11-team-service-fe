@@ -4,6 +4,7 @@ import JobCard from "../components/JobCard";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Logo from "../components/Logo";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -118,8 +119,10 @@ const Dashboard = () => {
   return (
     <div className="bg-white min-h-screen pb-24">
       {/* Header Section */}
-      <div className="bg-white px-5 pt-12 pb-4 sticky top-0 z-20 border-b border-gray-100">
-        <h1 className="text-xl font-bold text-gray-900 mb-4">채용공고</h1>
+      <div className="bg-white px-5 pt-8 pb-4 sticky top-0 z-20 border-b border-gray-100">
+        <div className="flex justify-center mb-6">
+          <Logo />
+        </div>
 
         {/* Search Bar */}
         <div className="relative mb-4">
