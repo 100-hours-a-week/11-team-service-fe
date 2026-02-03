@@ -21,14 +21,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-useEffect(() => {
-  const token = localStorage.getItem("accessToken");
-  const isValid = !!token && token !== "null" && token !== "undefined";
-  setIsAuthenticated(isValid);
-  if (isValid) {
-    fetchUser();
-  }
-  setLoading(false);
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    const isValid = !!token && token !== "null" && token !== "undefined";
+    setIsAuthenticated(isValid);
+    if (isValid) {
+      fetchUser();
+    }
+    setLoading(false);
 
     // Listen for global auth errors (from axios client)
     const handleAuthError = (event) => {

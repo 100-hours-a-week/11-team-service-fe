@@ -10,7 +10,13 @@ const formatTime = (dateStr) => {
   });
 };
 
-const ChatBubble = ({ message, isMe, showSender, showTime, onProfileClick }) => {
+const ChatBubble = ({
+  message,
+  isMe,
+  showSender,
+  showTime,
+  onProfileClick,
+}) => {
   // System message
   if (message.messageType === "SYSTEM") {
     return (
@@ -60,7 +66,9 @@ const ChatBubble = ({ message, isMe, showSender, showTime, onProfileClick }) => 
             </span>
           </button>
         )}
-        <div className={`flex items-end space-x-1 ${showSender ? "ml-8" : "ml-8"}`}>
+        <div
+          className={`flex items-end space-x-1 ${showSender ? "ml-8" : "ml-8"}`}
+        >
           <div className="bg-gray-100 text-gray-900 rounded-2xl rounded-tl-md px-3.5 py-2.5">
             {message.messageType === "FILE" ? (
               <MessageFilePreview file={message.file} isMe={false} />

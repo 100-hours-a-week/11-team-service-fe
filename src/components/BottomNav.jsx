@@ -1,4 +1,4 @@
-import { useNavigate, useLocation, Link} from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { MessageSquare, FileText, MessageCircle, User } from "lucide-react"; // Updated icons
 import clsx from "clsx";
 import { useAuth } from "../context/AuthContext";
@@ -15,11 +15,11 @@ const BottomNav = () => {
     { name: "마이페이지", path: "/mypage", icon: User },
   ];
 
-// Hide BottomNav on these paths
-const hideOnPaths = ["/analysis", "/jobs", "/login"];
-const shouldHide =
-  hideOnPaths.some((path) => location.pathname.startsWith(path)) ||
-  /^\/chat\/\d+/.test(location.pathname);
+  // Hide BottomNav on these paths
+  const hideOnPaths = ["/analysis", "/jobs", "/login"];
+  const shouldHide =
+    hideOnPaths.some((path) => location.pathname.startsWith(path)) ||
+    /^\/chat\/\d+/.test(location.pathname);
 
   if (shouldHide) return null;
 

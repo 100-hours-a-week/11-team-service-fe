@@ -16,10 +16,7 @@ const MemberDrawer = ({
 
   const handleKick = async (e, member) => {
     e.stopPropagation();
-    if (
-      !confirm(`${member.nickname}님을 강제 퇴장시키시겠습니까?`)
-    )
-      return;
+    if (!confirm(`${member.nickname}님을 강제 퇴장시키시겠습니까?`)) return;
 
     try {
       await kickMember(chatRoomId, member.chatRoomMemberId);
@@ -40,7 +37,8 @@ const MemberDrawer = ({
         {/* Header */}
         <div className="flex items-center justify-between px-4 h-14 border-b border-gray-100">
           <h2 className="font-bold text-gray-900">
-            멤버 <span className="text-gray-400 font-normal">{members.length}</span>
+            멤버{" "}
+            <span className="text-gray-400 font-normal">{members.length}</span>
           </h2>
           <button onClick={onClose} className="p-1">
             <X className="w-5 h-5 text-gray-400" />
