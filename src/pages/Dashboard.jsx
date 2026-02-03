@@ -13,7 +13,7 @@ const Dashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [keyword, setKeyword] = useState("");
-  const [onlyOpen, setOnlyOpen] = useState(false); // Filter state: 모집중
+  const [onlyOpen, setOnlyOpen] = useState(true); // Filter state: Default to true (Only Recruiting)
 
   // Pagination State
   const [cursor, setCursor] = useState(null);
@@ -41,7 +41,7 @@ const Dashboard = () => {
     setCursor(null);
     setHasMore(true);
     fetchJobs(null, true);
-  }, [onlyOpen]); // Refetch when filter changes (keyword search usually requires a submit button or debounce, but let's debounce later if needed)
+  }, [onlyOpen]); // Refetch when filter changes
 
   // Search handler
   const handleSearch = (e) => {
@@ -118,8 +118,12 @@ const Dashboard = () => {
   return (
     <div className="bg-white min-h-screen pb-24">
       {/* Header Section */}
-      <div className="bg-white px-5 pt-12 pb-4 sticky top-0 z-20 border-b border-gray-100">
-        <h1 className="text-xl font-bold text-gray-900 mb-4">채용공고</h1>
+      <div className="bg-white px-5 pt-8 pb-4 sticky top-0 z-20 border-b border-gray-100">
+        <div className="flex justify-center mb-6">
+          <span className="text-2xl font-black tracking-tighter text-[#101827] font-sans">
+            SCUAD
+          </span>
+        </div>
 
         {/* Search Bar */}
         <div className="relative mb-4">
