@@ -97,7 +97,7 @@ const JobAnalysis = () => {
     if (!result.jobPostingId) {
       alert(
         "Internal Error: JobPosting ID is missing in result: " +
-          JSON.stringify(result),
+        JSON.stringify(result),
       );
       return;
     }
@@ -177,18 +177,17 @@ const JobAnalysis = () => {
                 if (validateUrl(e.target.value)) setError("");
               }}
               disabled={!!result} // Keep input visually but disabled if analyzed? Spec says "URL 입력 영역은 유지된다... prefill... disabled 언급은 없음"
-              // Actually spec says "URL 분석 1회 이상 수행하여... 공고 정보가 표시된 상태에서도 URL 입력 영역은 유지된다... URL을 다시 등록하여 갱신할 수 있다."
-              // So DO NOT disable input.
+            // Actually spec says "URL 분석 1회 이상 수행하여... 공고 정보가 표시된 상태에서도 URL 입력 영역은 유지된다... URL을 다시 등록하여 갱신할 수 있다."
+            // So DO NOT disable input.
             />
             <button
               onClick={handleAnalyze}
               disabled={!url || !validateUrl(url) || loading}
               className={`text-xs font-bold px-4 py-2 rounded-lg whitespace-nowrap transition-colors flex-shrink-0
-                                ${
-                                  !url || !validateUrl(url) || loading
-                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                    : "bg-[#101827] text-white hover:bg-[#1a263d]"
-                                }`}
+                                ${!url || !validateUrl(url) || loading
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-[#101827] text-white hover:bg-[#1a263d]"
+                }`}
             >
               {loading ? "분석중" : "등록"}
             </button>
@@ -203,80 +202,77 @@ const JobAnalysis = () => {
           <div className="mt-8 pb-24 animate-fade-in-up">
             {/* Wrapper for the result fields */}
             <div className="p-1 relative">
-              <div className="grid grid-cols-2 gap-y-6 gap-x-4 mb-6">
+              <div className="grid grid-cols-2 gap-y-6 gap-x-4 mb-8">
                 {/* Company */}
-                <div>
-                  <div className="text-xs text-gray-900 font-bold mb-1">
+                <div className="flex flex-col">
+                  <div className="text-xs text-gray-900 font-bold mb-2">
                     기업명
                   </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2 text-sm text-gray-700 font-medium break-words">
+                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-sm text-gray-700 font-medium break-words flex-1 flex items-center">
                     {result.companyName || "-"}
                   </div>
                 </div>
                 {/* Job Title */}
-                <div>
-                  <div className="text-xs text-gray-900 font-bold mb-1">
+                <div className="flex flex-col">
+                  <div className="text-xs text-gray-900 font-bold mb-2">
                     직무 명
                   </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2 text-sm text-gray-700 font-medium break-words">
+                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-sm text-gray-700 font-medium break-words flex-1 flex items-center">
                     {result.jobTitle || "-"}
                   </div>
                 </div>
 
                 {/* Main Tasks */}
-                <div className="col-span-1">
-                  <div className="mb-2 text-sm font-bold text-gray-700">
+                <div className="col-span-1 flex flex-col">
+                  <div className="text-xs text-gray-900 font-bold mb-2">
                     주요 업무
                   </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2 text-xs text-gray-700 font-medium h-full flex items-center">
-                    <span className="break-words w-full">
-                      {result.mainTasks && result.mainTasks.length > 0
-                        ? result.mainTasks.join(", ")
-                        : "-"}
-                    </span>
+                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-medium flex-1 flex items-start break-words">
+                    {result.mainTasks && result.mainTasks.length > 0
+                      ? result.mainTasks.join(", ")
+                      : "-"}
                   </div>
                 </div>
                 {/* Tech Stack */}
-                <div className="col-span-1">
-                  <div className="mb-2 text-sm font-bold text-gray-700">
+                <div className="col-span-1 flex flex-col">
+                  <div className="text-xs text-gray-900 font-bold mb-2">
                     필요기술스택
                   </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2 text-xs text-gray-700 font-medium h-full flex items-center">
-                    <span className="break-words w-full">
-                      {result.skills && result.skills.length > 0
-                        ? result.skills.join(", ")
-                        : "-"}
-                    </span>
+                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-medium flex-1 flex items-start break-words">
+                    {result.skills && result.skills.length > 0
+                      ? result.skills.join(", ")
+                      : "-"}
                   </div>
                 </div>
 
                 {/* Status */}
-                <div className="col-span-2">
-                  <div className="mb-2 text-sm font-bold text-gray-700">
+                <div className="col-span-2 flex flex-col">
+                  <div className="text-xs text-gray-900 font-bold mb-2">
                     모집상태
                   </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2 text-sm text-gray-700 font-medium">
+                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-sm text-gray-700 font-medium">
                     {result.status === "OPEN" ? "모집중" : "마감"}
                   </div>
                 </div>
                 {/* Period */}
-                <div className="col-span-2">
-                  <div className="mb-2 text-sm font-bold text-gray-700">
+                <div className="col-span-2 flex flex-col">
+                  <div className="text-xs text-gray-900 font-bold mb-2">
                     모집 기간
                   </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2 text-xs text-gray-700 font-medium flex items-center h-full">
-                    {(result.startDate || "YYYY.MM.DD").replaceAll("-", ".")}~
-                    {(result.endDate || "YYYY.MM.DD").replaceAll("-", ".")}
+                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-medium">
+                    {result.startDate && result.endDate
+                      ? `${result.startDate.replaceAll("-", ".")} ~ ${result.endDate.replaceAll("-", ".")}`
+                      : "-"}
                   </div>
                 </div>
               </div>
 
               {/* AI Summary */}
-              <section>
-                <div className="mb-2 text-sm font-bold text-gray-700">
+              <section className="mt-8 pb-6">
+                <div className="mb-2 text-xs text-gray-900 font-bold">
                   AI공고 요약
                 </div>
-                <div className="bg-gray-100 rounded-xl p-4 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap break-all min-h-[120px]">
+                <div className="bg-gray-100 rounded-xl p-4 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap break-words min-h-[120px]">
                   {result.aiSummary || "AI 요약 정보가 없습니다."}
                 </div>
               </section>
@@ -287,7 +283,7 @@ const JobAnalysis = () => {
 
       {/* 3. Bottom Action Buttons (Fixed, only when result exists) */}
       {result && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 pb-10 flex space-x-3 z-[100]">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white border-t border-gray-100 p-4 pb-8 flex space-x-3 z-[100]">
           <button
             onClick={handleCancelClick}
             className="flex-1 bg-[#F3F4F6] text-[#101827] font-bold py-3.5 rounded-xl text-sm hover:bg-gray-200 transition-colors"
@@ -299,7 +295,7 @@ const JobAnalysis = () => {
             disabled={confirmLoading}
             className={`flex-1 font-bold py-3.5 rounded-xl text-sm transition-colors text-white bg-[#101827] hover:bg-[#1a263d]`}
           >
-            {confirmLoading ? "저장중" : "등록"}
+            {confirmLoading ? "저장중" : "확인"}
           </button>
         </div>
       )}

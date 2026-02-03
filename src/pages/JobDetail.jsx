@@ -51,10 +51,8 @@ const JobDetail = () => {
       <div className="p-4 text-center pt-20">공고를 찾을 수 없습니다.</div>
     );
 
-  const startDate = job.startDate
-    ? job.startDate.replaceAll("-", ".")
-    : "YYYY.MM.DD";
-  const endDate = job.endDate ? job.endDate.replaceAll("-", ".") : "YYYY.MM.DD";
+  const startDate = job.startDate ? job.startDate.replaceAll("-", ".") : null;
+  const endDate = job.endDate ? job.endDate.replaceAll("-", ".") : null;
 
   const isClosed = job.jobStatus !== "OPEN";
 
@@ -71,58 +69,56 @@ const JobDetail = () => {
 
       <div className="p-5">
         {/* 1. Basic Info Grid */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-y-6 gap-x-4 mb-8">
           {/* Row 1: Company & Job Title */}
-          <div>
-            <div className="mb-2 text-sm font-bold text-gray-700">기업명</div>
-            <div className="bg-[#F9FAFB] rounded-xl px-4 py-3.5 text-sm font-bold text-gray-900 border border-gray-100 flex items-center min-h-[52px]">
+          <div className="flex flex-col">
+            <div className="mb-2 text-xs font-bold text-gray-900">기업명</div>
+            <div className="bg-[#F9FAFB] rounded-xl px-4 py-3.5 text-sm font-bold text-gray-900 border border-gray-100 flex-1 flex items-center min-h-[52px]">
               <span className="w-full break-keep">{job.companyName}</span>
             </div>
           </div>
-          <div>
-            <div className="mb-2 text-sm font-bold text-gray-700">직무명</div>
-            <div className="bg-[#F9FAFB] rounded-xl px-4 py-3.5 text-sm font-bold text-gray-900 border border-gray-100 flex items-center min-h-[52px]">
+          <div className="flex flex-col">
+            <div className="mb-2 text-xs font-bold text-gray-900">직무명</div>
+            <div className="bg-[#F9FAFB] rounded-xl px-4 py-3.5 text-sm font-bold text-gray-900 border border-gray-100 flex-1 flex items-center min-h-[52px]">
               <span className="w-full break-keep">{job.jobTitle}</span>
             </div>
           </div>
 
           {/* Row 2: Status & Period */}
-          <div>
-            <div className="mb-2 text-sm font-bold text-gray-700">모집상태</div>
+          <div className="flex flex-col">
+            <div className="mb-2 text-xs font-bold text-gray-900">모집상태</div>
             <div
-              className={`rounded-xl px-4 py-3.5 text-sm font-bold border flex items-center justify-center min-h-[52px]
+              className={`rounded-xl px-4 py-3.5 text-sm font-bold border flex-1 flex items-center justify-center min-h-[52px]
                             ${!isClosed ? "bg-[#F9FAFB] text-gray-900 border-gray-100" : "bg-gray-100 text-gray-400 border-gray-200"}`}
             >
               {!isClosed ? "모집중" : "마감"}
             </div>
           </div>
-          <div>
-            <div className="mb-2 text-sm font-bold text-gray-700">
+          <div className="flex flex-col">
+            <div className="mb-2 text-xs font-bold text-gray-900">
               모집 기간
             </div>
-            <div className="bg-[#F9FAFB] rounded-xl px-3 py-3.5 text-[11px] font-bold text-gray-900 border border-gray-100 flex items-center justify-center min-h-[52px] text-center">
-              {startDate} ~ {endDate}
+            <div className="bg-[#F9FAFB] rounded-xl px-3 py-3.5 text-[11px] font-bold text-gray-900 border border-gray-100 flex-1 flex items-center justify-center min-h-[52px] text-center">
+              {startDate && endDate ? `${startDate} ~ ${endDate}` : "-"}
             </div>
           </div>
 
-          {/* Row 3: Main Tasks (Full Width) */}
-          <div className="col-span-2">
-            <div className="mb-2 text-sm font-bold text-gray-700">
+          {/* Row 3: Main Tasks & Tech Stack */}
+          <div className="col-span-1 flex flex-col">
+            <div className="mb-2 text-xs font-bold text-gray-900">
               주요 업무
             </div>
-            <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed">
+            <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed flex-1 flex items-start break-words">
               {job.mainTasks && job.mainTasks.length > 0
                 ? job.mainTasks.join(", ")
                 : "-"}
             </div>
           </div>
-
-          {/* Row 4: Tech Stack (Full Width) */}
-          <div className="col-span-2">
-            <div className="mb-2 text-sm font-bold text-gray-700">
+          <div className="col-span-1 flex flex-col">
+            <div className="mb-2 text-xs font-bold text-gray-900">
               필요기술스택
             </div>
-            <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed">
+            <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed flex-1 flex items-start break-words">
               {job.skills && job.skills.length > 0
                 ? job.skills.join(", ")
                 : "-"}
@@ -145,11 +141,11 @@ const JobDetail = () => {
         )}
 
         {/* 3. AI Summary */}
-        <section className="mb-24">
-          <div className="mb-2 text-sm font-bold text-gray-700">
+        <section className="mb-28 mt-8">
+          <div className="mb-2 text-xs font-bold text-gray-900">
             AI공고 요약
           </div>
-          <div className="bg-[#F9FAFB] rounded-xl p-6 text-sm text-gray-700 leading-loose whitespace-pre-wrap min-h-[150px] break-all border border-gray-100">
+          <div className="bg-[#F9FAFB] rounded-xl p-6 text-sm text-gray-700 leading-loose whitespace-pre-wrap min-h-[150px] break-words border border-gray-100">
             {job.aiSummary || "AI 요약 정보가 없습니다."}
           </div>
         </section>

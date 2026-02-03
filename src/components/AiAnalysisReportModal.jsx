@@ -61,11 +61,11 @@ const AiAnalysisReportModal = ({ isOpen, onClose, result }) => {
           <div className="space-y-4 pt-2">
             {competencies.map((item, idx) => (
               <div key={idx}>
-                <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-sm font-bold text-gray-700">
+                <div className="flex justify-between items-start mb-1.5">
+                  <span className="text-sm font-bold text-gray-700 flex-1 pr-4 break-words">
                     {item.name}
                   </span>
-                  <span className="text-xs text-gray-400 font-bold">
+                  <span className="text-xs text-gray-400 font-bold whitespace-nowrap pt-0.5">
                     {item.score}/100
                   </span>
                 </div>
@@ -93,7 +93,7 @@ const AiAnalysisReportModal = ({ isOpen, onClose, result }) => {
             onClick={onClose}
             className="w-full bg-gray-900 text-white font-bold py-4 rounded-xl text-base hover:bg-black transition-all active:scale-[0.98]"
           >
-            확인 완료
+            확인
           </button>
         </div>
       </div>
