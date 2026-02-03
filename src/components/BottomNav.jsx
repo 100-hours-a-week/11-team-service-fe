@@ -1,9 +1,12 @@
-import { Link, useLocation } from "react-router-dom";
-import { MessageSquare, FileText, MessageCircle, User } from "lucide-react";
+import { useNavigate, useLocation, Link, useLocation } from "react-router-dom";
+import { MessageSquare, FileText, MessageCircle, User } from "lucide-react"; // Updated icons
 import clsx from "clsx";
+import { useAuth } from "../context/AuthContext";
 
 const BottomNav = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, showAuthModal } = useAuth();
 
   const navItems = [
     { name: "커뮤니티", path: "/", icon: MessageSquare },
@@ -12,10 +15,11 @@ const BottomNav = () => {
     { name: "마이페이지", path: "/mypage", icon: User },
   ];
 
-  const shouldHide =
-    location.pathname.startsWith("/analysis") ||
-    location.pathname.startsWith("/jobs") ||
-    /^\/chat\/\d+/.test(location.pathname);
+// Hide BottomNav on these paths
+const hideOnPaths = ["/analysis", "/jobs", "/login"];
+const shouldHide =
+  hideOnPaths.some((path) => location.pathname.startsWith(path)) ||
+  /^\/chat\/\d+/.test(location.pathname);
 
   if (shouldHide) return null;
 
@@ -29,9 +33,17 @@ const BottomNav = () => {
             (item.path !== "/" && location.pathname.startsWith(item.path));
 
           return (
-            <Link
+            <button
               key={item.path}
-              to={item.path}
+              onClick={(e) => {
+                const isPublicPath = item.path === "/";
+                if (!isPublicPath && !isAuthenticated) {
+                  e.preventDefault();
+                  showAuthModal("로그인이 필요합니다.");
+                  return;
+                }
+                navigate(item.path);
+              }}
               className={clsx(
                 "flex flex-col items-center justify-center w-full h-full",
                 isActive
@@ -45,7 +57,7 @@ const BottomNav = () => {
                   isActive ? "fill-[#101827]" : "stroke-current",
                 )}
               />
-            </Link>
+            </button>
           );
         })}
       </div>
