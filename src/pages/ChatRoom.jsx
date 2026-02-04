@@ -215,7 +215,8 @@ const ChatRoom = () => {
   }
 
   return (
-    <div className="bg-white min-h-screen flex flex-col h-screen">
+    <div className="flex justify-center h-screen bg-gray-100">
+    <div className="w-full max-w-[480px] bg-white flex flex-col h-full shadow-xl">
       {/* Header */}
       <div className="flex items-center justify-between px-4 h-14 border-b border-gray-100 bg-white flex-shrink-0">
         <div className="flex items-center min-w-0">
@@ -382,6 +383,7 @@ const ChatRoom = () => {
         isHost={isHost}
         onAction={handleActionSheetAction}
       />
+    </div>
     </div>
   );
 };
