@@ -3,15 +3,17 @@ import client from "../api/client";
 import JobCard from "../components/JobCard";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, showAuthModal } = useAuth();
 
   // State
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [keyword, setKeyword] = useState("");
-  const [onlyOpen, setOnlyOpen] = useState(false); // Filter state: 모집중
+  const [onlyOpen, setOnlyOpen] = useState(true); // Filter state: 모집중
 
   // Pagination State
   const [cursor, setCursor] = useState(null);
@@ -39,7 +41,7 @@ const Dashboard = () => {
     setCursor(null);
     setHasMore(true);
     fetchJobs(null, true);
-  }, [onlyOpen]); // Refetch when filter changes (keyword search usually requires a submit button or debounce, but let's debounce later if needed)
+  }, [onlyOpen]); // Refetch when filter changes
 
   // Search handler
   const handleSearch = (e) => {
@@ -51,14 +53,32 @@ const Dashboard = () => {
     }
   };
 
-  const fetchJobs = async (currentCursor, isReset = false) => {
+  // Handle keyword change and auto-reset when cleared
+  const handleKeywordChange = (e) => {
+    const newKeyword = e.target.value;
+    setKeyword(newKeyword);
+
+    // If user clears the search, automatically reset to show all jobs
+    if (newKeyword === "") {
+      setJobs([]);
+      setCursor(null);
+      setHasMore(true);
+      fetchJobs(null, true, ""); // Pass empty string directly
+    }
+  };
+
+  const fetchJobs = async (
+    currentCursor,
+    isReset = false,
+    searchKeyword = null,
+  ) => {
     try {
       setLoading(true);
 
       const params = {
         size: 20,
         cursor: currentCursor,
-        keyword: keyword,
+        keyword: searchKeyword !== null ? searchKeyword : keyword, // Use passed keyword or state
         status: onlyOpen ? "OPEN" : null, // Send 'OPEN' or nothing
       };
 
@@ -98,8 +118,12 @@ const Dashboard = () => {
   return (
     <div className="bg-white min-h-screen pb-24">
       {/* Header Section */}
-      <div className="bg-white px-5 pt-12 pb-4 sticky top-0 z-20 border-b border-gray-100">
-        <h1 className="text-xl font-bold text-gray-900 mb-4">채용공고</h1>
+      <div className="bg-white px-5 pt-4 pb-4 sticky top-0 z-20 border-b border-gray-100">
+        <div className="flex justify-center mb-6">
+          <span className="text-2xl font-black tracking-tighter text-[#101827] font-sans">
+            SCUAD
+          </span>
+        </div>
 
         {/* Search Bar */}
         <div className="relative mb-4">
@@ -111,7 +135,7 @@ const Dashboard = () => {
             className="block w-full pl-10 pr-3 py-3.5 bg-gray-50 border border-transparent focus:border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-100 transition-all font-medium"
             placeholder="기업명 또는 직무명 검색"
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
+            onChange={handleKeywordChange}
             onKeyDown={handleSearch}
           />
         </div>
@@ -137,7 +161,13 @@ const Dashboard = () => {
 
           {/* Register Button */}
           <button
-            onClick={() => navigate("/analysis")} // Mapping "Job Registration" to Analysis for now as per previous logic, or separate page
+            onClick={() => {
+              if (!isAuthenticated) {
+                showAuthModal();
+                return;
+              }
+              navigate("/analysis");
+            }}
             className="bg-[#101827] hover:bg-[#1a263d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
           >
             공고 등록
@@ -147,7 +177,7 @@ const Dashboard = () => {
       </div>
 
       {/* Job List */}
-      <div className="px-5 py-4 space-y-1">
+      <div className="px-5 py-4">
         {jobs.map((job, index) => {
           if (jobs.length === index + 1) {
             return (

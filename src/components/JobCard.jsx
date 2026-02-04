@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const JobCard = ({ job }) => {
   const navigate = useNavigate();
+  const { isAuthenticated, showAuthModal } = useAuth();
 
   // Mapping data
   const company = job.companyName || "회사명";
@@ -15,13 +17,25 @@ const JobCard = ({ job }) => {
 
   const isClosed = status !== "OPEN";
 
-  const handleClick = () => {
+  const handleCardClick = () => {
+    if (!isAuthenticated) {
+      showAuthModal("로그인이 필요합니다.");
+      return;
+    }
+    // Navigate to chatroom list for this job
+    navigate(`/jobs/${job.jobMasterId || job.id}/chat`);
+  };
+
+  const handleDetailClick = (e) => {
+    // Prevent card click event
+    e.stopPropagation();
+    // Navigate to job detail page
     navigate(`/jobs/${job.jobMasterId || job.id}`);
   };
 
   return (
     <div
-      onClick={handleClick}
+      onClick={handleCardClick}
       className="bg-white rounded-[20px] p-6 mb-4 shadow-[0_8px_24px_rgba(0,0,0,0.04)] border border-gray-100 hover:shadow-lg transition-all active:scale-[0.99] relative cursor-pointer"
     >
       {/* Header: Company, Title, Status */}
@@ -57,19 +71,24 @@ const JobCard = ({ job }) => {
       </div>
 
       {/* Date Range */}
-      <div className="flex justify-end text-xs text-gray-400 mb-5 font-medium tracking-tight">
+      <div className="flex justify-end text-xs text-gray-500 mb-5 font-medium tracking-tight">
         {startDate} ~ {endDate}
       </div>
 
       {/* Footer: Group Count and Detail Link */}
       <div className="flex justify-between items-center border-t border-gray-50 pt-4">
         <div className="flex items-center space-x-1.5 bg-gray-50 px-3 py-1.5 rounded-lg">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${groupCount > 0 ? "bg-[#101827]" : "bg-gray-300"}`}
+          ></span>
           <span className="text-xs font-bold text-gray-700">
             현재 모임 {groupCount}개
           </span>
         </div>
-        <div className="flex items-center text-xs font-bold text-gray-400">
+        <div
+          onClick={handleDetailClick}
+          className="flex items-center text-xs font-bold text-gray-700 hover:text-gray-900 transition-colors"
+        >
           상세보기 <span className="ml-1">→</span>
         </div>
       </div>
