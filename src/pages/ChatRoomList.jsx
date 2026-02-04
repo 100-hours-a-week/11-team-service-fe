@@ -84,7 +84,7 @@ const ChatRoomList = () => {
       }, 3000);
     }
     return () => clearInterval(intervalId);
-  }, [isEvaluating]);
+  }, [isEvaluating, activeTab]);
 
   const checkMyScore = async (force = false) => {
     if (!force && myScore !== null && !isEvaluating)
@@ -120,7 +120,7 @@ const ChatRoomList = () => {
         }
         setHasApplied(true);
         setIsEvaluating(false);
-        if (isEvaluating) {
+        if (isEvaluating && activeTab !== "SCORE") {
           setShowResultModal(true);
         }
         return {
