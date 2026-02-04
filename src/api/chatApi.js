@@ -23,9 +23,7 @@ export const leaveChatRoom = (chatRoomId) =>
   client.delete(`/api/v1/chat-rooms/${chatRoomId}/members/me`);
 
 export const kickMember = (chatRoomId, chatRoomMemberId) =>
-  client.delete(
-    `/api/v1/chat-rooms/${chatRoomId}/members/${chatRoomMemberId}`,
-  );
+  client.delete(`/api/v1/chat-rooms/${chatRoomId}/members/${chatRoomMemberId}`);
 
 export const closeChatRoom = (chatRoomId) =>
   client.delete(`/api/v1/chat-rooms/${chatRoomId}`);
@@ -59,9 +57,7 @@ export const getMembers = (chatRoomId) =>
   client.get(`/api/v1/chat-rooms/${chatRoomId}/members`);
 
 export const getMemberProfile = (chatRoomId, chatRoomMemberId) =>
-  client.get(
-    `/api/v1/chat-rooms/${chatRoomId}/members/${chatRoomMemberId}`,
-  );
+  client.get(`/api/v1/chat-rooms/${chatRoomId}/members/${chatRoomMemberId}`);
 
 export const getMemberResume = (chatRoomId, chatRoomMemberId) =>
   client.get(

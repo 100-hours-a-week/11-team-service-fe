@@ -173,9 +173,7 @@ const CreateRoomModal = ({ isOpen, onClose, jobMasterId, onSuccess }) => {
           </div>
 
           {/* Error */}
-          {error && (
-            <p className="text-red-500 text-xs font-medium">{error}</p>
-          )}
+          {error && <p className="text-red-500 text-xs font-medium">{error}</p>}
 
           {/* Buttons */}
           <div className="flex space-x-3 pt-2 pb-safe">

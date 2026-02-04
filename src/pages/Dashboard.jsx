@@ -13,7 +13,7 @@ const Dashboard = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [keyword, setKeyword] = useState("");
-  const [onlyOpen, setOnlyOpen] = useState(true); // Filter state: Default to true (Only Recruiting)
+  const [onlyOpen, setOnlyOpen] = useState(true); // Filter state: 모집중
 
   // Pagination State
   const [cursor, setCursor] = useState(null);
@@ -118,7 +118,7 @@ const Dashboard = () => {
   return (
     <div className="bg-white min-h-screen pb-24">
       {/* Header Section */}
-      <div className="bg-white px-5 pt-8 pb-4 sticky top-0 z-20 border-b border-gray-100">
+      <div className="bg-white px-5 pt-4 pb-4 sticky top-0 z-20 border-b border-gray-100">
         <div className="flex justify-center mb-6">
           <span className="text-2xl font-black tracking-tighter text-[#101827] font-sans">
             SCUAD
@@ -177,7 +177,7 @@ const Dashboard = () => {
       </div>
 
       {/* Job List */}
-      <div className="px-5 py-4 space-y-1">
+      <div className="px-5 py-4">
         {jobs.map((job, index) => {
           if (jobs.length === index + 1) {
             return (
