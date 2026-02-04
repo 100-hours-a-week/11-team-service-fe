@@ -117,9 +117,7 @@ const ChatRoom = () => {
 
   const isMe = (senderId) => {
     console.log("[isMe] user:", JSON.stringify(user), "senderId:", senderId);
-    return (
-      user?.userId != null && String(user.userId) === String(senderId)
-    );
+    return user?.userId != null && String(user.userId) === String(senderId);
   };
   const isHost = myMembership?.role === "HOST";
   const isClosed = roomDetail?.status === "CLOSED";
