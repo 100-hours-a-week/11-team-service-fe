@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import client from "../api/client";
 import { getChatRoomsForJob } from "../api/chatApi";
 import {
@@ -170,7 +171,7 @@ const ChatRoomList = () => {
 
     if (evaluatingNow) {
       if (!currentApplicationId) {
-        alert("AI 분석이 진행 중입니다. 잠시만 기다려주세요.");
+        toast.error("AI 분석이 진행 중입니다. 잠시만 기다려주세요.");
         return;
       }
       setShowEvaluationModal(true);
@@ -178,7 +179,7 @@ const ChatRoomList = () => {
     }
 
     if (score < room.cutlineScore) {
-      alert(
+      toast.error(
         `입장 조건을 충족하지 못했습니다. (내 점수: ${score}점 / 컷라인: ${room.cutlineScore}점)`,
       );
       return;
@@ -210,7 +211,7 @@ const ChatRoomList = () => {
         navigate(`/chat/${selectedRoom.chatRoomId}`);
         return;
       }
-      alert(err.response?.data?.message || "입장 신청에 실패했습니다.");
+      toast.error(err.response?.data?.message || "입장 신청에 실패했습니다.");
       if (err.response?.status !== 401) {
         setShowJoinConfirmModal(false);
       }

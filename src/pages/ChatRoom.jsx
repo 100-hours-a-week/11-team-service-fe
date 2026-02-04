@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { ChevronLeft, Users, Loader2, MoreVertical } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -82,7 +83,7 @@ const ChatRoom = () => {
       } catch (e) {
         console.error("Failed to fetch room detail:", e);
         if (e.response?.status === 403 || e.response?.status === 404) {
-          alert("채팅방에 접근할 수 없습니다.");
+          toast.error("채팅방에 접근할 수 없습니다.");
           navigate(-1);
         }
       } finally {
@@ -144,7 +145,7 @@ const ChatRoom = () => {
       navigate(-1);
     } catch (e) {
       console.error("Failed to leave:", e);
-      alert(e.response?.data?.message || "나가기에 실패했습니다.");
+      toast.error(e.response?.data?.message || "나가기에 실패했습니다.");
     }
   };
 
@@ -157,7 +158,7 @@ const ChatRoom = () => {
       navigate(-1);
     } catch (e) {
       console.error("Failed to close room:", e);
-      alert(e.response?.data?.message || "채팅방 종료에 실패했습니다.");
+      toast.error(e.response?.data?.message || "채팅방 종료에 실패했습니다.");
     }
   };
 
@@ -197,7 +198,7 @@ const ChatRoom = () => {
       );
     } catch (err) {
       console.error("Failed to kick member:", err);
-      alert(err.response?.data?.message || "강제 퇴장에 실패했습니다.");
+      toast.error(err.response?.data?.message || "강제 퇴장에 실패했습니다.");
     }
   };
 

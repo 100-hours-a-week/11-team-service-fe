@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import client from "../api/client";
 import { ChevronLeft, Bell } from "lucide-react";
 import JobAnalysisProgressModal from "../components/JobAnalysisProgressModal";
@@ -92,11 +93,11 @@ const JobAnalysis = () => {
   const handleRegister = async () => {
     // Debug check
     if (!result) {
-      alert("Internal Error: Result is missing");
+      toast.error("Internal Error: Result is missing");
       return;
     }
     if (!result.jobPostingId) {
-      alert(
+      toast.error(
         "Internal Error: JobPosting ID is missing in result: " +
           JSON.stringify(result),
       );
