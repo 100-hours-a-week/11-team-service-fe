@@ -115,7 +115,8 @@ const ChatRoom = () => {
     }
   }, [loading]);
 
-  const isMe = (senderId) => user?.userId === senderId;
+  const isMe = (senderId) =>
+    user?.userId != null && String(user.userId) === String(senderId);
   const isHost = myMembership?.role === "HOST";
   const isClosed = roomDetail?.status === "CLOSED";
 
