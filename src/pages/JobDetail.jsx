@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import client from "../api/client";
 import {
   ChevronLeft,
@@ -135,7 +136,7 @@ const JobDetail = () => {
             onClick={(e) => {
               if (!job.sourceUrl) {
                 e.preventDefault();
-                alert("공고 원본 링크가 없습니다.");
+                toast.error("공고 원본 링크가 없습니다.");
               }
             }}
             target="_blank"

@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Paperclip, SendHorizontal, X } from "lucide-react";
+import toast from "react-hot-toast";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ACCEPTED_TYPES = "image/*,application/pdf,.docx,.xlsx";
@@ -63,7 +64,7 @@ const ChatInput = ({ onSendText, onSendFile, disabled }) => {
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      alert("파일 크기는 10MB 이하여야 합니다.");
+      toast.error("파일 크기는 10MB 이하여야 합니다.");
       return;
     }
     setSelectedFile(file);

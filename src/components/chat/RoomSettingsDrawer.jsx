@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X, LogOut, Trash2, Crown } from "lucide-react";
+import toast from "react-hot-toast";
 import { leaveChatRoom, closeChatRoom } from "../../api/chatApi";
 
 const GOAL_LABEL = {
@@ -32,7 +33,7 @@ const RoomSettingsDrawer = ({
       onLeft?.();
     } catch (e) {
       console.error("Failed to leave:", e);
-      alert(e.response?.data?.message || "나가기에 실패했습니다.");
+      toast.error(e.response?.data?.message || "나가기에 실패했습니다.");
     } finally {
       setProcessing(false);
     }
@@ -48,7 +49,7 @@ const RoomSettingsDrawer = ({
       onRoomClosed?.();
     } catch (e) {
       console.error("Failed to close room:", e);
-      alert(e.response?.data?.message || "채팅방 종료에 실패했습니다.");
+      toast.error(e.response?.data?.message || "채팅방 종료에 실패했습니다.");
     } finally {
       setProcessing(false);
     }

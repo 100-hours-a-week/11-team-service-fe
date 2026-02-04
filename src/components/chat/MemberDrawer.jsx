@@ -1,5 +1,6 @@
 import { X, Crown, UserMinus } from "lucide-react";
 import clsx from "clsx";
+import toast from "react-hot-toast";
 import { kickMember } from "../../api/chatApi";
 
 const MemberDrawer = ({
@@ -23,7 +24,7 @@ const MemberDrawer = ({
       onKickMember?.(member.chatRoomMemberId);
     } catch (err) {
       console.error("Failed to kick member:", err);
-      alert(err.response?.data?.message || "강제 퇴장에 실패했습니다.");
+      toast.error(err.response?.data?.message || "강제 퇴장에 실패했습니다.");
     }
   };
 
