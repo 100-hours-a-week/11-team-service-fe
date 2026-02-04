@@ -162,10 +162,11 @@ const ChatRoomList = () => {
       score,
       applied,
       isEvaluating: evaluatingNow,
-    } = await checkMyScore();
+    } = await checkMyScore(true);
 
     if (!applied) {
-      setShowScoreModal(true);
+      toast.error("이력서를 먼저 제출해야 입장할 수 있습니다.");
+      setShowApplyModal(true);
       return;
     }
 
