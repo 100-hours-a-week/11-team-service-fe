@@ -190,6 +190,18 @@ const ChatRoomList = () => {
     setShowJoinConfirmModal(true);
   };
 
+  const handleCreateRoom = async () => {
+    const { applied } = await checkMyScore(true);
+
+    if (!applied) {
+      toast.error("이력서를 먼저 제출해야 채팅방을 생성할 수 있습니다.");
+      setShowApplyModal(true);
+      return;
+    }
+
+    setShowCreateModal(true);
+  };
+
   const handleEnterRoom = (room) => {
     navigate(`/chat/${room.chatRoomId}`);
   };
@@ -245,7 +257,7 @@ const ChatRoomList = () => {
           </div>
           <div className="flex items-center space-x-1">
             <button
-              onClick={() => setShowCreateModal(true)}
+              onClick={handleCreateRoom}
               className="px-3 py-1.5 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-lg whitespace-nowrap"
             >
               채팅방 생성
@@ -295,7 +307,7 @@ const ChatRoomList = () => {
                   아직 채팅방이 없습니다
                 </p>
                 <button
-                  onClick={() => setShowCreateModal(true)}
+                  onClick={handleCreateRoom}
                   className="px-6 py-3 bg-[#101827] text-white font-bold rounded-2xl text-sm"
                 >
                   첫 채팅방 만들기
