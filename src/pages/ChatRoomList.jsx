@@ -84,7 +84,6 @@ const ChatRoomList = () => {
       }, 3000);
     }
     return () => clearInterval(intervalId);
-    return () => clearInterval(intervalId);
   }, [isEvaluating, activeTab]);
 
   const checkMyScore = async (force = false) => {
