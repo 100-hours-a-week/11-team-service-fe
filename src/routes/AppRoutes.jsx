@@ -79,14 +79,6 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path="chat/:chatRoomId"
-          element={
-            <ProtectedRoute>
-              <ChatRoom />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="mypage"
           element={
             <ProtectedRoute>
@@ -97,6 +89,15 @@ const AppRoutes = () => {
           }
         />
       </Route>
+
+      <Route
+        path="chat/:chatRoomId"
+        element={
+          <ProtectedRoute>
+            <ChatRoom />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
