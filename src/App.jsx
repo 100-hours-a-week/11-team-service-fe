@@ -19,6 +19,7 @@ function App() {
               borderRadius: "12px",
               padding: "14px 20px",
               textAlign: "center",
+              wordBreak: "keep-all",
               textWrap: "balance",
             },
             error: {

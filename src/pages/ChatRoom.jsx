@@ -115,7 +115,8 @@ const ChatRoom = () => {
     }
   }, [loading]);
 
-  const isMe = (senderId) => user?.userId === senderId;
+  const isMe = (senderId) =>
+    user?.userId != null && String(user.userId) === String(senderId);
   const isHost = myMembership?.role === "HOST";
   const isClosed = roomDetail?.status === "CLOSED";
 
@@ -215,173 +216,175 @@ const ChatRoom = () => {
   }
 
   return (
-    <div className="bg-white min-h-screen flex flex-col h-screen">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 h-14 border-b border-gray-100 bg-white flex-shrink-0">
-        <div className="flex items-center min-w-0">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 mr-2">
-            <ChevronLeft className="w-6 h-6 text-gray-900" />
-          </button>
-          <div className="min-w-0">
-            <h1 className="font-bold text-gray-900 text-base truncate">
-              {roomDetail?.roomName}
-            </h1>
-            <p className="text-xs text-gray-400">
-              {members.length}/{roomDetail?.maxParticipants}명
-            </p>
+    <div className="flex justify-center h-screen bg-gray-100">
+      <div className="w-full max-w-[480px] bg-white flex flex-col h-full shadow-xl">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 h-14 border-b border-gray-100 bg-white flex-shrink-0">
+          <div className="flex items-center min-w-0">
+            <button onClick={() => navigate(-1)} className="p-2 -ml-2 mr-2">
+              <ChevronLeft className="w-6 h-6 text-gray-900" />
+            </button>
+            <div className="min-w-0">
+              <h1 className="font-bold text-gray-900 text-base truncate">
+                {roomDetail?.roomName}
+              </h1>
+              <p className="text-xs text-gray-400">
+                {members.length}/{roomDetail?.maxParticipants}명
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center space-x-1">
-          <button
-            onClick={() => setShowMemberDrawer(true)}
-            className="p-2 text-gray-600"
-          >
-            <Users className="w-5 h-5" />
-          </button>
-          <div className="relative">
+          <div className="flex items-center space-x-1">
             <button
-              onClick={() => setShowDropdown((prev) => !prev)}
+              onClick={() => setShowMemberDrawer(true)}
               className="p-2 text-gray-600"
             >
-              <MoreVertical className="w-5 h-5" />
+              <Users className="w-5 h-5" />
             </button>
-            {showDropdown && (
-              <>
-                <div
-                  className="fixed inset-0 z-[199]"
-                  onClick={() => setShowDropdown(false)}
-                />
-                <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-gray-100 z-[200] overflow-hidden">
-                  <button
-                    onClick={() => {
-                      setShowDropdown(false);
-                      handleLeaveRoom();
-                    }}
-                    className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    채팅방 나가기
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowDropdown(false);
-                      handleCloseRoom();
-                    }}
-                    className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100"
-                  >
-                    채팅방 종료하기
-                  </button>
-                </div>
-              </>
-            )}
+            <div className="relative">
+              <button
+                onClick={() => setShowDropdown((prev) => !prev)}
+                className="p-2 text-gray-600"
+              >
+                <MoreVertical className="w-5 h-5" />
+              </button>
+              {showDropdown && (
+                <>
+                  <div
+                    className="fixed inset-0 z-[199]"
+                    onClick={() => setShowDropdown(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-lg border border-gray-100 z-[200] overflow-hidden">
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false);
+                        handleLeaveRoom();
+                      }}
+                      className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      채팅방 나가기
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false);
+                        handleCloseRoom();
+                      }}
+                      className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100"
+                    >
+                      채팅방 종료하기
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Messages */}
-      <div
-        ref={messageContainerRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto bg-white py-2"
-      >
-        {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-sm text-gray-400">
-              아직 메시지가 없습니다. 첫 메시지를 보내보세요!
-            </p>
+        {/* Messages */}
+        <div
+          ref={messageContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto bg-white py-2"
+        >
+          {messages.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-sm text-gray-400">
+                아직 메시지가 없습니다. 첫 메시지를 보내보세요!
+              </p>
+            </div>
+          ) : (
+            messages.map((msg, i) => {
+              const prev = messages[i - 1];
+              const next = messages[i + 1];
+              const showDate =
+                !prev || getDateKey(prev.sentAt) !== getDateKey(msg.sentAt);
+              const showSender =
+                msg.messageType !== "SYSTEM" &&
+                !isMe(msg.senderId) &&
+                !isSameGroup(prev, msg);
+              const showTime =
+                msg.messageType !== "SYSTEM" && !isSameGroup(msg, next);
+
+              return (
+                <div key={msg.messageId}>
+                  {showDate && <DateSeparator date={msg.sentAt} />}
+                  <ChatBubble
+                    message={msg}
+                    isMe={isMe(msg.senderId)}
+                    showSender={showSender}
+                    showTime={showTime}
+                    onProfileClick={handleProfileClick}
+                  />
+                </div>
+              );
+            })
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input */}
+        {isClosed ? (
+          <div className="border-t border-gray-100 bg-gray-50 px-4 py-4 text-center">
+            <p className="text-sm text-gray-400">종료된 채팅방입니다</p>
           </div>
         ) : (
-          messages.map((msg, i) => {
-            const prev = messages[i - 1];
-            const next = messages[i + 1];
-            const showDate =
-              !prev || getDateKey(prev.sentAt) !== getDateKey(msg.sentAt);
-            const showSender =
-              msg.messageType !== "SYSTEM" &&
-              !isMe(msg.senderId) &&
-              !isSameGroup(prev, msg);
-            const showTime =
-              msg.messageType !== "SYSTEM" && !isSameGroup(msg, next);
-
-            return (
-              <div key={msg.messageId}>
-                {showDate && <DateSeparator date={msg.sentAt} />}
-                <ChatBubble
-                  message={msg}
-                  isMe={isMe(msg.senderId)}
-                  showSender={showSender}
-                  showTime={showTime}
-                  onProfileClick={handleProfileClick}
-                />
-              </div>
-            );
-          })
+          <ChatInput
+            onSendText={sendTextMessage}
+            onSendFile={sendFileMessage}
+            disabled={sending}
+          />
         )}
-        <div ref={messagesEndRef} />
+
+        {/* Member Drawer */}
+        <MemberDrawer
+          isOpen={showMemberDrawer}
+          onClose={() => setShowMemberDrawer(false)}
+          members={members}
+          isHost={isHost}
+          chatRoomId={chatRoomId}
+          onMemberClick={handleMemberClick}
+          onKickMember={handleKickMember}
+          myUserId={user?.userId}
+        />
+
+        {/* Member Profile Modal */}
+        {showMemberProfile && (
+          <MemberProfileModal
+            chatRoomId={chatRoomId}
+            member={showMemberProfile}
+            onClose={() => setShowMemberProfile(null)}
+            onCompare={handleComparisonClick}
+          />
+        )}
+
+        {/* Comparison Modal */}
+        {showComparison && (
+          <ComparisonModal
+            chatRoomId={chatRoomId}
+            member={showComparison}
+            onClose={() => setShowComparison(null)}
+          />
+        )}
+
+        {/* Settings Drawer */}
+        <RoomSettingsDrawer
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          chatRoomId={chatRoomId}
+          roomDetail={roomDetail}
+          isHost={isHost}
+          onRoomClosed={handleRoomClosed}
+          onLeft={handleRoomClosed}
+        />
+
+        {/* Member Action Sheet */}
+        <MemberActionSheet
+          isOpen={!!actionSheetMember}
+          onClose={() => setActionSheetMember(null)}
+          member={actionSheetMember}
+          isHost={isHost}
+          onAction={handleActionSheetAction}
+        />
       </div>
-
-      {/* Input */}
-      {isClosed ? (
-        <div className="border-t border-gray-100 bg-gray-50 px-4 py-4 text-center">
-          <p className="text-sm text-gray-400">종료된 채팅방입니다</p>
-        </div>
-      ) : (
-        <ChatInput
-          onSendText={sendTextMessage}
-          onSendFile={sendFileMessage}
-          disabled={sending}
-        />
-      )}
-
-      {/* Member Drawer */}
-      <MemberDrawer
-        isOpen={showMemberDrawer}
-        onClose={() => setShowMemberDrawer(false)}
-        members={members}
-        isHost={isHost}
-        chatRoomId={chatRoomId}
-        onMemberClick={handleMemberClick}
-        onKickMember={handleKickMember}
-        myUserId={user?.userId}
-      />
-
-      {/* Member Profile Modal */}
-      {showMemberProfile && (
-        <MemberProfileModal
-          chatRoomId={chatRoomId}
-          member={showMemberProfile}
-          onClose={() => setShowMemberProfile(null)}
-          onCompare={handleComparisonClick}
-        />
-      )}
-
-      {/* Comparison Modal */}
-      {showComparison && (
-        <ComparisonModal
-          chatRoomId={chatRoomId}
-          member={showComparison}
-          onClose={() => setShowComparison(null)}
-        />
-      )}
-
-      {/* Settings Drawer */}
-      <RoomSettingsDrawer
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-        chatRoomId={chatRoomId}
-        roomDetail={roomDetail}
-        isHost={isHost}
-        onRoomClosed={handleRoomClosed}
-        onLeft={handleRoomClosed}
-      />
-
-      {/* Member Action Sheet */}
-      <MemberActionSheet
-        isOpen={!!actionSheetMember}
-        onClose={() => setActionSheetMember(null)}
-        member={actionSheetMember}
-        isHost={isHost}
-        onAction={handleActionSheetAction}
-      />
     </div>
   );
 };
