@@ -8,6 +8,9 @@ const GOAL_LABEL = {
   INTERVIEW: "면접",
 };
 
+// TODO: API 개발 완료 후 SHOW_COMING_SOON을 false로 변경
+const SHOW_COMING_SOON = true;
+
 const MyChatRooms = () => {
   const navigate = useNavigate();
   const [rooms, setRooms] = useState([]);
@@ -37,7 +40,10 @@ const MyChatRooms = () => {
   }, []);
 
   useEffect(() => {
-    fetchRooms();
+    // TODO: API 개발 완료 후 주석 해제
+    if (!SHOW_COMING_SOON) {
+      fetchRooms();
+    }
   }, [fetchRooms]);
 
   const formatTime = (dateStr) => {
@@ -54,6 +60,35 @@ const MyChatRooms = () => {
     }
     return d.toLocaleDateString("ko-KR", { month: "short", day: "numeric" });
   };
+
+  // 준비중 화면
+  if (SHOW_COMING_SOON) {
+    return (
+      <div className="bg-white min-h-screen flex flex-col">
+        {/* Header */}
+        <div className="sticky top-0 bg-white z-10 border-b border-gray-100">
+          <div className="flex items-center justify-between px-4 h-14">
+            <h1 className="font-bold text-gray-900 text-lg">채팅방</h1>
+          </div>
+        </div>
+
+        {/* Content - 준비중 */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center">
+            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+              <MessageCircle className="w-8 h-8 text-gray-300" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              서비스 준비중입니다
+            </h3>
+            <p className="text-gray-400 text-sm">
+              빠른 시일 내에 찾아뵙겠습니다
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white min-h-screen flex flex-col">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { FileText, User } from "lucide-react";
 import Layout from "../components/Layout";
 import Login from "../pages/Login";
 import AuthCallback from "../pages/AuthCallback";
@@ -10,6 +11,28 @@ import JobAnalysis from "../pages/JobAnalysis";
 import ChatRoomList from "../pages/ChatRoomList";
 import MyChatRooms from "../pages/MyChatRooms";
 import ChatRoom from "../pages/ChatRoom";
+
+// 준비중 페이지 공통 컴포넌트
+const ComingSoon = ({ title, icon: Icon }) => (
+  <div className="bg-white min-h-screen flex flex-col">
+    <div className="sticky top-0 bg-white z-10 border-b border-gray-100">
+      <div className="flex items-center justify-between px-4 h-14">
+        <h1 className="font-bold text-gray-900 text-lg">{title}</h1>
+      </div>
+    </div>
+    <div className="flex-1 overflow-y-auto">
+      <div className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center">
+        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+          <Icon className="w-8 h-8 text-gray-300" />
+        </div>
+        <h3 className="text-lg font-bold text-gray-900 mb-2">
+          서비스 준비중입니다
+        </h3>
+        <p className="text-gray-400 text-sm">빠른 시일 내에 찾아뵙겠습니다</p>
+      </div>
+    </div>
+  </div>
+);
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading, showAuthModal } = useAuth();
@@ -64,9 +87,7 @@ const AppRoutes = () => {
           path="resume"
           element={
             <ProtectedRoute>
-              <div className="p-8 text-center text-gray-500">
-                이력관리 페이지 (준비 중)
-              </div>
+              <ComingSoon title="이력관리" icon={FileText} />
             </ProtectedRoute>
           }
         />
@@ -82,9 +103,7 @@ const AppRoutes = () => {
           path="mypage"
           element={
             <ProtectedRoute>
-              <div className="p-8 text-center text-gray-500">
-                마이페이지 (준비 중)
-              </div>
+              <ComingSoon title="마이페이지" icon={User} />
             </ProtectedRoute>
           }
         />

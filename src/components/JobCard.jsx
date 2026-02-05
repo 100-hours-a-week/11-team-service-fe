@@ -100,8 +100,8 @@ const JobCard = ({ job }) => {
 const calculateProgress = (start, end) => {
   if (!start || !end) return 0;
   const today = new Date(); // Or consistent mock date if needed
-  const startDate = new Date(start.replaceAll(".", "-"));
-  const endDate = new Date(end.replaceAll(".", "-"));
+  const startDate = new Date(start.replaceAll(".", "/"));
+  const endDate = new Date(end.replaceAll(".", "/"));
 
   if (today < startDate) return 0;
   if (today > endDate) return 100;

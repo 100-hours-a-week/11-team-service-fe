@@ -61,14 +61,14 @@ const ChatRoomList = () => {
 
   useEffect(() => {
     const fetchJobInfo = async () => {
-      setJobInfo({ title: "정보 불러오는 중...", company: "" });
+      setJobInfo({ title: "", company: "정보 불러오는 중..." });
       try {
         const response = await client.get(`/api/v1/job-postings/${id}`);
         const data = response.data.data;
         setJobInfo({ title: data.jobTitle, company: data.companyName });
       } catch (e) {
         console.error("Job info fetch error", e);
-        setJobInfo({ title: "채용공고", company: "-" });
+        setJobInfo({ title: "-", company: "채용공고" });
       }
     };
     fetchJobInfo();
@@ -252,7 +252,7 @@ const ChatRoomList = () => {
               <ChevronLeft className="w-6 h-6 text-gray-900" />
             </button>
             <h1 className="font-bold text-gray-900 text-lg truncate max-w-[200px]">
-              {jobInfo.title}
+              {jobInfo.company}
             </h1>
           </div>
           <div className="flex items-center space-x-1">
