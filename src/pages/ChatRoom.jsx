@@ -266,7 +266,9 @@ const ChatRoom = () => {
                     <button
                       onClick={() => {
                         setShowDropdown(false);
-                        handleCloseRoom();
+                        // TODO: API 개발 완료 후 handleCloseRoom() 활성화
+                        // handleCloseRoom();
+                        toast("준비중인 기능입니다");
                       }}
                       className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100"
                     >

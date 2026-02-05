@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { X, FileText, Download, Loader2, Crown } from "lucide-react";
+import toast from "react-hot-toast";
 import {
   getMemberProfile,
   getMemberResume,
   getMemberPortfolio,
 } from "../../api/chatApi";
+
+// TODO: API 개발 완료 후 false로 변경
+const SHOW_COMING_SOON = true;
 
 const MemberProfileModal = ({ chatRoomId, member, onClose, onCompare }) => {
   const [profile, setProfile] = useState(null);
@@ -47,6 +51,10 @@ const MemberProfileModal = ({ chatRoomId, member, onClose, onCompare }) => {
   };
 
   const handleTabChange = (tab) => {
+    if (SHOW_COMING_SOON) {
+      toast("준비중인 기능입니다");
+      return;
+    }
     setActiveDoc(tab);
     fetchDoc(tab);
   };
@@ -177,7 +185,13 @@ const MemberProfileModal = ({ chatRoomId, member, onClose, onCompare }) => {
 
             {/* Compare Button */}
             <button
-              onClick={() => onCompare?.(member)}
+              onClick={() => {
+                if (SHOW_COMING_SOON) {
+                  toast("준비중인 기능입니다");
+                  return;
+                }
+                onCompare?.(member);
+              }}
               className="w-full py-4 bg-[#101827] text-white font-bold rounded-2xl text-sm"
             >
               나와 비교분석
