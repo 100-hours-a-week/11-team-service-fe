@@ -96,7 +96,11 @@ const ChatInput = ({ onSendText, onSendFile, disabled }) => {
       {/* Input Area */}
       <div className="flex items-end space-x-2 px-4 py-3 pb-safe">
         <button
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => {
+            // TODO: API 개발 완료 후 파일 전송 기능 활성화
+            // fileInputRef.current?.click();
+            toast("준비중인 기능입니다");
+          }}
           disabled={disabled}
           className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 flex-shrink-0"
         >
