@@ -252,6 +252,7 @@ const ChatRoomList = () => {
               <ChevronLeft className="w-6 h-6 text-gray-900" />
             </button>
             <h1 className="font-bold text-gray-900 text-lg truncate max-w-[200px]">
+              {jobInfo.company}
             </h1>
           </div>
           <div className="flex items-center space-x-1">
