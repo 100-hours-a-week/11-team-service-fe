@@ -165,6 +165,13 @@ const JobAnalysis = () => {
 
       <div className="p-5 flex-1 relative">
         {/* 1. URL Input Section (Step 1) */}
+        {/* 안내 문구 */}
+        <div className="mb-4 flex justify-center">
+          <p className="text-sm font-extrabold text-[#101827]">
+            현재는 사람인, 원티드 링크만 등록 가능해요
+          </p>
+        </div>
+
         <div className="relative">
           <div
             className={`bg-gray-50 rounded-xl p-1 flex items-center pr-2 ${error ? "border border-red-500" : ""}`}
