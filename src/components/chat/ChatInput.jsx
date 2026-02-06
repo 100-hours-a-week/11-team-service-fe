@@ -3,6 +3,7 @@ import { Paperclip, SendHorizontal, X } from "lucide-react";
 import toast from "react-hot-toast";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_TEXT_LENGTH = 500;
 const ACCEPTED_TYPES = "image/*,application/pdf,.docx,.xlsx";
 
 const ChatInput = ({ onSendText, onSendFile, disabled }) => {
@@ -45,6 +46,11 @@ const ChatInput = ({ onSendText, onSendFile, disabled }) => {
     const trimmed = text.trim();
     if (!trimmed) return;
 
+    if (trimmed.length > MAX_TEXT_LENGTH) {
+      toast.error(`메시지는 ${MAX_TEXT_LENGTH}자 이하로 입력해주세요.`);
+      return;
+    }
+
     try {
       setSending(true);
       await onSendText(trimmed);
@@ -56,6 +62,7 @@ const ChatInput = ({ onSendText, onSendFile, disabled }) => {
       console.error("Message send failed:", e);
     } finally {
       setSending(false);
+      setTimeout(() => textareaRef.current?.focus(), 0);
     }
   };
 
