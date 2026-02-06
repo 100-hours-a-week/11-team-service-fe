@@ -62,7 +62,7 @@ const ChatInput = ({ onSendText, onSendFile, disabled }) => {
       console.error("Message send failed:", e);
     } finally {
       setSending(false);
-      textareaRef.current?.focus();
+      setTimeout(() => textareaRef.current?.focus(), 0);
     }
   };
 
