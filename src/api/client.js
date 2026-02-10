@@ -34,22 +34,16 @@ client.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) {
-          throw new Error("No refresh token available");
-        }
-
+        // refreshToken은 HttpOnly 쿠키로 자동 전송됨
         const { data } = await axios.post(
           `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"}/api/v1/auth/kakao/refresh`,
-          {
-            refreshToken,
-          },
+          {},
+          { withCredentials: true },
         );
 
-        const { accessToken, refreshToken: newRefreshToken } = data;
+        const { accessToken } = data.data;
 
         localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", newRefreshToken);
 
         // Update header and retry original request
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -58,9 +52,8 @@ client.interceptors.response.use(
         // Refresh failed (expired or invalid)
         console.error("Auth sync failed:", refreshError);
 
-        // Clear local credentials regardless
+        // Clear local credentials
         localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
 
         // Only show "Session Expired" modal if we are on a protected page.
         // If we are on a public page (Dashboard or JobDetail), just clear and keep them as guest.
