@@ -11,6 +11,7 @@ import JobAnalysis from "../pages/JobAnalysis";
 import ChatRoomList from "../pages/ChatRoomList";
 import MyChatRooms from "../pages/MyChatRooms";
 import ChatRoom from "../pages/ChatRoom";
+import MyApplications from "../pages/MyApplications";
 
 // 준비중 페이지 공통 컴포넌트
 const ComingSoon = ({ title, icon: Icon }) => (
@@ -87,7 +88,7 @@ const AppRoutes = () => {
           path="resume"
           element={
             <ProtectedRoute>
-              <ComingSoon title="이력관리" icon={FileText} />
+              <MyApplications />
             </ProtectedRoute>
           }
         />
