@@ -70,9 +70,17 @@ CMD ["npm", "run", "dev"]
 #================================
 FROM nginx:alpine AS production
 
+COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY --from=build /app/dist /usr/share/nginx/html
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx/conf.d && \
+    chown -R nginx:nginx /var/run && \
+    chown -R nginx:nginx /run
+
+USER nginx
 
 EXPOSE 3000
 
