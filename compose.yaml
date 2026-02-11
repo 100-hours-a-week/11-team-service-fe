@@ -1,0 +1,44 @@
+services:
+  # ========================================
+  # Development Service
+  # ========================================
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: app-fe-dev
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./public:/app/public:ro
+      - ./src:/app/src:ro
+      - ./package.json:/app/package.json
+      - ./vite.config.ts:/app/vite.config.ts:ro
+      - ./tailwind.config.js:/app/tailwind.config.js:ro
+      - ./postcss.config.js:/app/postcss.config.js:ro
+    develop:
+      watch:
+        - action: sync
+          path: ./public
+          target: /app/public
+        - action: sync
+          path: ./src
+          target: /app/src
+          ignore:
+            - '**/*.test.*'
+            - '**/__tests__/**'
+        - action: rebuild
+          path: ./package.json
+        - action: sync
+          path: ./vite.config.ts
+          target: /app/vite.config.ts
+        - action: sync
+          path: ./tailwind.config.js
+          target: /app/tailwind.config.js
+        - action: sync
+          path: ./postcss.config.js
+          target: /app/postcss.config.js
+    restart: unless-stopped
