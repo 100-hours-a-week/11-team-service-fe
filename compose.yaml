@@ -9,14 +9,14 @@ services:
       target: development
     container_name: app-fe-dev
     ports:
-      - '3000:3000'
+      - "3000:3000"
     environment:
       NODE_ENV: development
     volumes:
       - ./public:/app/public:ro
       - ./src:/app/src:ro
       - ./package.json:/app/package.json
-      - ./vite.config.ts:/app/vite.config.ts:ro
+      - ./vite.config.js:/app/vite.config.js:ro
       - ./tailwind.config.js:/app/tailwind.config.js:ro
       - ./postcss.config.js:/app/postcss.config.js:ro
     develop:
@@ -28,17 +28,34 @@ services:
           path: ./src
           target: /app/src
           ignore:
-            - '**/*.test.*'
-            - '**/__tests__/**'
+            - "**/*.test.*"
+            - "**/__tests__/**"
         - action: rebuild
           path: ./package.json
         - action: sync
-          path: ./vite.config.ts
-          target: /app/vite.config.ts
+          path: ./vite.config.js
+          target: /app/vite.config.js
         - action: sync
           path: ./tailwind.config.js
           target: /app/tailwind.config.js
         - action: sync
           path: ./postcss.config.js
           target: /app/postcss.config.js
+    profiles:
+      - dev
+    restart: unless-stopped
+  app-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+    container_name: app-fe-prod
+    ports:
+      - "3000:80"
+    environment:
+      NODE_ENV: production
+    profiles:
+      - prod
     restart: unless-stopped
