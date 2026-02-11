@@ -40,13 +40,10 @@ RUN mkdir -p /app/node_modules/.vite && \
 #================================
 FROM build-deps AS build
 
-# Copy only necessary files for building (respects .dockerignore)
 COPY --chown=nodejs:nodejs . .
 
-# Build the application
 RUN npm run build
 
-# Set proper ownership
 RUN chown -R nodejs:nodejs /app
 
 #================================
@@ -54,25 +51,18 @@ RUN chown -R nodejs:nodejs /app
 #================================
 FROM build-deps AS development
 
-# Set environment
-ENV NODE_ENV=development \
-    NPM_CONFIG_LOGLEVEL=warn
+ENV NODE_ENV=development
 
-# Copy source files
 COPY . .
 
-# Ensure all directories have proper permissions
 RUN mkdir -p /app/node_modules/.vite && \
     chown -R nodejs:nodejs /app && \
     chmod -R 755 /app
 
-# Switch to non-root user
 USER nodejs
 
-# Expose ports
 EXPOSE 3000
 
-# Start development server
 CMD ["npm", "run", "dev"]
 
 #================================
