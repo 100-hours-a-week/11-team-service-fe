@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { FileText, User } from "lucide-react";
+import UserMenu from "../components/UserMenu";
 import Layout from "../components/Layout";
 import Login from "../pages/Login";
 import AuthCallback from "../pages/AuthCallback";
@@ -19,6 +20,7 @@ const ComingSoon = ({ title, icon: Icon }) => (
     <div className="sticky top-0 bg-white z-10 border-b border-gray-100">
       <div className="flex items-center justify-between px-4 h-14">
         <h1 className="font-bold text-gray-900 text-lg">{title}</h1>
+        <UserMenu />
       </div>
     </div>
     <div className="flex-1 overflow-y-auto">

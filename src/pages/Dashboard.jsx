@@ -3,6 +3,7 @@ import client from "../api/client";
 import JobCard from "../components/JobCard";
 import { Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import UserMenu from "../components/UserMenu";
 import { useAuth } from "../context/AuthContext";
 
 const Dashboard = () => {
@@ -119,10 +120,14 @@ const Dashboard = () => {
     <div className="bg-white min-h-screen pb-24">
       {/* Header Section */}
       <div className="bg-white px-5 pt-4 pb-4 sticky top-0 z-20 border-b border-gray-100">
-        <div className="flex justify-center mb-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="w-10" />
           <span className="text-2xl font-black tracking-tighter text-[#101827] font-sans">
             SCUAD
           </span>
+          <div className="w-10 flex justify-end">
+            <UserMenu />
+          </div>
         </div>
 
         {/* Search Bar */}

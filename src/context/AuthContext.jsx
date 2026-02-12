@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import client from "../api/client";
+import { logoutApi } from "../api/authApi";
 
 const AuthContext = createContext(null);
 
@@ -64,6 +65,16 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } catch (error) {
+      console.error("Logout API error (cleaning up anyway):", error);
+    } finally {
+      logout();
+    }
+  };
+
   const showAuthModal = (message) => {
     setAuthModalConfig({
       isOpen: true,
@@ -83,6 +94,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         logout,
+        handleLogout,
         authModalConfig,
         showAuthModal,
         closeAuthModal,
