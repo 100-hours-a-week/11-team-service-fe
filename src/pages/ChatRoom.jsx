@@ -283,9 +283,9 @@ const ChatRoom = () => {
                     <button
                       onClick={async () => {
                         setShowDropdown(false);
+                        navigate("/", { replace: true });
                         await handleLogout();
                         toast("로그아웃되었습니다");
-                        navigate("/", { replace: true });
                       }}
                       className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-t border-gray-100"
                     >

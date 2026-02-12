@@ -17,6 +17,9 @@ const UserMenu = () => {
     setLoggingOut(true);
     setIsOpen(false);
 
+    // 먼저 공개 페이지로 이동하여 ProtectedRoute의 auth 모달 방지
+    navigate("/", { replace: true });
+
     try {
       await handleLogout();
     } catch (error) {
@@ -24,7 +27,6 @@ const UserMenu = () => {
     }
 
     toast("로그아웃되었습니다");
-    navigate("/", { replace: true });
   };
 
   return (
