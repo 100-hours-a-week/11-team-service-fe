@@ -12,6 +12,7 @@ import {
   FileText,
 } from "lucide-react";
 import ScoreCheckModal from "../components/ScoreCheckModal";
+import UserMenu from "../components/UserMenu";
 import ApplyModal from "../components/ApplyModal";
 import EvaluationProgressModal from "../components/EvaluationProgressModal";
 import JoinConfirmModal from "../components/JoinConfirmModal";
@@ -268,6 +269,7 @@ const ChatRoomList = () => {
             <button className="p-2 text-gray-900">
               <Bell className="w-5 h-5" />
             </button>
+            <UserMenu />
           </div>
         </div>
 

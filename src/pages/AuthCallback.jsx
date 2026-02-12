@@ -9,14 +9,15 @@ const AuthCallback = () => {
 
   useEffect(() => {
     const accessToken = searchParams.get("accessToken");
-    const refreshToken = searchParams.get("refreshToken");
+    // refreshToken은 HttpOnly 쿠키로 자동 저장됨
 
-    if (accessToken && refreshToken) {
-      login(accessToken, refreshToken);
-      // Wait a moment purely for visual transition or go immediately
+    if (accessToken) {
+      login(accessToken);
+      // URL 히스토리에서 토큰 제거
+      window.history.replaceState({}, document.title, "/auth/callback");
       navigate("/");
     } else {
-      console.error("Login failed: Tokens not found in URL");
+      console.error("Login failed: Token not found in URL");
       navigate("/login");
     }
   }, [searchParams, login, navigate]);

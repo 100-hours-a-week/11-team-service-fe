@@ -1,7 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { ChevronLeft, Users, Loader2, MoreVertical } from "lucide-react";
+import {
+  ChevronLeft,
+  Users,
+  Loader2,
+  MoreVertical,
+  LogOut,
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import {
   getChatRoomDetail,
@@ -39,7 +45,7 @@ const isSameGroup = (a, b) => {
 const ChatRoom = () => {
   const { chatRoomId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, handleLogout } = useAuth();
 
   const [roomDetail, setRoomDetail] = useState(null);
   const [members, setMembers] = useState([]);
@@ -273,6 +279,18 @@ const ChatRoom = () => {
                       className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100"
                     >
                       채팅방 종료하기
+                    </button>
+                    <button
+                      onClick={async () => {
+                        setShowDropdown(false);
+                        navigate("/", { replace: true });
+                        await handleLogout();
+                        toast("로그아웃되었습니다");
+                      }}
+                      className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-t border-gray-100"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>로그아웃</span>
                     </button>
                   </div>
                 </>

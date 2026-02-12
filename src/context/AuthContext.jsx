@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import client from "../api/client";
+import { logoutApi } from "../api/authApi";
 
 const AuthContext = createContext(null);
 
@@ -50,18 +51,28 @@ export const AuthProvider = ({ children }) => {
       window.removeEventListener("scuad-auth-event", handleAuthError);
   }, []);
 
-  const login = (accessToken, refreshToken) => {
+  const login = (accessToken) => {
     localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("refreshToken", refreshToken);
+    // refreshToken은 HttpOnly 쿠키로 자동 관리됨
     setIsAuthenticated(true);
     fetchUser();
   };
 
   const logout = () => {
     localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    // refreshToken은 HttpOnly 쿠키이므로 서버 측에서 만료 처리
     setIsAuthenticated(false);
     setUser(null);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } catch (error) {
+      console.error("Logout API error (cleaning up anyway):", error);
+    } finally {
+      logout();
+    }
   };
 
   const showAuthModal = (message) => {
@@ -83,6 +94,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         logout,
+        handleLogout,
         authModalConfig,
         showAuthModal,
         closeAuthModal,
