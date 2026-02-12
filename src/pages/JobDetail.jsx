@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import client from "../api/client";
+import UserMenu from "../components/UserMenu";
 import {
   ChevronLeft,
   Share2,
@@ -67,7 +68,9 @@ const JobDetail = () => {
           <ChevronLeft className="w-6 h-6 text-gray-900" />
         </button>
         <h1 className="font-bold text-gray-900 text-lg">채용공고 상세</h1>
-        <div className="w-10"></div>
+        <div className="w-10 flex justify-end">
+          <UserMenu />
+        </div>
       </div>
 
       <div className="p-5">

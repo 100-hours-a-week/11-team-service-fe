@@ -29,7 +29,8 @@ client.interceptors.response.use(
     // If 401/403 (Unauthorized/Forbidden) and not already retrying
     if (
       (error.response?.status === 401 || error.response?.status === 403) &&
-      !originalRequest._retry
+      !originalRequest._retry &&
+      !originalRequest._skipAuthRetry
     ) {
       originalRequest._retry = true;
 

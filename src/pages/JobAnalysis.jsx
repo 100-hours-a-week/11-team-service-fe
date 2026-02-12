@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import client from "../api/client";
 import { ChevronLeft, Bell } from "lucide-react";
+import UserMenu from "../components/UserMenu";
 import JobAnalysisProgressModal from "../components/JobAnalysisProgressModal";
 
 const JobAnalysis = () => {
@@ -160,7 +161,9 @@ const JobAnalysis = () => {
           <ChevronLeft className="w-6 h-6 text-gray-900" />
         </button>
         <h1 className="font-bold text-gray-900 text-lg">공고 등록</h1>
-        <div className="w-10"></div>
+        <div className="w-10 flex justify-end">
+          <UserMenu />
+        </div>
       </div>
 
       <div className="p-5 flex-1 relative">
