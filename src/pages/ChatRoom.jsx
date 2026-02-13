@@ -316,7 +316,8 @@ const ChatRoom = () => {
               const prev = messages[i - 1];
               const next = messages[i + 1];
               const showDate =
-                !prev || getDateKey(prev.createdAt) !== getDateKey(msg.createdAt);
+                !prev ||
+                getDateKey(prev.createdAt) !== getDateKey(msg.createdAt);
               const showSender =
                 msg.messageType !== "SYSTEM" &&
                 !isMe(msg.senderId) &&
