@@ -1,14 +1,12 @@
-import { useNavigate } from "react-router-dom";
 import { AlertCircle } from "lucide-react";
 
 const AuthModal = ({ isOpen, message, onClose }) => {
-  const navigate = useNavigate();
-
   if (!isOpen) return null;
 
   const handleConfirm = () => {
     onClose();
-    navigate("/login", { replace: true });
+    // Force navigation to ensure redirect works reliably
+    window.location.href = "/login";
   };
 
   return (

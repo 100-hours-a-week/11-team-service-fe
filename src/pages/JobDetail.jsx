@@ -74,7 +74,17 @@ const JobDetail = () => {
       </div>
 
       <div className="p-5">
-        {/* 1. Basic Info Grid */}
+        {/* 1. AI Summary (moved to top) */}
+        <section className="mb-8">
+          <div className="mb-2 text-xs font-bold text-gray-900">
+            AI공고 요약
+          </div>
+          <div className="bg-[#F9FAFB] rounded-xl p-6 text-sm text-gray-700 leading-loose whitespace-pre-wrap min-h-[150px] break-words border border-gray-100">
+            {job.aiSummary || "AI 요약 정보가 없습니다."}
+          </div>
+        </section>
+
+        {/* 2. Basic Info Grid */}
         <div className="grid grid-cols-2 gap-y-6 gap-x-4 mb-8">
           {/* Row 1: Company & Job Title */}
           <div className="flex flex-col">
@@ -114,9 +124,11 @@ const JobDetail = () => {
             <div className="mb-2 text-xs font-bold text-gray-900">
               주요 업무
             </div>
-            <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed flex-1 flex items-start break-words">
+            <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed flex-1 flex flex-col gap-1.5 break-words">
               {job.mainTasks && job.mainTasks.length > 0
-                ? job.mainTasks.join(", ")
+                ? job.mainTasks.map((task, index) => (
+                    <div key={index}>- {task}</div>
+                  ))
                 : "-"}
             </div>
           </div>
@@ -124,16 +136,18 @@ const JobDetail = () => {
             <div className="mb-2 text-xs font-bold text-gray-900">
               필요기술스택
             </div>
-            <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed flex-1 flex items-start break-words">
+            <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed flex-1 flex flex-col gap-1.5 break-words">
               {job.skills && job.skills.length > 0
-                ? job.skills.join(", ")
+                ? job.skills.map((skill, index) => (
+                    <div key={index}>- {skill}</div>
+                  ))
                 : "-"}
             </div>
           </div>
         </div>
 
-        {/* 2. External Link Button */}
-        <div className="mb-10">
+        {/* 3. External Link Button (moved to bottom) */}
+        <div className="mb-28">
           <a
             href={job.sourceUrl || "#"}
             onClick={(e) => {
@@ -149,16 +163,6 @@ const JobDetail = () => {
             공고 바로가기
           </a>
         </div>
-
-        {/* 3. AI Summary */}
-        <section className="mb-28 mt-8">
-          <div className="mb-2 text-xs font-bold text-gray-900">
-            AI공고 요약
-          </div>
-          <div className="bg-[#F9FAFB] rounded-xl p-6 text-sm text-gray-700 leading-loose whitespace-pre-wrap min-h-[150px] break-words border border-gray-100">
-            {job.aiSummary || "AI 요약 정보가 없습니다."}
-          </div>
-        </section>
       </div>
 
       {/* Custom Modals */}

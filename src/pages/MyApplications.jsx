@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, Search, Loader2 } from "lucide-react";
 import client from "../api/client";
-import UserMenu from "../components/UserMenu";
 
 const MyApplications = () => {
   const navigate = useNavigate();
@@ -40,7 +39,7 @@ const MyApplications = () => {
   }, [debouncedKeyword]);
 
   const handleCardClick = (app) => {
-    navigate(`/jobs/${app.jobMasterId}`);
+    navigate(`/applications/${app.id}`);
   };
 
   const getStatusLabel = (status) => {
@@ -84,7 +83,6 @@ const MyApplications = () => {
               이력 관리
             </h1>
           </div>
-          <UserMenu />
         </div>
       </div>
 
