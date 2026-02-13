@@ -34,8 +34,8 @@ const isSameGroup = (a, b) => {
   if (!a || !b) return false;
   if (a.senderId !== b.senderId) return false;
   if (a.messageType === "SYSTEM" || b.messageType === "SYSTEM") return false;
-  const aTime = new Date(a.sentAt);
-  const bTime = new Date(b.sentAt);
+  const aTime = new Date(a.createdAt);
+  const bTime = new Date(b.createdAt);
   return (
     aTime.getHours() === bTime.getHours() &&
     aTime.getMinutes() === bTime.getMinutes()
@@ -316,7 +316,7 @@ const ChatRoom = () => {
               const prev = messages[i - 1];
               const next = messages[i + 1];
               const showDate =
-                !prev || getDateKey(prev.sentAt) !== getDateKey(msg.sentAt);
+                !prev || getDateKey(prev.createdAt) !== getDateKey(msg.createdAt);
               const showSender =
                 msg.messageType !== "SYSTEM" &&
                 !isMe(msg.senderId) &&
@@ -326,7 +326,7 @@ const ChatRoom = () => {
 
               return (
                 <div key={msg.messageId}>
-                  {showDate && <DateSeparator date={msg.sentAt} />}
+                  {showDate && <DateSeparator date={msg.createdAt} />}
                   <ChatBubble
                     message={msg}
                     isMe={isMe(msg.senderId)}

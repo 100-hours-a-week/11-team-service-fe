@@ -34,7 +34,7 @@ const ChatBubble = ({
         <div className="flex items-end space-x-1 max-w-[75%]">
           {showTime && (
             <span className="text-[10px] text-gray-400 mb-1 flex-shrink-0">
-              {formatTime(message.sentAt)}
+              {formatTime(message.createdAt)}
             </span>
           )}
           <div className="bg-[#101827] text-white rounded-2xl rounded-tr-md px-3.5 py-2.5">
@@ -80,7 +80,7 @@ const ChatBubble = ({
           </div>
           {showTime && (
             <span className="text-[10px] text-gray-400 mb-1 flex-shrink-0">
-              {formatTime(message.sentAt)}
+              {formatTime(message.createdAt)}
             </span>
           )}
         </div>
