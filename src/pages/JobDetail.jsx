@@ -127,8 +127,8 @@ const JobDetail = () => {
             <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed flex-1 flex flex-col gap-1.5 break-words">
               {job.mainTasks && job.mainTasks.length > 0
                 ? job.mainTasks.map((task, index) => (
-                  <div key={index}>- {task}</div>
-                ))
+                    <div key={index}>- {task}</div>
+                  ))
                 : "-"}
             </div>
           </div>
@@ -139,8 +139,8 @@ const JobDetail = () => {
             <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed flex-1 flex flex-col gap-1.5 break-words">
               {job.skills && job.skills.length > 0
                 ? job.skills.map((skill, index) => (
-                  <div key={index}>- {skill}</div>
-                ))
+                    <div key={index}>- {skill}</div>
+                  ))
                 : "-"}
             </div>
           </div>

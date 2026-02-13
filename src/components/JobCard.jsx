@@ -51,10 +51,11 @@ const JobCard = ({ job }) => {
         <div className="shrink-0">
           <span
             className={`text-xs font-bold px-3 py-1.5 rounded-full border
-            ${isClosed
+            ${
+              isClosed
                 ? "bg-gray-100 text-gray-400 border-gray-200"
                 : "bg-[#101827] text-white border-[#101827]"
-              }`}
+            }`}
           >
             {isClosed ? "마감" : "진행중"}
           </span>
@@ -65,7 +66,11 @@ const JobCard = ({ job }) => {
       <div className="w-full h-1.5 bg-gray-100 rounded-full mb-2 overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${isClosed ? "bg-gray-300" : "bg-[#101827]"}`}
-          style={{ width: isAlwaysOpen ? "100%" : `${calculateProgress(startDate, endDate)}%` }}
+          style={{
+            width: isAlwaysOpen
+              ? "100%"
+              : `${calculateProgress(startDate, endDate)}%`,
+          }}
         ></div>
       </div>
 

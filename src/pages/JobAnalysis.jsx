@@ -132,7 +132,7 @@ const JobAnalysis = () => {
     if (!result.jobPostingId) {
       toast.error(
         "Internal Error: JobPosting ID is missing in result: " +
-        JSON.stringify(result),
+          JSON.stringify(result),
       );
       return;
     }
@@ -222,17 +222,18 @@ const JobAnalysis = () => {
                 if (validateUrl(e.target.value)) setError("");
               }}
               disabled={!!result} // Keep input visually but disabled if analyzed? Spec says "URL 입력 영역은 유지된다... prefill... disabled 언급은 없음"
-            // Actually spec says "URL 분석 1회 이상 수행하여... 공고 정보가 표시된 상태에서도 URL 입력 영역은 유지된다... URL을 다시 등록하여 갱신할 수 있다."
-            // So DO NOT disable input.
+              // Actually spec says "URL 분석 1회 이상 수행하여... 공고 정보가 표시된 상태에서도 URL 입력 영역은 유지된다... URL을 다시 등록하여 갱신할 수 있다."
+              // So DO NOT disable input.
             />
             <button
               onClick={handleAnalyze}
               disabled={!url || !validateUrl(url) || loading}
               className={`text-xs font-bold px-4 py-2 rounded-lg whitespace-nowrap transition-colors flex-shrink-0
-                                ${!url || !validateUrl(url) || loading
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-[#101827] text-white hover:bg-[#1a263d]"
-                }`}
+                                ${
+                                  !url || !validateUrl(url) || loading
+                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                    : "bg-[#101827] text-white hover:bg-[#1a263d]"
+                                }`}
             >
               {loading ? "분석중" : "등록"}
             </button>
@@ -285,8 +286,8 @@ const JobAnalysis = () => {
                   <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-medium flex-1 flex flex-col gap-1.5 break-words">
                     {result.mainTasks && result.mainTasks.length > 0
                       ? result.mainTasks.map((task, index) => (
-                        <div key={index}>- {task}</div>
-                      ))
+                          <div key={index}>- {task}</div>
+                        ))
                       : "-"}
                   </div>
                 </div>
@@ -298,8 +299,8 @@ const JobAnalysis = () => {
                   <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-medium flex-1 flex flex-col gap-1.5 break-words">
                     {result.skills && result.skills.length > 0
                       ? result.skills.map((skill, index) => (
-                        <div key={index}>- {skill}</div>
-                      ))
+                          <div key={index}>- {skill}</div>
+                        ))
                       : "-"}
                   </div>
                 </div>
