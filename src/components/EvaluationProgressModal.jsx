@@ -156,7 +156,7 @@ const EvaluationProgressModal = ({
                 // Stay or Navigate?
               }
             }}
-            className="w-full bg-gray-100 text-gray-500 font-bold py-4 rounded-2xl text-sm hover:bg-gray-200 transition-all active:scale-[0.98]"
+            className="w-full bg-[#101827] text-white font-bold py-4 rounded-2xl text-sm hover:bg-[#1a263d] transition-all active:scale-[0.98]"
           >
             닫기
           </button>

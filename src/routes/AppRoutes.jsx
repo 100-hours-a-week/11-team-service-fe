@@ -13,6 +13,8 @@ import ChatRoomList from "../pages/ChatRoomList";
 import MyChatRooms from "../pages/MyChatRooms";
 import ChatRoom from "../pages/ChatRoom";
 import MyApplications from "../pages/MyApplications";
+import ResumeDetail from "../pages/ResumeDetail";
+import DocumentViewer from "../pages/DocumentViewer";
 
 // 준비중 페이지 공통 컴포넌트
 const ComingSoon = ({ title, icon: Icon }) => (
@@ -99,6 +101,22 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <MyChatRooms />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="applications/:applicationId"
+          element={
+            <ProtectedRoute>
+              <ResumeDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="applications/:applicationId/documents/:docType"
+          element={
+            <ProtectedRoute>
+              <DocumentViewer />
             </ProtectedRoute>
           }
         />
