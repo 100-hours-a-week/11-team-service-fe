@@ -33,9 +33,11 @@ const ResumeDetail = () => {
   const [isPolling, setIsPolling] = useState(false);
   const pollingTimerRef = useRef(null);
 
-  const fetchApplicationDetail = async () => {
+  const fetchApplicationDetail = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) {
+        setLoading(true);
+      }
       const response = await client.get(
         `/api/v1/applications/${applicationId}`,
       );
@@ -51,7 +53,9 @@ const ResumeDetail = () => {
         navigate(-1);
       }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   };
 
@@ -85,8 +89,8 @@ const ResumeDetail = () => {
   };
 
   const handleModalSuccess = () => {
-    // Refresh data after upload
-    fetchApplicationDetail();
+    // Refresh data after upload (silent mode - no loading spinner)
+    fetchApplicationDetail(true);
   };
 
   const checkAnalysisStatus = async () => {
