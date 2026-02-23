@@ -1,8 +1,7 @@
 import { FileText, Briefcase, BarChart2, UserMinus } from "lucide-react";
 import toast from "react-hot-toast";
 
-// TODO: API 개발 완료 후 false로 변경
-const COMING_SOON_ACTIONS = ["resume", "portfolio", "comparison"];
+const COMING_SOON_ACTIONS = ["comparison"];
 
 const MemberActionSheet = ({ isOpen, onClose, member, onAction }) => {
   if (!isOpen || !member) return null;
