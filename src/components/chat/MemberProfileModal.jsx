@@ -7,10 +7,7 @@ import {
   getMemberPortfolio,
 } from "../../api/chatApi";
 
-// TODO: API 개발 완료 후 false로 변경
-const SHOW_COMING_SOON = true;
-
-const MemberProfileModal = ({ chatRoomId, member, onClose, onCompare }) => {
+const MemberProfileModal = ({ chatRoomId, member, onClose }) => {
   const [profile, setProfile] = useState(null);
   const [activeDoc, setActiveDoc] = useState("resume");
   const [resume, setResume] = useState(null);
@@ -45,16 +42,17 @@ const MemberProfileModal = ({ chatRoomId, member, onClose, onCompare }) => {
       const res = await fetcher(chatRoomId, member.chatRoomMemberId);
       setter(res.data.data);
     } catch (e) {
-      console.error(`Failed to fetch ${type}:`, e);
-      setter({ error: true });
+      const code = e.response?.data?.code;
+      if (code === "DOCUMENT_NOT_FOUND") {
+        setter({ notFound: true });
+      } else {
+        console.error(`Failed to fetch ${type}:`, e);
+        setter({ error: true });
+      }
     }
   };
 
   const handleTabChange = (tab) => {
-    if (SHOW_COMING_SOON) {
-      toast("준비중인 기능입니다");
-      return;
-    }
     setActiveDoc(tab);
     fetchDoc(tab);
   };
@@ -73,6 +71,13 @@ const MemberProfileModal = ({ chatRoomId, member, onClose, onCompare }) => {
         </button>
       );
     }
+    if (doc.notFound) {
+      return (
+        <p className="text-sm text-gray-400 py-8 text-center">
+          제출된 {label}가 없습니다
+        </p>
+      );
+    }
     if (doc.error) {
       return (
         <p className="text-sm text-gray-400 py-8 text-center">
@@ -81,15 +86,9 @@ const MemberProfileModal = ({ chatRoomId, member, onClose, onCompare }) => {
       );
     }
 
-    const baseUrl =
-      import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
-    const url = doc.downloadUrl?.startsWith("http")
-      ? doc.downloadUrl
-      : `${baseUrl}${doc.downloadUrl}`;
-
     return (
       <a
-        href={url}
+        href={doc.fileUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl"
@@ -186,11 +185,7 @@ const MemberProfileModal = ({ chatRoomId, member, onClose, onCompare }) => {
             {/* Compare Button */}
             <button
               onClick={() => {
-                if (SHOW_COMING_SOON) {
-                  toast("준비중인 기능입니다");
-                  return;
-                }
-                onCompare?.(member);
+                toast("준비중인 기능입니다");
               }}
               className="w-full py-4 bg-[#101827] text-white font-bold rounded-2xl text-sm"
             >
