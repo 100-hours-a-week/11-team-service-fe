@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { X, FileText, Download, Loader2, Crown } from "lucide-react";
-import toast from "react-hot-toast";
 import {
   getMemberProfile,
   getMemberResume,
   getMemberPortfolio,
 } from "../../api/chatApi";
 
-const MemberProfileModal = ({ chatRoomId, member, onClose }) => {
+const MemberProfileModal = ({ chatRoomId, member, myUserId, onClose, onCompare }) => {
   const [profile, setProfile] = useState(null);
   const [activeDoc, setActiveDoc] = useState("resume");
   const [resume, setResume] = useState(null);
@@ -183,14 +182,15 @@ const MemberProfileModal = ({ chatRoomId, member, onClose }) => {
             {renderDocView()}
 
             {/* Compare Button */}
-            <button
-              onClick={() => {
-                toast("준비중인 기능입니다");
-              }}
-              className="w-full py-4 bg-[#101827] text-white font-bold rounded-2xl text-sm"
-            >
-              나와 비교분석
-            </button>
+            {member.userId != null &&
+              String(member.userId) !== String(myUserId) && (
+                <button
+                  onClick={() => onCompare?.(member)}
+                  className="w-full py-4 bg-[#101827] text-white font-bold rounded-2xl text-sm"
+                >
+                  나와 비교분석
+                </button>
+              )}
           </div>
         )}
       </div>
