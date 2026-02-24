@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import client from "../api/client";
 import { AlertCircle, CheckCircle } from "lucide-react";
 
@@ -14,6 +14,21 @@ const ApplyModal = ({ isOpen, onClose, jobPostingId, jobTitle, onSuccess }) => {
 
   const resumeInputRef = useRef(null);
   const portfolioInputRef = useRef(null);
+
+  // 모달이 닫힐 때 상태를 초기화합니다.
+  useEffect(() => {
+    if (!isOpen) {
+      setResume(null);
+      setPortfolio(null);
+      setError("");
+      setHelperText("");
+      setSuccess(false);
+
+      // 파일 input 태그의 value도 초기화 (브라우저 정책)
+      if (resumeInputRef.current) resumeInputRef.current.value = "";
+      if (portfolioInputRef.current) portfolioInputRef.current.value = "";
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

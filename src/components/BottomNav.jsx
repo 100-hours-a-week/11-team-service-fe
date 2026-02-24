@@ -57,6 +57,14 @@ const BottomNav = () => {
                   isActive ? "fill-[#101827]" : "stroke-current",
                 )}
               />
+              <span
+                className={clsx(
+                  "text-[10px] mt-0.5 font-medium",
+                  isActive ? "text-[#101827]" : "text-gray-400",
+                )}
+              >
+                {item.name}
+              </span>
             </button>
           );
         })}
