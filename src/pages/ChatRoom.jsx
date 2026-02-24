@@ -396,6 +396,7 @@ const ChatRoom = () => {
           <MemberProfileModal
             chatRoomId={chatRoomId}
             member={showMemberProfile}
+            myUserId={user?.userId}
             onClose={() => setShowMemberProfile(null)}
             onCompare={handleComparisonClick}
           />
@@ -426,6 +427,7 @@ const ChatRoom = () => {
           isOpen={!!actionSheetMember}
           onClose={() => setActionSheetMember(null)}
           member={actionSheetMember}
+          myUserId={user?.userId}
           isHost={isHost}
           onAction={handleActionSheetAction}
         />

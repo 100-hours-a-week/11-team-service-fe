@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { X, Loader2, TrendingUp, TrendingDown } from "lucide-react";
+import { X, Loader2, TrendingUp, TrendingDown, Brain } from "lucide-react";
+import toast from "react-hot-toast";
 import { getMemberComparison } from "../../api/chatApi";
 
 const ComparisonModal = ({ chatRoomId, member, onClose }) => {
@@ -7,7 +8,7 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchComparison = async () => {
       try {
         setLoading(true);
         const res = await getMemberComparison(
@@ -16,110 +17,148 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
         );
         setData(res.data.data);
       } catch (e) {
-        console.error("Failed to fetch comparison:", e);
+        const code = e.response?.data?.code;
+        if (code === "AI_SERVICE_ERROR") {
+          toast.error(
+            "분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+          );
+        } else if (code === "CHAT_MEMBER_NOT_FOUND") {
+          toast.error("멤버 정보를 찾을 수 없습니다.");
+        } else {
+          toast.error("비교 결과를 불러오지 못했습니다.");
+        }
+        onClose();
       } finally {
         setLoading(false);
       }
     };
-    fetch();
+    fetchComparison();
   }, [chatRoomId, member.chatRoomMemberId]);
 
   return (
     <div className="fixed inset-0 z-[500] flex items-end justify-center">
       <div
         className="absolute inset-0 bg-black/60 animate-fade-in"
-        onClick={onClose}
+        onClick={loading ? undefined : onClose}
       />
       <div className="relative w-full max-w-[480px] bg-white rounded-t-3xl animate-slide-up max-h-[85vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white flex items-center justify-between px-5 pt-5 pb-3 border-b border-gray-100 z-10">
-          <h2 className="text-lg font-bold text-gray-900">비교 분석</h2>
-          <button onClick={onClose} className="p-1">
-            <X className="w-5 h-5 text-gray-400" />
-          </button>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">AI 비교 분석</h2>
+            <p className="text-xs text-gray-400 mt-0.5">
+              나 vs {member.nickname}
+            </p>
+          </div>
+          {!loading && (
+            <button onClick={onClose} className="p-1">
+              <X className="w-5 h-5 text-gray-400" />
+            </button>
+          )}
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-6 h-6 text-gray-300 animate-spin" />
-          </div>
-        ) : !data ? (
-          <div className="py-16 text-center">
-            <p className="text-sm text-gray-400">
-              비교 분석 결과를 불러올 수 없습니다
-            </p>
-          </div>
-        ) : (
-          <div className="p-5 space-y-6">
-            {/* Score Comparison */}
-            <div className="flex items-center justify-center space-x-6">
-              <div className="text-center">
-                <p className="text-xs text-gray-400 mb-1">나</p>
-                <p className="text-3xl font-extrabold text-gray-900">
-                  {data.myScore ?? "-"}
-                </p>
-              </div>
-              <span className="text-gray-300 text-2xl font-light">vs</span>
-              <div className="text-center">
-                <p className="text-xs text-gray-400 mb-1">{member.nickname}</p>
-                <p className="text-3xl font-extrabold text-gray-900">
-                  {data.targetScore ?? "-"}
-                </p>
-              </div>
+          <div className="flex flex-col items-center justify-center py-16 space-y-4 px-5">
+            <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center">
+              <Brain className="w-8 h-8 text-gray-400 animate-pulse" />
             </div>
+            <div className="text-center space-y-1.5">
+              <p className="text-sm font-bold text-gray-900">
+                AI가 분석 중입니다
+              </p>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                최초 분석 시 수십 초가 걸릴 수 있습니다{"\n"}
+                잠시만 기다려 주세요
+              </p>
+            </div>
+            <Loader2 className="w-5 h-5 text-gray-300 animate-spin" />
+          </div>
+        ) : data ? (
+          <div className="p-5 space-y-6 pb-8">
+            {/* Metrics */}
+            {data.comparisonMetrics?.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold text-gray-900">항목별 비교</h3>
+                {data.comparisonMetrics.map((metric, i) => (
+                  <div key={i} className="space-y-1.5">
+                    <p className="text-xs font-medium text-gray-700">
+                      {metric.name}
+                    </p>
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-[10px] text-gray-500 w-5 flex-shrink-0">
+                          나
+                        </span>
+                        <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="h-full bg-[#101827] rounded-full transition-all duration-700"
+                            style={{ width: `${metric.myScore}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-gray-900 w-6 text-right">
+                          {metric.myScore}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-[10px] text-gray-400 w-5 flex-shrink-0">
+                          상대
+                        </span>
+                        <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="h-full bg-gray-400 rounded-full transition-all duration-700"
+                            style={{ width: `${metric.competitorScore}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-gray-500 w-6 text-right">
+                          {metric.competitorScore}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Legend */}
+                <div className="flex items-center space-x-4 pt-1">
+                  <div className="flex items-center space-x-1.5">
+                    <div className="w-3 h-2 rounded-full bg-[#101827]" />
+                    <span className="text-[10px] text-gray-500">나</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <div className="w-3 h-2 rounded-full bg-gray-400" />
+                    <span className="text-[10px] text-gray-500">
+                      {member.nickname}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Strengths */}
-            {data.strengths?.length > 0 && (
-              <div>
-                <div className="flex items-center space-x-2 mb-3">
-                  <TrendingUp className="w-4 h-4 text-green-500" />
-                  <h3 className="text-sm font-bold text-gray-900">
+            {data.strengthsReport && (
+              <div className="bg-green-50 border border-green-100 rounded-2xl p-4">
+                <div className="flex items-center space-x-2 mb-2">
+                  <TrendingUp className="w-4 h-4 text-green-600 flex-shrink-0" />
+                  <h3 className="text-sm font-bold text-green-900">
                     내가 강한 점
                   </h3>
                 </div>
-                <div className="space-y-2">
-                  {data.strengths.map((s, i) => (
-                    <div
-                      key={i}
-                      className="bg-green-50 border border-green-100 rounded-xl px-4 py-3"
-                    >
-                      <p className="text-sm text-green-800">{s}</p>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-sm text-green-800 leading-relaxed">
+                  {data.strengthsReport}
+                </p>
               </div>
             )}
 
             {/* Weaknesses */}
-            {data.weaknesses?.length > 0 && (
-              <div>
-                <div className="flex items-center space-x-2 mb-3">
-                  <TrendingDown className="w-4 h-4 text-red-500" />
-                  <h3 className="text-sm font-bold text-gray-900">
+            {data.weaknessesReport && (
+              <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4">
+                <div className="flex items-center space-x-2 mb-2">
+                  <TrendingDown className="w-4 h-4 text-orange-600 flex-shrink-0" />
+                  <h3 className="text-sm font-bold text-orange-900">
                     보완이 필요한 점
                   </h3>
                 </div>
-                <div className="space-y-2">
-                  {data.weaknesses.map((w, i) => (
-                    <div
-                      key={i}
-                      className="bg-red-50 border border-red-100 rounded-xl px-4 py-3"
-                    >
-                      <p className="text-sm text-red-800">{w}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Summary */}
-            {data.summary && (
-              <div className="bg-gray-50 rounded-xl p-4">
-                <h3 className="text-sm font-bold text-gray-900 mb-2">
-                  종합 의견
-                </h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {data.summary}
+                <p className="text-sm text-orange-800 leading-relaxed">
+                  {data.weaknessesReport}
                 </p>
               </div>
             )}
@@ -131,7 +170,7 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
               닫기
             </button>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
