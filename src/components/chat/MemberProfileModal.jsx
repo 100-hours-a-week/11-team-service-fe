@@ -6,7 +6,13 @@ import {
   getMemberPortfolio,
 } from "../../api/chatApi";
 
-const MemberProfileModal = ({ chatRoomId, member, myUserId, onClose, onCompare }) => {
+const MemberProfileModal = ({
+  chatRoomId,
+  member,
+  myUserId,
+  onClose,
+  onCompare,
+}) => {
   const [profile, setProfile] = useState(null);
   const [activeDoc, setActiveDoc] = useState("resume");
   const [resume, setResume] = useState(null);

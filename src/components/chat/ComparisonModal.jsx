@@ -11,12 +11,17 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
     const fetchComparison = async () => {
       try {
         setLoading(true);
-        const res = await getMemberComparison(chatRoomId, member.chatRoomMemberId);
+        const res = await getMemberComparison(
+          chatRoomId,
+          member.chatRoomMemberId,
+        );
         setData(res.data.data);
       } catch (e) {
         const code = e.response?.data?.code;
         if (code === "AI_SERVICE_ERROR") {
-          toast.error("분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+          toast.error(
+            "분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+          );
         } else if (code === "CHAT_MEMBER_NOT_FOUND") {
           toast.error("멤버 정보를 찾을 수 없습니다.");
         } else {
@@ -58,7 +63,9 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
               <Brain className="w-8 h-8 text-gray-400 animate-pulse" />
             </div>
             <div className="text-center space-y-1.5">
-              <p className="text-sm font-bold text-gray-900">AI가 분석 중입니다</p>
+              <p className="text-sm font-bold text-gray-900">
+                AI가 분석 중입니다
+              </p>
               <p className="text-xs text-gray-400 leading-relaxed">
                 최초 분석 시 수십 초가 걸릴 수 있습니다{"\n"}
                 잠시만 기다려 주세요

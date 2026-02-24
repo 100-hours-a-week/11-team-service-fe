@@ -3,7 +3,8 @@ import { FileText, Briefcase, BarChart2, UserMinus } from "lucide-react";
 const MemberActionSheet = ({ isOpen, onClose, member, myUserId, onAction }) => {
   if (!isOpen || !member) return null;
 
-  const isSelf = member.userId != null && String(member.userId) === String(myUserId);
+  const isSelf =
+    member.userId != null && String(member.userId) === String(myUserId);
 
   const actions = [
     {
