@@ -167,7 +167,15 @@ const ChatRoom = () => {
       navigate(-1);
     } catch (e) {
       console.error("Failed to close room:", e);
-      toast.error(e.response?.data?.message || "채팅방 종료에 실패했습니다.");
+      const code = e.response?.data?.code;
+      if (code === "CHAT_ROOM_NOT_FOUND") {
+        toast.error("이미 종료된 채팅방입니다.");
+        navigate(-1);
+      } else if (code === "CHAT_ROOM_HOST_ONLY") {
+        toast.error("방장만 채팅방을 종료할 수 있습니다.");
+      } else {
+        toast.error("채팅방 종료에 실패했습니다.");
+      }
     }
   };
 
@@ -293,17 +301,17 @@ const ChatRoom = () => {
                     >
                       채팅방 나가기
                     </button>
-                    <button
-                      onClick={() => {
-                        setShowDropdown(false);
-                        // TODO: API 개발 완료 후 handleCloseRoom() 활성화
-                        // handleCloseRoom();
-                        toast("준비중인 기능입니다");
-                      }}
-                      className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100"
-                    >
-                      채팅방 종료하기
-                    </button>
+                    {isHost && (
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          handleCloseRoom();
+                        }}
+                        className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100"
+                      >
+                        채팅방 종료하기
+                      </button>
+                    )}
                     <button
                       onClick={async () => {
                         setShowDropdown(false);
