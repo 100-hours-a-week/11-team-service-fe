@@ -1,13 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  ChevronLeft,
-  FileText,
-  ExternalLink,
-  ChevronRight,
-  Loader2,
-  Sparkles,
-} from "lucide-react";
+import { ChevronLeft, FileText, ChevronRight, Loader2 } from "lucide-react";
 import client from "../api/client";
 import DocumentUploadModal from "../components/DocumentUploadModal";
 import EvaluationProgressModal from "../components/EvaluationProgressModal";
@@ -30,21 +23,17 @@ const ResumeDetail = () => {
   const [analysisData, setAnalysisData] = useState(null);
 
   // Background Polling State
-  const [isPolling, setIsPolling] = useState(false);
   const pollingTimerRef = useRef(null);
 
   const fetchApplicationDetail = async (silent = false) => {
     try {
-      if (!silent) {
-        setLoading(true);
-      }
+      if (!silent) setLoading(true);
       const response = await client.get(
         `/api/v1/applications/${applicationId}`,
       );
       setApplication(response.data.data);
     } catch (e) {
       console.error("Failed to fetch application detail", e);
-      // If forbidden or not found, go back
       if (
         e.response &&
         (e.response.status === 403 || e.response.status === 404)
@@ -53,9 +42,7 @@ const ResumeDetail = () => {
         navigate(-1);
       }
     } finally {
-      if (!silent) {
-        setLoading(false);
-      }
+      if (!silent) setLoading(false);
     }
   };
 
@@ -63,12 +50,9 @@ const ResumeDetail = () => {
     fetchApplicationDetail();
   }, [applicationId]);
 
-  // Cleanup polling on unmount
   useEffect(() => {
     return () => {
-      if (pollingTimerRef.current) {
-        clearTimeout(pollingTimerRef.current);
-      }
+      if (pollingTimerRef.current) clearTimeout(pollingTimerRef.current);
     };
   }, []);
 
@@ -77,7 +61,6 @@ const ResumeDetail = () => {
       alert("등록된 파일이 없습니다.");
       return;
     }
-    // Navigate to DocumentViewer page
     navigate(
       `/applications/${applicationId}/documents/${doc.docType.toLowerCase()}`,
     );
@@ -89,60 +72,43 @@ const ResumeDetail = () => {
   };
 
   const handleModalSuccess = () => {
-    // Refresh data after upload (silent mode - no loading spinner)
     fetchApplicationDetail(true);
   };
 
   const checkAnalysisStatus = async () => {
     if (!applicationId) return;
-
     try {
       const response = await client.get(
         `/api/v1/applications/${applicationId}/analyses`,
       );
-
       if (response.status === 200 && response.data.data) {
-        console.log("[DEBUG] Analysis complete, showing result modal");
-        setIsPolling(false);
         setShowEvaluationModal(false);
         setAnalysisData(response.data.data);
         setShowReportModal(true);
       } else if (response.status === 202) {
-        console.log("[DEBUG] Analysis in progress, polling again...");
         pollingTimerRef.current = setTimeout(checkAnalysisStatus, 3000);
       }
     } catch (e) {
       if (e.response?.status === 202) {
         pollingTimerRef.current = setTimeout(checkAnalysisStatus, 3000);
       } else {
-        console.error("[DEBUG] Polling error", e);
-        setIsPolling(false);
+        console.error("Polling error", e);
       }
     }
   };
 
   const handleRequestAnalysis = async () => {
     if (!application) return;
-
     try {
       setLoading(true);
-      console.log("[DEBUG] Requesting analysis...");
-      // First, request the analysis
       await client.post(`/api/v1/applications/${applicationId}/analyses`, {
-        analysis_type: "EVALUATION",
+        analysis_type: "ALL",
       });
-      console.log("Analysis request successful");
-      console.log("[DEBUG] Analysis request successful, showing modal");
-
-      // Only show modal after successful request
       setShowEvaluationModal(true);
-      setIsPolling(true);
       pollingTimerRef.current = setTimeout(checkAnalysisStatus, 3000);
-      console.log("[DEBUG] setShowEvaluationModal(true) called");
     } catch (e) {
-      console.error("[DEBUG] Analysis request failed", e);
       setShowEvaluationModal(false);
-      if (e.response && e.response.data && e.response.data.message) {
+      if (e.response?.data?.message) {
         alert(e.response.data.message);
       } else {
         alert("분석 요청 중 오류가 발생했습니다.");
@@ -180,51 +146,13 @@ const ResumeDetail = () => {
 
   if (loading && !application) {
     return (
-      <>
-        <div className="min-h-screen bg-white flex items-center justify-center">
-          <Loader2 className="w-8 h-8 text-gray-300 animate-spin" />
-        </div>
-
-        <EvaluationProgressModal
-          isOpen={showEvaluationModal}
-          onClose={() => setShowEvaluationModal(false)}
-          applicationId={applicationId}
-          onAnalysisComplete={handleAnalysisComplete}
-        />
-
-        <AiAnalysisReportModal
-          isOpen={showReportModal}
-          onClose={() => {
-            setShowReportModal(false);
-            fetchApplicationDetail();
-          }}
-          result={analysisData}
-        />
-      </>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-gray-300 animate-spin" />
+      </div>
     );
   }
 
-  if (!application) {
-    return (
-      <>
-        <EvaluationProgressModal
-          isOpen={showEvaluationModal}
-          onClose={() => setShowEvaluationModal(false)}
-          applicationId={applicationId}
-          onAnalysisComplete={handleAnalysisComplete}
-        />
-
-        <AiAnalysisReportModal
-          isOpen={showReportModal}
-          onClose={() => {
-            setShowReportModal(false);
-            fetchApplicationDetail();
-          }}
-          result={analysisData}
-        />
-      </>
-    );
-  }
+  if (!application) return null;
 
   const statusLabel = getStatusLabel(application.jobStatus);
 
@@ -287,7 +215,11 @@ const ResumeDetail = () => {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center ${doc.isRegistered ? "bg-[#101827]/5 text-[#101827]" : "bg-gray-50 text-gray-300"}`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        doc.isRegistered
+                          ? "bg-[#101827]/5 text-[#101827]"
+                          : "bg-gray-50 text-gray-300"
+                      }`}
                     >
                       <FileText className="w-5 h-5" />
                     </div>
@@ -301,7 +233,6 @@ const ResumeDetail = () => {
                     </div>
                   </div>
 
-                  {/* Status Badge */}
                   {doc.docType === "RESUME" && (
                     <span className="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-1 rounded-full">
                       필수

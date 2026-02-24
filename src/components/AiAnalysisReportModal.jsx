@@ -88,7 +88,7 @@ const AiAnalysisReportModal = ({ isOpen, onClose, result }) => {
         </div>
 
         {/* Footer (Fixed at bottom) */}
-        <div className="p-5 pb-8 pb-safe shrink-0 bg-white border-t border-gray-100/50">
+        <div className="p-5 pb-8 shrink-0 bg-white border-t border-gray-100/50">
           <button
             onClick={onClose}
             className="w-full bg-gray-900 text-white font-bold py-4 rounded-xl text-base hover:bg-black transition-all active:scale-[0.98]"
