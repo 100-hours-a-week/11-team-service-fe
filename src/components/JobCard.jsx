@@ -47,6 +47,24 @@ const JobCard = ({ job }) => {
           <span className="text-sm text-gray-500 font-medium line-clamp-1">
             {title}
           </span>
+          {/* Skills Tags (Up to 4) */}
+          {job.skills && job.skills.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
+              {job.skills.slice(0, 4).map((skill, idx) => (
+                <span
+                  key={idx}
+                  className="px-2 py-0.5 bg-gray-50 text-gray-600 text-[11px] font-semibold border border-gray-200 rounded text-center whitespace-nowrap"
+                >
+                  {skill}
+                </span>
+              ))}
+              {job.skills.length > 4 && (
+                <span className="px-2 py-0.5 bg-gray-50 text-gray-500 text-[11px] font-medium border border-gray-100 rounded text-center whitespace-nowrap">
+                  +{job.skills.length - 4}
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <div className="shrink-0">
           <span
@@ -76,7 +94,13 @@ const JobCard = ({ job }) => {
 
       {/* Date Range */}
       <div className="flex justify-end text-xs text-gray-500 mb-5 font-medium tracking-tight">
-        {isAlwaysOpen ? "상시모집" : `${startDate} ~ ${endDate}`}
+        {isAlwaysOpen ? (
+          "상시모집"
+        ) : (
+          <>
+            {startDate ? startDate : ""} ~ {endDate ? endDate : ""}
+          </>
+        )}
       </div>
 
       {/* Footer: Group Count and Detail Link */}
