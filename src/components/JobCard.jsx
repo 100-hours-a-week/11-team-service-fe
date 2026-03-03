@@ -9,13 +9,13 @@ const JobCard = ({ job }) => {
   const company = job.companyName || "회사명";
   const title = job.jobTitle || "직무";
   const status = job.status || "OPEN"; // OPEN, CLOSED
-  const startDate = job.startDate
-    ? job.startDate.replaceAll("-", ".")
-    : "2026.01.01";
-  const endDate = job.endDate ? job.endDate.replaceAll("-", ".") : "2026.12.31";
+  const startDate = job.startDate ? job.startDate.replaceAll("-", ".") : null;
+  const endDate = job.endDate ? job.endDate.replaceAll("-", ".") : null;
   const groupCount = job.currentGroupCount || 0;
 
-  const isClosed = status !== "OPEN";
+  // If dates are missing, treat as "Always Recruiting" (Open)
+  const isAlwaysOpen = !startDate && !endDate;
+  const isClosed = !isAlwaysOpen && job.status !== "OPEN";
 
   const handleCardClick = () => {
     if (!isAuthenticated) {
@@ -47,6 +47,24 @@ const JobCard = ({ job }) => {
           <span className="text-sm text-gray-500 font-medium line-clamp-1">
             {title}
           </span>
+          {/* Skills Tags (Up to 4) */}
+          {job.skills && job.skills.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-1.5">
+              {job.skills.slice(0, 4).map((skill, idx) => (
+                <span
+                  key={idx}
+                  className="px-2 py-0.5 bg-gray-50 text-gray-600 text-[11px] font-semibold border border-gray-200 rounded text-center whitespace-nowrap"
+                >
+                  {skill}
+                </span>
+              ))}
+              {job.skills.length > 4 && (
+                <span className="px-2 py-0.5 bg-gray-50 text-gray-500 text-[11px] font-medium border border-gray-100 rounded text-center whitespace-nowrap">
+                  +{job.skills.length - 4}
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <div className="shrink-0">
           <span
@@ -66,13 +84,23 @@ const JobCard = ({ job }) => {
       <div className="w-full h-1.5 bg-gray-100 rounded-full mb-2 overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${isClosed ? "bg-gray-300" : "bg-[#101827]"}`}
-          style={{ width: `${calculateProgress(startDate, endDate)}%` }}
+          style={{
+            width: isAlwaysOpen
+              ? "100%"
+              : `${calculateProgress(startDate, endDate)}%`,
+          }}
         ></div>
       </div>
 
       {/* Date Range */}
       <div className="flex justify-end text-xs text-gray-500 mb-5 font-medium tracking-tight">
-        {startDate} ~ {endDate}
+        {isAlwaysOpen ? (
+          "상시모집"
+        ) : (
+          <>
+            {startDate ? startDate : ""} ~ {endDate ? endDate : ""}
+          </>
+        )}
       </div>
 
       {/* Footer: Group Count and Detail Link */}

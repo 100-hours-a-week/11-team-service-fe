@@ -26,7 +26,7 @@ export const kickMember = (chatRoomId, chatRoomMemberId) =>
   client.delete(`/api/v1/chat-rooms/${chatRoomId}/members/${chatRoomMemberId}`);
 
 export const closeChatRoom = (chatRoomId) =>
-  client.delete(`/api/v1/chat-rooms/${chatRoomId}`);
+  client.patch(`/api/v1/chat-rooms/${chatRoomId}/close`);
 
 // === 메시지 ===
 
@@ -61,12 +61,12 @@ export const getMemberProfile = (chatRoomId, chatRoomMemberId) =>
 
 export const getMemberResume = (chatRoomId, chatRoomMemberId) =>
   client.get(
-    `/api/v1/chat-rooms/${chatRoomId}/members/${chatRoomMemberId}/resume`,
+    `/api/v1/chat-rooms/${chatRoomId}/members/${chatRoomMemberId}/documents/resume`,
   );
 
 export const getMemberPortfolio = (chatRoomId, chatRoomMemberId) =>
   client.get(
-    `/api/v1/chat-rooms/${chatRoomId}/members/${chatRoomMemberId}/portfolio`,
+    `/api/v1/chat-rooms/${chatRoomId}/members/${chatRoomMemberId}/documents/portfolio`,
   );
 
 export const getMemberComparison = (chatRoomId, chatRoomMemberId) =>

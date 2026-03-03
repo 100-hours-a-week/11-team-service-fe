@@ -16,7 +16,7 @@ const BottomNav = () => {
   ];
 
   // Hide BottomNav on these paths
-  const hideOnPaths = ["/analysis", "/jobs", "/login"];
+  const hideOnPaths = ["/analysis", "/jobs", "/login", "/applications"];
   const shouldHide =
     hideOnPaths.some((path) => location.pathname.startsWith(path)) ||
     /^\/chat\/\d+/.test(location.pathname);
@@ -57,6 +57,14 @@ const BottomNav = () => {
                   isActive ? "fill-[#101827]" : "stroke-current",
                 )}
               />
+              <span
+                className={clsx(
+                  "text-[10px] mt-0.5 font-medium",
+                  isActive ? "text-[#101827]" : "text-gray-400",
+                )}
+              >
+                {item.name}
+              </span>
             </button>
           );
         })}

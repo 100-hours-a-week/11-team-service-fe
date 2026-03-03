@@ -40,7 +40,7 @@ const MyApplications = () => {
   }, [debouncedKeyword]);
 
   const handleCardClick = (app) => {
-    navigate(`/jobs/${app.jobMasterId}`);
+    navigate(`/applications/${app.id}`);
   };
 
   const getStatusLabel = (status) => {

@@ -14,6 +14,8 @@ import {
   getMembers,
   leaveChatRoom,
   closeChatRoom,
+  getMemberResume,
+  getMemberPortfolio,
 } from "../api/chatApi";
 import useChatMessages from "../hooks/useChatMessages";
 import ChatBubble from "../components/chat/ChatBubble";
@@ -34,8 +36,8 @@ const isSameGroup = (a, b) => {
   if (!a || !b) return false;
   if (a.senderId !== b.senderId) return false;
   if (a.messageType === "SYSTEM" || b.messageType === "SYSTEM") return false;
-  const aTime = new Date(a.sentAt);
-  const bTime = new Date(b.sentAt);
+  const aTime = new Date(a.createdAt);
+  const bTime = new Date(b.createdAt);
   return (
     aTime.getHours() === bTime.getHours() &&
     aTime.getMinutes() === bTime.getMinutes()
@@ -165,7 +167,15 @@ const ChatRoom = () => {
       navigate(-1);
     } catch (e) {
       console.error("Failed to close room:", e);
-      toast.error(e.response?.data?.message || "채팅방 종료에 실패했습니다.");
+      const code = e.response?.data?.code;
+      if (code === "CHAT_ROOM_NOT_FOUND") {
+        toast.error("이미 종료된 채팅방입니다.");
+        navigate(-1);
+      } else if (code === "CHAT_ROOM_HOST_ONLY") {
+        toast.error("방장만 채팅방을 종료할 수 있습니다.");
+      } else {
+        toast.error("채팅방 종료에 실패했습니다.");
+      }
     }
   };
 
@@ -178,13 +188,35 @@ const ChatRoom = () => {
     setActionSheetMember(member);
   };
 
+  const openMemberDocument = async (member, type) => {
+    if (!member.chatRoomMemberId) {
+      toast.error("멤버 정보를 찾을 수 없습니다.");
+      return;
+    }
+    const fetcher = type === "resume" ? getMemberResume : getMemberPortfolio;
+    const label = type === "resume" ? "이력서" : "포트폴리오";
+    try {
+      const res = await fetcher(chatRoomId, member.chatRoomMemberId);
+      window.open(res.data.data.fileUrl, "_blank");
+    } catch (e) {
+      const code = e.response?.data?.code;
+      if (code === "DOCUMENT_NOT_FOUND") {
+        toast(`제출된 ${label}가 없습니다.`);
+      } else if (code === "CHAT_MEMBER_NOT_FOUND") {
+        toast.error("멤버 정보를 찾을 수 없습니다.");
+      } else {
+        toast.error(`${label}를 불러오지 못했습니다.`);
+      }
+    }
+  };
+
   const handleActionSheetAction = (actionKey, member) => {
     switch (actionKey) {
       case "resume":
-        setShowMemberProfile(member);
+        openMemberDocument(member, "resume");
         break;
       case "portfolio":
-        setShowMemberProfile(member);
+        openMemberDocument(member, "portfolio");
         break;
       case "comparison":
         setShowComparison(member);
@@ -269,16 +301,28 @@ const ChatRoom = () => {
                     >
                       채팅방 나가기
                     </button>
+                    {isHost && (
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          handleCloseRoom();
+                        }}
+                        className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100"
+                      >
+                        채팅방 종료하기
+                      </button>
+                    )}
                     <button
-                      onClick={() => {
+                      onClick={async () => {
                         setShowDropdown(false);
-                        // TODO: API 개발 완료 후 handleCloseRoom() 활성화
-                        // handleCloseRoom();
-                        toast("준비중인 기능입니다");
+                        navigate("/", { replace: true });
+                        await handleLogout();
+                        toast("로그아웃되었습니다");
                       }}
-                      className="w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100"
+                      className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-t border-gray-100"
                     >
-                      채팅방 종료하기
+                      <LogOut className="w-4 h-4" />
+                      <span>로그아웃</span>
                     </button>
                     <button
                       onClick={async () => {
@@ -316,7 +360,8 @@ const ChatRoom = () => {
               const prev = messages[i - 1];
               const next = messages[i + 1];
               const showDate =
-                !prev || getDateKey(prev.sentAt) !== getDateKey(msg.sentAt);
+                !prev ||
+                getDateKey(prev.createdAt) !== getDateKey(msg.createdAt);
               const showSender =
                 msg.messageType !== "SYSTEM" &&
                 !isMe(msg.senderId) &&
@@ -326,7 +371,7 @@ const ChatRoom = () => {
 
               return (
                 <div key={msg.messageId}>
-                  {showDate && <DateSeparator date={msg.sentAt} />}
+                  {showDate && <DateSeparator date={msg.createdAt} />}
                   <ChatBubble
                     message={msg}
                     isMe={isMe(msg.senderId)}
@@ -371,6 +416,7 @@ const ChatRoom = () => {
           <MemberProfileModal
             chatRoomId={chatRoomId}
             member={showMemberProfile}
+            myUserId={user?.userId}
             onClose={() => setShowMemberProfile(null)}
             onCompare={handleComparisonClick}
           />
@@ -401,6 +447,7 @@ const ChatRoom = () => {
           isOpen={!!actionSheetMember}
           onClose={() => setActionSheetMember(null)}
           member={actionSheetMember}
+          myUserId={user?.userId}
           isHost={isHost}
           onAction={handleActionSheetAction}
         />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import client from "../api/client";
@@ -19,6 +19,38 @@ const JobAnalysis = () => {
   const [error, setError] = useState("");
   const [modalError, setModalError] = useState(""); // Separate state for modal message
   const [redirectTarget, setRedirectTarget] = useState(null);
+
+  const isConfirmedRef = useRef(false);
+  const resultRef = useRef(null);
+
+  // Sync resultRef for cleanup
+  useEffect(() => {
+    resultRef.current = result;
+  }, [result]);
+
+  // Cleanup on unmount: If not confirmed and result exists, delete draft
+  useEffect(() => {
+    return () => {
+      // Check if we have a draft and it wasn't confirmed
+      if (
+        resultRef.current &&
+        resultRef.current.jobMasterId &&
+        !isConfirmedRef.current
+      ) {
+        // Use fetch with keepalive to ensure request completes after unload
+        const token = localStorage.getItem("accessToken");
+        const url = `${import.meta.env.VITE_API_BASE_URL || "/api"}/api/v1/job-postings/${resultRef.current.jobMasterId}`;
+
+        fetch(url, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          keepalive: true,
+        }).catch((e) => console.error("Auto-delete draft failed", e));
+      }
+    };
+  }, []);
 
   // --- Actions ---
 
@@ -110,6 +142,7 @@ const JobAnalysis = () => {
       await client.patch(`/api/v1/job-postings/${result.jobMasterId}`, {
         registrationStatus: "CONFIRMED",
       });
+      isConfirmedRef.current = true; // Mark as confirmed to prevent auto-delete
       navigate(`/jobs/${result.jobMasterId}`, { replace: true });
     } catch (err) {
       console.error(err);
@@ -215,6 +248,16 @@ const JobAnalysis = () => {
           <div className="mt-8 pb-24 animate-fade-in-up">
             {/* Wrapper for the result fields */}
             <div className="p-1 relative">
+              {/* AI Summary (moved to top) */}
+              <section className="mb-8">
+                <div className="mb-2 text-xs text-gray-900 font-bold">
+                  AI공고 요약
+                </div>
+                <div className="bg-gray-100 rounded-xl p-4 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap break-words min-h-[120px]">
+                  {result.aiSummary || "AI 요약 정보가 없습니다."}
+                </div>
+              </section>
+
               <div className="grid grid-cols-2 gap-y-6 gap-x-4 mb-8">
                 {/* Company */}
                 <div className="flex flex-col">
@@ -240,9 +283,11 @@ const JobAnalysis = () => {
                   <div className="text-xs text-gray-900 font-bold mb-2">
                     주요 업무
                   </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-medium flex-1 flex items-start break-words">
+                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-medium flex-1 flex flex-col gap-1.5 break-words">
                     {result.mainTasks && result.mainTasks.length > 0
-                      ? result.mainTasks.join(", ")
+                      ? result.mainTasks.map((task, index) => (
+                          <div key={index}>- {task}</div>
+                        ))
                       : "-"}
                   </div>
                 </div>
@@ -251,9 +296,11 @@ const JobAnalysis = () => {
                   <div className="text-xs text-gray-900 font-bold mb-2">
                     필요기술스택
                   </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-medium flex-1 flex items-start break-words">
+                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-medium flex-1 flex flex-col gap-1.5 break-words">
                     {result.skills && result.skills.length > 0
-                      ? result.skills.join(", ")
+                      ? result.skills.map((skill, index) => (
+                          <div key={index}>- {skill}</div>
+                        ))
                       : "-"}
                   </div>
                 </div>
@@ -279,16 +326,6 @@ const JobAnalysis = () => {
                   </div>
                 </div>
               </div>
-
-              {/* AI Summary */}
-              <section className="mt-8 pb-6">
-                <div className="mb-2 text-xs text-gray-900 font-bold">
-                  AI공고 요약
-                </div>
-                <div className="bg-gray-100 rounded-xl p-4 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap break-words min-h-[120px]">
-                  {result.aiSummary || "AI 요약 정보가 없습니다."}
-                </div>
-              </section>
             </div>
           </div>
         )}

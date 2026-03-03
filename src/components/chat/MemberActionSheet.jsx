@@ -1,11 +1,10 @@
 import { FileText, Briefcase, BarChart2, UserMinus } from "lucide-react";
-import toast from "react-hot-toast";
 
-// TODO: API 개발 완료 후 false로 변경
-const COMING_SOON_ACTIONS = ["resume", "portfolio", "comparison"];
-
-const MemberActionSheet = ({ isOpen, onClose, member, onAction }) => {
+const MemberActionSheet = ({ isOpen, onClose, member, myUserId, onAction }) => {
   if (!isOpen || !member) return null;
+
+  const isSelf =
+    member.userId != null && String(member.userId) === String(myUserId);
 
   const actions = [
     {
@@ -20,12 +19,16 @@ const MemberActionSheet = ({ isOpen, onClose, member, onAction }) => {
       icon: Briefcase,
       color: "text-gray-700",
     },
-    {
-      key: "comparison",
-      label: "나와의 비교 결과 보기",
-      icon: BarChart2,
-      color: "text-gray-700",
-    },
+    ...(!isSelf
+      ? [
+          {
+            key: "comparison",
+            label: "나와의 비교 결과 보기",
+            icon: BarChart2,
+            color: "text-gray-700",
+          },
+        ]
+      : []),
     {
       key: "kick",
       label: "강제 퇴장",
@@ -53,11 +56,6 @@ const MemberActionSheet = ({ isOpen, onClose, member, onAction }) => {
             <button
               key={action.key}
               onClick={() => {
-                if (COMING_SOON_ACTIONS.includes(action.key)) {
-                  toast("준비중인 기능입니다");
-                  onClose();
-                  return;
-                }
                 onAction(action.key, member);
                 onClose();
               }}
