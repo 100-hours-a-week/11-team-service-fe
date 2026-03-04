@@ -8,11 +8,14 @@ const EvaluationProgressModal = ({
   onClose,
   applicationId,
   onAnalysisComplete,
+  hasPortfolio = false,
 }) => {
   const navigate = useNavigate();
   const [status, setStatus] = useState("REQUESTED"); // REQUESTED | PROGRESS | FAILED | SUCCESS
   const [errorDetails, setErrorDetails] = useState("");
   const pollTimerRef = useRef(null);
+  const resumeTimerRef = useRef(null);
+  const portfolioTimerRef = useRef(null);
 
   // Status Texts
   const STATUS_CONFIG = {
@@ -80,6 +83,75 @@ const EvaluationProgressModal = ({
       clearTimeout(pollTimerRef.current);
       pollTimerRef.current = null;
     }
+    if (resumeTimerRef.current) {
+      clearTimeout(resumeTimerRef.current);
+      resumeTimerRef.current = null;
+    }
+    if (portfolioTimerRef.current) {
+      clearTimeout(portfolioTimerRef.current);
+      portfolioTimerRef.current = null;
+    }
+  };
+
+  // 이력서/포트폴리오 완료 상태를 추적하는 ref
+  const resumeDoneRef = useRef(false);
+  const portfolioDoneRef = useRef(false);
+
+  const checkAllSubAnalysesDone = (onComplete) => {
+    const portfolioReady = !hasPortfolio || portfolioDoneRef.current;
+    if (resumeDoneRef.current && portfolioReady) {
+      onComplete();
+    }
+  };
+
+  const checkResumeStatus = async (onAllDone) => {
+    try {
+      await client.get(`/api/v1/applications/${applicationId}/analyses/resume`);
+      // 200이면 완료
+      resumeDoneRef.current = true;
+      checkAllSubAnalysesDone(onAllDone);
+    } catch (err) {
+      if (err.response?.status === 202) {
+        resumeTimerRef.current = setTimeout(
+          () => checkResumeStatus(onAllDone),
+          3000,
+        );
+      } else {
+        console.error("Resume polling error:", err);
+        setStatus("FAILED");
+        setErrorDetails(
+          err.response?.data?.message || "이력서 분석에 실패했습니다.",
+        );
+      }
+    }
+  };
+
+  const checkPortfolioStatus = async (onAllDone) => {
+    try {
+      await client.get(
+        `/api/v1/applications/${applicationId}/analyses/portfolio`,
+      );
+      // 200이면 완료
+      portfolioDoneRef.current = true;
+      checkAllSubAnalysesDone(onAllDone);
+    } catch (err) {
+      if (err.response?.status === 202) {
+        portfolioTimerRef.current = setTimeout(
+          () => checkPortfolioStatus(onAllDone),
+          3000,
+        );
+      } else if (err.response?.status === 404) {
+        // 포트폴리오 없음 → 완료로 처리
+        portfolioDoneRef.current = true;
+        checkAllSubAnalysesDone(onAllDone);
+      } else {
+        console.error("Portfolio polling error:", err);
+        setStatus("FAILED");
+        setErrorDetails(
+          err.response?.data?.message || "포트폴리오 분석에 실패했습니다.",
+        );
+      }
+    }
   };
 
   const checkAnalysisStatus = async () => {
@@ -91,8 +163,20 @@ const EvaluationProgressModal = ({
       );
 
       if (response.status === 200 && response.data.data) {
-        setStatus("SUCCESS"); // Optional, normally we close and show result modal
-        onAnalysisComplete(response.data.data);
+        // 종합평가 완료 → 이력서/포트폴리오 개별 분석도 폴링 시작
+        const analysisData = response.data.data;
+        resumeDoneRef.current = false;
+        portfolioDoneRef.current = false;
+
+        const onAllDone = () => {
+          setStatus("SUCCESS");
+          onAnalysisComplete(analysisData);
+        };
+
+        checkResumeStatus(onAllDone);
+        if (hasPortfolio) {
+          checkPortfolioStatus(onAllDone);
+        }
       } else if (response.status === 202) {
         setStatus("PROGRESS");
         pollTimerRef.current = setTimeout(checkAnalysisStatus, 3000);

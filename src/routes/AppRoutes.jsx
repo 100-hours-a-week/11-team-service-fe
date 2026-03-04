@@ -15,6 +15,7 @@ import ChatRoom from "../pages/ChatRoom";
 import MyApplications from "../pages/MyApplications";
 import ResumeDetail from "../pages/ResumeDetail";
 import DocumentViewer from "../pages/DocumentViewer";
+import NotFound from "../pages/NotFound";
 
 // 준비중 페이지 공통 컴포넌트
 const ComingSoon = ({ title, icon: Icon }) => (
@@ -139,8 +140,8 @@ const AppRoutes = () => {
         }
       />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Fallback - 정의되지 않은 경로는 404 페이지로 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

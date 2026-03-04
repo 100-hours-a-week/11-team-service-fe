@@ -294,6 +294,11 @@ const ResumeDetail = () => {
       <EvaluationProgressModal
         isOpen={showEvaluationModal}
         onClose={() => setShowEvaluationModal(false)}
+        applicationId={applicationId}
+        onAnalysisComplete={handleAnalysisComplete}
+        hasPortfolio={application?.documents?.some(
+          (doc) => doc.docType === "PORTFOLIO" && doc.isRegistered,
+        )}
       />
 
       <AiAnalysisReportModal
