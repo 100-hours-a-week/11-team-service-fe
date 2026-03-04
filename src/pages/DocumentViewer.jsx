@@ -71,9 +71,13 @@ const DocumentViewer = () => {
     try {
       const response = await client.get(endpoint);
       if (response.status === 200 && response.data.data) {
+        // 분석 완료
         setReportData(response.data.data);
         setReportLoading(false);
         setReportFetched(true);
+      } else if (response.status === 202) {
+        // axios는 202를 에러로 던지지 않으므로 여기서 처리
+        pollingRef.current = setTimeout(fetchReport, 3000);
       }
     } catch (e) {
       if (e.response?.status === 202) {

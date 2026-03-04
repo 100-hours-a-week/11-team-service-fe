@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, FileText, ChevronRight, Loader2 } from "lucide-react";
 import client from "../api/client";
@@ -21,9 +21,6 @@ const ResumeDetail = () => {
   const [showEvaluationModal, setShowEvaluationModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [analysisData, setAnalysisData] = useState(null);
-
-  // Background Polling State
-  const pollingTimerRef = useRef(null);
 
   const fetchApplicationDetail = async (silent = false) => {
     try {
@@ -50,12 +47,6 @@ const ResumeDetail = () => {
     fetchApplicationDetail();
   }, [applicationId]);
 
-  useEffect(() => {
-    return () => {
-      if (pollingTimerRef.current) clearTimeout(pollingTimerRef.current);
-    };
-  }, []);
-
   const handleOpenDocument = (doc) => {
     if (!doc || !doc.isRegistered) {
       alert("등록된 파일이 없습니다.");
@@ -75,28 +66,6 @@ const ResumeDetail = () => {
     fetchApplicationDetail(true);
   };
 
-  const checkAnalysisStatus = async () => {
-    if (!applicationId) return;
-    try {
-      const response = await client.get(
-        `/api/v1/applications/${applicationId}/analyses`,
-      );
-      if (response.status === 200 && response.data.data) {
-        setShowEvaluationModal(false);
-        setAnalysisData(response.data.data);
-        setShowReportModal(true);
-      } else if (response.status === 202) {
-        pollingTimerRef.current = setTimeout(checkAnalysisStatus, 3000);
-      }
-    } catch (e) {
-      if (e.response?.status === 202) {
-        pollingTimerRef.current = setTimeout(checkAnalysisStatus, 3000);
-      } else {
-        console.error("Polling error", e);
-      }
-    }
-  };
-
   const handleRequestAnalysis = async () => {
     if (!application) return;
     try {
@@ -105,7 +74,7 @@ const ResumeDetail = () => {
         analysis_type: "ALL",
       });
       setShowEvaluationModal(true);
-      pollingTimerRef.current = setTimeout(checkAnalysisStatus, 3000);
+      // 폴링은 EvaluationProgressModal이 전담
     } catch (e) {
       setShowEvaluationModal(false);
       if (e.response?.data?.message) {
@@ -296,9 +265,6 @@ const ResumeDetail = () => {
         onClose={() => setShowEvaluationModal(false)}
         applicationId={applicationId}
         onAnalysisComplete={handleAnalysisComplete}
-        hasPortfolio={application?.documents?.some(
-          (doc) => doc.docType === "PORTFOLIO" && doc.isRegistered,
-        )}
       />
 
       <AiAnalysisReportModal
