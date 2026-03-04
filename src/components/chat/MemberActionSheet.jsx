@@ -1,6 +1,13 @@
 import { FileText, Briefcase, BarChart2, UserMinus } from "lucide-react";
 
-const MemberActionSheet = ({ isOpen, onClose, member, myUserId, isHost, onAction }) => {
+const MemberActionSheet = ({
+  isOpen,
+  onClose,
+  member,
+  myUserId,
+  isHost,
+  onAction,
+}) => {
   if (!isOpen || !member) return null;
 
   const isSelf =
