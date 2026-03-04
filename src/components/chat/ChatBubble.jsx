@@ -31,13 +31,13 @@ const ChatBubble = ({
   if (isMe) {
     return (
       <div className="flex justify-end px-4 mb-1">
-        <div className="flex items-end space-x-1 max-w-[75%]">
+        <div className="flex items-end space-x-1 max-w-[75%] min-w-0">
           {showTime && (
             <span className="text-[10px] text-gray-400 mb-1 flex-shrink-0">
               {formatTime(message.createdAt)}
             </span>
           )}
-          <div className="bg-[#101827] text-white rounded-2xl rounded-tr-md px-3.5 py-2.5">
+          <div className="bg-[#101827] text-white rounded-2xl rounded-tr-md px-3.5 py-2.5 min-w-0 overflow-hidden">
             {message.messageType === "FILE" ? (
               <MessageFilePreview file={message.file} isMe />
             ) : (
@@ -53,7 +53,7 @@ const ChatBubble = ({
 
   return (
     <div className="flex px-4 mb-1">
-      <div className="max-w-[75%]">
+      <div className="max-w-[75%] min-w-0">
         {showSender && (
           <button
             type="button"
@@ -66,10 +66,8 @@ const ChatBubble = ({
             </span>
           </button>
         )}
-        <div
-          className={`flex items-end space-x-1 ${showSender ? "ml-8" : "ml-8"}`}
-        >
-          <div className="bg-gray-100 text-gray-900 rounded-2xl rounded-tl-md px-3.5 py-2.5">
+        <div className="flex items-end space-x-1 ml-8">
+          <div className="bg-gray-100 text-gray-900 rounded-2xl rounded-tl-md px-3.5 py-2.5 min-w-0 overflow-hidden">
             {message.messageType === "FILE" ? (
               <MessageFilePreview file={message.file} isMe={false} />
             ) : (

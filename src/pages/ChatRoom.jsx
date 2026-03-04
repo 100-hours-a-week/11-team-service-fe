@@ -335,7 +335,7 @@ const ChatRoom = () => {
         <div
           ref={messageContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto bg-white py-2"
+          className="flex-1 overflow-y-auto overflow-x-hidden bg-white py-2"
         >
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
