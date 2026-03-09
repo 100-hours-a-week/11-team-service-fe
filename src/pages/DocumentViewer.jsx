@@ -5,6 +5,7 @@ import client from "../api/client";
 import PDFViewer from "../components/PDFViewer";
 import ResumeAnalysisReport from "../components/ResumeAnalysisReport";
 import PortfolioAnalysisReport from "../components/PortfolioAnalysisReport";
+import AlertModal from "../components/AlertModal";
 
 const DocumentViewer = () => {
   const { applicationId, docType } = useParams();
@@ -20,6 +21,14 @@ const DocumentViewer = () => {
   const [reportLoading, setReportLoading] = useState(false);
   const [reportFetched, setReportFetched] = useState(false);
   const pollingRef = useRef(null);
+
+  // Alert State
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    message: "",
+    type: "info",
+    onClose: null,
+  });
 
   useEffect(() => {
     fetchDocumentUrl();
@@ -41,8 +50,12 @@ const DocumentViewer = () => {
       );
 
       if (!doc || !doc.isRegistered) {
-        alert("등록된 파일이 없습니다.");
-        navigate(-1);
+        setAlertConfig({
+          isOpen: true,
+          message: "등록된 파일이 없습니다.",
+          type: "info",
+          onClose: () => navigate(-1),
+        });
         return;
       }
 
@@ -55,8 +68,12 @@ const DocumentViewer = () => {
       setPdfUrl(downloadUrl);
     } catch (e) {
       console.error("Failed to fetch document", e);
-      alert("파일을 불러오는데 실패했습니다.");
-      navigate(-1);
+      setAlertConfig({
+        isOpen: true,
+        message: "파일을 불러오는데 실패했습니다.",
+        type: "error",
+        onClose: () => navigate(-1),
+      });
     } finally {
       setLoading(false);
     }
@@ -196,6 +213,16 @@ const DocumentViewer = () => {
           </div>
         )}
       </div>
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        onClose={() => {
+          if (alertConfig.onClose) alertConfig.onClose();
+          setAlertConfig((prev) => ({ ...prev, isOpen: false }));
+        }}
+      />
     </div>
   );
 };

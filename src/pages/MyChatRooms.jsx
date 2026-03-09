@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { MessageCircle, Loader2, Crown, Users } from "lucide-react";
+import {
+  MessageCircle,
+  Loader2,
+  Crown,
+  Users,
+  ChevronLeft,
+} from "lucide-react";
 import { getMyChatRooms } from "../api/chatApi";
 import UserMenu from "../components/UserMenu";
 
@@ -66,11 +72,26 @@ const MyChatRooms = () => {
 
   return (
     <div className="bg-white min-h-screen flex flex-col">
-      {/* Header */}
-      <div className="sticky top-0 bg-white z-10 border-b border-gray-100">
-        <div className="flex items-center justify-between px-4 h-14">
-          <h1 className="font-bold text-gray-900 text-lg">채팅방</h1>
-          <UserMenu />
+      {/* Header Section: Zero-Jump Structure */}
+      <div className="bg-white sticky top-0 z-20 border-b border-gray-100 pb-2 pt-safe">
+        {/* Title Row */}
+        <div className="relative flex items-center justify-between h-14 px-4 mt-2">
+          {/* Left: Back Button (Matched w-10) */}
+          <div className="w-10 flex-shrink-0">
+            <button onClick={() => navigate(-1)} className="p-2 -ml-2">
+              <ChevronLeft className="w-6 h-6 text-gray-900" />
+            </button>
+          </div>
+
+          <h1 className="font-bold text-gray-900 text-lg absolute left-1/2 -translate-x-1/2 whitespace-nowrap">
+            채팅방
+          </h1>
+
+          {/* Right: Menu + Placeholder (w-10) to match Bell icon space */}
+          <div className="flex items-center gap-1 flex-shrink-0 h-10">
+            <div className="w-10 flex-shrink-0" />
+            <UserMenu />
+          </div>
         </div>
       </div>
 

@@ -62,14 +62,17 @@ const JobDetail = () => {
 
   return (
     <div className="bg-white min-h-screen pb-safe">
-      {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-100 px-4 h-14 flex items-center justify-between z-10">
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2">
-          <ChevronLeft className="w-6 h-6 text-gray-900" />
-        </button>
-        <h1 className="font-bold text-gray-900 text-lg">채용공고 상세</h1>
-        <div className="w-10 flex justify-end">
-          <UserMenu />
+      <div className="sticky top-0 bg-white border-b border-gray-100 pt-safe z-10">
+        <div className="h-14 flex items-center justify-center px-4 relative mt-2">
+          <div className="absolute left-4">
+            <button onClick={() => navigate(-1)} className="p-2 -ml-2">
+              <ChevronLeft className="w-6 h-6 text-gray-900" />
+            </button>
+          </div>
+          <h1 className="font-bold text-gray-900 text-lg">채용공고 상세</h1>
+          <div className="absolute right-4">
+            <UserMenu />
+          </div>
         </div>
       </div>
 
