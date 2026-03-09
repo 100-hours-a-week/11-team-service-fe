@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import client from "../api/client";
 import JobCard from "../components/JobCard";
-import { Search } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Search, Bell } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
 import UserMenu from "../components/UserMenu";
 import { useAuth } from "../context/AuthContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, showAuthModal } = useAuth();
+  const { isAuthenticated, showAuthModal, unreadCount } = useAuth();
 
   // State
   const [jobs, setJobs] = useState([]);
@@ -119,65 +119,87 @@ const Dashboard = () => {
   return (
     <div className="bg-white min-h-screen pb-24">
       {/* Header Section */}
-      <div className="bg-white px-5 pt-4 pb-4 sticky top-0 z-20 border-b border-gray-100">
-        <div className="flex items-center justify-between mb-6">
-          <div className="w-10" />
-          <span className="text-2xl font-black tracking-tighter text-[#101827] font-sans">
+      <div className="bg-white sticky top-0 z-20 border-b border-gray-100 pb-5 pt-safe">
+        {/* Title/Logo Row: Zero-Jump Structure */}
+        <div className="relative flex items-center justify-between h-14 px-4 mt-2">
+          {/* Left Placeholder: Matches Back Button width (w-10) to keep title perfectly centered */}
+          <div className="w-10 flex-shrink-0" />
+
+          <span className="text-2xl font-black tracking-tighter text-[#101827] font-sans absolute left-1/2 -translate-x-1/2">
             SCUAD
           </span>
-          <div className="w-10 flex justify-end">
+
+          <div className="flex items-center gap-1 flex-shrink-0 h-10">
+            {isAuthenticated && (
+              <Link
+                to="/notifications"
+                className="relative p-2 -mr-1 text-gray-600 hover:text-[#101827] active:scale-[0.95] transition-all flex items-center justify-center w-10 h-10"
+              >
+                <Bell
+                  className="w-6 h-6 flex-shrink-0"
+                  style={{ minWidth: "24px", minHeight: "24px" }}
+                />
+                {unreadCount > 0 && (
+                  <span className="absolute top-[2px] right-[2px] bg-red-500 text-white text-[9px] font-bold min-w-[15px] h-3.5 flex items-center justify-center px-1 rounded-full border border-white z-10 shadow-sm">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+              </Link>
+            )}
             <UserMenu />
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative mb-4">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            className="block w-full pl-10 pr-3 py-3.5 bg-gray-50 border border-transparent focus:border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-100 transition-all font-medium"
-            placeholder="기업명 또는 직무명 검색"
-            value={keyword}
-            onChange={handleKeywordChange}
-            onKeyDown={handleSearch}
-          />
-        </div>
-
-        {/* Filter and Register Button Area */}
-        <div className="flex justify-between items-center">
-          {/* Status Filter */}
-          <button
-            onClick={() => setOnlyOpen(!onlyOpen)}
-            className="flex items-center space-x-2 active:scale-95 transition-transform"
-          >
-            <div
-              className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${onlyOpen ? "bg-[#101827] border-[#101827]" : "border-gray-300"}`}
-            >
-              {onlyOpen && <div className="w-2 h-2 bg-white rounded-full" />}
+        {/* Control Area: Standard search-first hierarchy */}
+        <div className="px-5 mt-4 space-y-5">
+          {/* Search Bar (Now prominent at the top) */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
             </div>
-            <span
-              className={`text-sm font-bold ${onlyOpen ? "text-gray-900" : "text-gray-500"}`}
-            >
-              모집중
-            </span>
-          </button>
+            <input
+              type="text"
+              className="block w-full pl-10 pr-3 py-3.5 bg-gray-50 border border-transparent focus:border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-100 transition-all font-medium"
+              placeholder="기업명 또는 직무명 검색"
+              value={keyword}
+              onChange={handleKeywordChange}
+              onKeyDown={handleSearch}
+            />
+          </div>
 
-          {/* Register Button */}
-          <button
-            onClick={() => {
-              if (!isAuthenticated) {
-                showAuthModal();
-                return;
-              }
-              navigate("/analysis");
-            }}
-            className="bg-[#101827] hover:bg-[#1a263d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
-          >
-            공고 등록
-          </button>
-          {/* Note: In the design, "공고 등록" is a button on the right. */}
+          {/* Filters and Register Button Area (Now secondary) */}
+          <div className="flex justify-between items-center">
+            {/* Status Filter */}
+            <button
+              onClick={() => setOnlyOpen(!onlyOpen)}
+              className="flex items-center space-x-2 active:scale-95 transition-transform"
+            >
+              <div
+                className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${onlyOpen ? "bg-[#101827] border-[#101827]" : "border-gray-300"}`}
+              >
+                {onlyOpen && <div className="w-2 h-2 bg-white rounded-full" />}
+              </div>
+              <span
+                className={`text-sm font-bold ${onlyOpen ? "text-gray-900" : "text-gray-500"}`}
+              >
+                모집중
+              </span>
+            </button>
+
+            {/* Register Button */}
+            <button
+              onClick={() => {
+                if (!isAuthenticated) {
+                  showAuthModal();
+                  return;
+                }
+                navigate("/analysis");
+              }}
+              className="bg-[#101827] hover:bg-[#1a263d] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors"
+            >
+              공고 등록
+            </button>
+          </div>
         </div>
       </div>
 
