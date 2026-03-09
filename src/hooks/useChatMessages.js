@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import axios from "axios";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import {
@@ -45,6 +46,8 @@ const useChatMessages = (chatRoomId) => {
   useEffect(() => {
     if (!chatRoomId) return;
 
+    let isDeactivating = false;
+
     const client = new Client({
       webSocketFactory: () => {
         const token = localStorage.getItem("accessToken");
@@ -61,6 +64,28 @@ const useChatMessages = (chatRoomId) => {
           });
         });
       },
+      onWebSocketClose: () => {
+        if (isDeactivating) return;
+        // Try to refresh token so the next reconnect uses a fresh token
+        axios
+          .post(
+            `${API_BASE_URL}/api/v1/auth/kakao/refresh`,
+            {},
+            { withCredentials: true },
+          )
+          .then(({ data }) => {
+            localStorage.setItem("accessToken", data.data.accessToken);
+          })
+          .catch(() => {
+            // Refresh token also expired — stop reconnecting and signal session end
+            client.deactivate();
+            window.dispatchEvent(
+              new CustomEvent("scuad-auth-event", {
+                detail: { type: "SESSION_EXPIRED" },
+              }),
+            );
+          });
+      },
       onStompError: (frame) => {
         console.error("STOMP error:", frame);
       },
@@ -69,6 +94,7 @@ const useChatMessages = (chatRoomId) => {
     client.activate();
 
     return () => {
+      isDeactivating = true;
       client.deactivate();
     };
   }, [chatRoomId]);
