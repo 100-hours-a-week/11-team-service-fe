@@ -17,6 +17,7 @@ import ResumeDetail from "../pages/ResumeDetail";
 import DocumentViewer from "../pages/DocumentViewer";
 import NotFound from "../pages/NotFound";
 import NotificationsPage from "../pages/NotificationsPage";
+import MyPage from "../pages/MyPage";
 
 // 준비중 페이지 공통 컴포넌트
 const ComingSoon = ({ title, icon: Icon }) => {
@@ -136,7 +137,7 @@ const AppRoutes = () => {
           path="mypage"
           element={
             <ProtectedRoute>
-              <ComingSoon title="마이페이지" icon={User} />
+              <MyPage />
             </ProtectedRoute>
           }
         />
