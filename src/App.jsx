@@ -1,19 +1,34 @@
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import AppRoutes from "./routes/AppRoutes";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
+import { useEffect } from "react";
 
 function App() {
+  useEffect(() => {
+    const handleGlobalClick = () => {
+      // 화면의 어느 곳이든 클릭하면 모든 토스트 강제 종료
+      toast.dismiss();
+    };
+
+    document.addEventListener("click", handleGlobalClick, { capture: true });
+    return () => {
+      document.removeEventListener("click", handleGlobalClick, {
+        capture: true,
+      });
+    };
+  }, []);
   return (
     <AuthProvider>
       <BrowserRouter>
         <AppRoutes />
         <Toaster
           position="top-center"
+          maxCount={1}
           toastOptions={{
             style: {
-              background: "#101827",
-              color: "#fff",
+              background: "#ffffff",
+              color: "#111827",
               fontSize: "14px",
               fontWeight: "600",
               borderRadius: "12px",
@@ -21,9 +36,20 @@ function App() {
               textAlign: "center",
               wordBreak: "keep-all",
               textWrap: "balance",
+              boxShadow:
+                "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05)",
+            },
+            success: {
+              iconTheme: {
+                primary: "#101827",
+                secondary: "#fff",
+              },
             },
             error: {
-              icon: null,
+              iconTheme: {
+                primary: "#101827",
+                secondary: "#fff",
+              },
             },
           }}
         />

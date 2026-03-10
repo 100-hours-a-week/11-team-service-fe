@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, Search, Loader2 } from "lucide-react";
 import client from "../api/client";
+import UserMenu from "../components/UserMenu";
 
 const MyApplications = () => {
   const navigate = useNavigate();
@@ -75,30 +76,42 @@ const MyApplications = () => {
 
   return (
     <div className="bg-white min-h-screen pb-safe flex flex-col relative">
-      {/* Header */}
-      <div className="sticky top-0 bg-white z-20 border-b border-gray-100">
-        <div className="flex items-center justify-between px-4 h-14">
-          <div className="flex items-center">
-            <h1 className="font-bold text-gray-900 text-lg tracking-tight">
-              이력 관리
-            </h1>
+      {/* Header Section: Zero-Jump Structure */}
+      <div className="bg-white sticky top-0 z-20 border-b border-gray-100 pb-5 pt-safe">
+        {/* Title Row */}
+        <div className="relative flex items-center justify-between h-14 px-4 mt-2">
+          {/* Left: Back Button (Matched w-10) */}
+          <div className="w-10 flex-shrink-0">
+            <button onClick={() => navigate(-1)} className="p-2 -ml-2">
+              <ChevronLeft className="w-6 h-6 text-gray-900" />
+            </button>
+          </div>
+
+          <h1 className="font-bold text-gray-900 text-lg tracking-tight absolute left-1/2 -translate-x-1/2 whitespace-nowrap">
+            이력 관리
+          </h1>
+
+          {/* Right: Menu + Placeholder (w-10) to match Bell icon space */}
+          <div className="flex items-center gap-1 flex-shrink-0 h-10">
+            <div className="w-10 flex-shrink-0" />
+            <UserMenu />
           </div>
         </div>
-      </div>
 
-      {/* Search Bar - Matching Dashboard Style */}
-      <div className="px-5 pt-4 pb-6 bg-white sticky top-14 z-10 transition-all">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+        {/* Search Bar: Unified Pixel-Perfect Alignment */}
+        <div className="px-5 mt-4">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent focus:border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-50 transition-all font-medium"
+              placeholder="기업명 또는 직무명 검색"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+            />
           </div>
-          <input
-            type="text"
-            className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-transparent focus:border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-50 transition-all font-medium"
-            placeholder="기업명 또는 직무명 검색"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-          />
         </div>
       </div>
 

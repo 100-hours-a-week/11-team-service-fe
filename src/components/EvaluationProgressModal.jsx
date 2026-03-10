@@ -153,14 +153,14 @@ const EvaluationProgressModal = ({
         <div className="p-6 pt-2">
           <button
             onClick={() => {
-              onClose();
-              if (status === "FAILED") {
-                // Stay or Navigate?
+              if (status === "SUCCESS") {
+                navigate(`/applications/${applicationId}`);
               }
+              onClose();
             }}
             className="w-full bg-[#101827] text-white font-bold py-4 rounded-2xl text-sm hover:bg-[#1a263d] transition-all active:scale-[0.98]"
           >
-            닫기
+            {status === "SUCCESS" ? "결과 보기" : "닫기"}
           </button>
         </div>
       </div>
