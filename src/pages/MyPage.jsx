@@ -310,7 +310,9 @@ const MyPage = () => {
                 </div>
               </div>
             ) : (
-              <p className="text-gray-900 font-semibold">{userData?.nickname}</p>
+              <p className="text-gray-900 font-semibold">
+                {userData?.nickname}
+              </p>
             )}
           </div>
 
