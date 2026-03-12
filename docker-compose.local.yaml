@@ -1,3 +1,4 @@
+name: scuad-frontend
 services:
   # ========================================
   # Development Service
@@ -7,7 +8,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: development
-    container_name: app-fe-dev
+    container_name: scuad-web
     ports:
       - "3000:3000"
     environment:
@@ -44,6 +45,7 @@ services:
     profiles:
       - dev
     restart: unless-stopped
+
   # ========================================
   # Production Service
   # ========================================
@@ -52,11 +54,17 @@ services:
       context: .
       dockerfile: Dockerfile
       target: production
-    container_name: app-fe-prod
+    container_name: scuad-nginx
     ports:
-      - "3000:3000"
+      - "80:3000"
     environment:
       NODE_ENV: production
     profiles:
       - prod
     restart: unless-stopped
+    networks: 
+      - scuad-network
+
+networks:
+  scuad-network:
+    external: true
