@@ -66,7 +66,7 @@ client.interceptors.response.use(
       try {
         // refreshToken은 HttpOnly 쿠키로 자동 전송됨
         const { data } = await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"}/api/v1/auth/kakao/refresh`,
+          `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"}/api/v1/auth/refresh`,
           {},
           { withCredentials: true },
         );
