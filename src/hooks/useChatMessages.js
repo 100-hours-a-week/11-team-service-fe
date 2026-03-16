@@ -69,7 +69,7 @@ const useChatMessages = (chatRoomId) => {
         // Try to refresh token so the next reconnect uses a fresh token
         axios
           .post(
-            `${API_BASE_URL}/api/v1/auth/kakao/refresh`,
+            `${API_BASE_URL}/api/v1/auth/refresh`,
             {},
             { withCredentials: true },
           )
