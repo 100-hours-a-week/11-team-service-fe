@@ -317,15 +317,15 @@ const MyPage = () => {
           </div>
 
           {/* Email Card */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-            <p className="text-xs font-medium text-gray-400 mb-1">이메일</p>
-            <p className="text-gray-900 font-semibold">
-              {userData?.email || "-"}
-            </p>
-            <p className="text-[11px] text-gray-400 mt-1">
-              카카오 계정 이메일은 변경할 수 없습니다
-            </p>
-          </div>
+          {userData?.email && (
+            <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+              <p className="text-xs font-medium text-gray-400 mb-1">이메일</p>
+              <p className="text-gray-900 font-semibold">{userData.email}</p>
+              <p className="text-[11px] text-gray-400 mt-1">
+                카카오 계정 이메일은 변경할 수 없습니다
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Withdraw Section */}
