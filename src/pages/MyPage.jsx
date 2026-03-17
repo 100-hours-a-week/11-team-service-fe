@@ -251,9 +251,6 @@ const MyPage = () => {
           <h2 className="mt-4 text-xl font-bold text-gray-900">
             {userData?.nickname}
           </h2>
-          {userData?.email && (
-            <p className="mt-1 text-sm text-gray-400">{userData.email}</p>
-          )}
         </div>
 
         {/* Info Section */}
@@ -315,17 +312,6 @@ const MyPage = () => {
               </p>
             )}
           </div>
-
-          {/* Email Card */}
-          {userData?.email && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-              <p className="text-xs font-medium text-gray-400 mb-1">이메일</p>
-              <p className="text-gray-900 font-semibold">{userData.email}</p>
-              <p className="text-[11px] text-gray-400 mt-1">
-                카카오 계정 이메일은 변경할 수 없습니다
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Withdraw Section */}
