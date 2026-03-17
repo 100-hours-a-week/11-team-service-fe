@@ -312,7 +312,6 @@ const MyPage = () => {
               </p>
             )}
           </div>
-
         </div>
 
         {/* Withdraw Section */}
