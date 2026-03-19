@@ -1,38 +1,59 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X, Loader2, TrendingUp, TrendingDown, Brain } from "lucide-react";
 import toast from "react-hot-toast";
-import { getMemberComparison } from "../../api/chatApi";
+import { postMemberComparison, getMemberComparison } from "../../api/chatApi";
 
 const ComparisonModal = ({ chatRoomId, member, onClose }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const pollTimerRef = useRef(null);
+
+  const stopPolling = () => {
+    if (pollTimerRef.current) {
+      clearTimeout(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+  };
+
+  const pollComparison = async () => {
+    try {
+      const res = await getMemberComparison(
+        chatRoomId,
+        member.chatRoomMemberId,
+      );
+      setData(res.data.data);
+      setLoading(false);
+    } catch (e) {
+      const code = e.response?.data?.code;
+      if (code === "COMPARISON_RESULT_NOT_FOUND") {
+        pollTimerRef.current = setTimeout(pollComparison, 3000);
+      } else if (code === "AI_SERVICE_ERROR") {
+        toast.error("분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", {
+          id: "scuad-toast",
+        });
+        onClose();
+      } else if (code === "CHAT_MEMBER_NOT_FOUND") {
+        toast.error("멤버 정보를 찾을 수 없습니다.", { id: "scuad-toast" });
+        onClose();
+      } else {
+        toast.error("비교 결과를 불러오지 못했습니다.", { id: "scuad-toast" });
+        onClose();
+      }
+    }
+  };
 
   useEffect(() => {
-    const fetchComparison = async () => {
+    const requestComparison = async () => {
       try {
-        setLoading(true);
-        const res = await getMemberComparison(
-          chatRoomId,
-          member.chatRoomMemberId,
-        );
-        setData(res.data.data);
+        await postMemberComparison(chatRoomId, member.chatRoomMemberId);
       } catch (e) {
-        const code = e.response?.data?.code;
-        if (code === "AI_SERVICE_ERROR") {
-          toast.error(
-            "분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-          );
-        } else if (code === "CHAT_MEMBER_NOT_FOUND") {
-          toast.error("멤버 정보를 찾을 수 없습니다.");
-        } else {
-          toast.error("비교 결과를 불러오지 못했습니다.");
-        }
-        onClose();
-      } finally {
-        setLoading(false);
+        // 이미 처리 중인 경우(202 외 응답)에도 폴링 진행
       }
+      pollComparison();
     };
-    fetchComparison();
+    requestComparison();
+
+    return () => stopPolling();
   }, [chatRoomId, member.chatRoomMemberId]);
 
   return (
