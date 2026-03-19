@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeft, Loader2, Clock, AlertCircle } from "lucide-react";
 import client from "../api/client";
 import PDFViewer from "../components/PDFViewer";
@@ -10,8 +10,11 @@ import AlertModal from "../components/AlertModal";
 const DocumentViewer = () => {
   const { applicationId, docType } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState("detail"); // "detail" | "report"
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get("tab") === "report" ? "report" : "detail",
+  ); // "detail" | "report"
   const [pdfUrl, setPdfUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [documentInfo, setDocumentInfo] = useState(null);
@@ -32,6 +35,10 @@ const DocumentViewer = () => {
 
   useEffect(() => {
     fetchDocumentUrl();
+    if (activeTab === "report" && !reportFetched && !reportLoading) {
+      setReportLoading(true);
+      fetchReport();
+    }
     return () => {
       if (pollingRef.current) clearTimeout(pollingRef.current);
     };
