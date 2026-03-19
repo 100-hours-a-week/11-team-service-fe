@@ -17,7 +17,10 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
 
   const pollComparison = async () => {
     try {
-      const res = await getMemberComparison(chatRoomId, member.chatRoomMemberId);
+      const res = await getMemberComparison(
+        chatRoomId,
+        member.chatRoomMemberId,
+      );
       setData(res.data.data);
       setLoading(false);
     } catch (e) {
@@ -25,7 +28,9 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
       if (code === "COMPARISON_RESULT_NOT_FOUND") {
         pollTimerRef.current = setTimeout(pollComparison, 3000);
       } else if (code === "AI_SERVICE_ERROR") {
-        toast.error("분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", { id: "scuad-toast" });
+        toast.error("분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", {
+          id: "scuad-toast",
+        });
         onClose();
       } else if (code === "CHAT_MEMBER_NOT_FOUND") {
         toast.error("멤버 정보를 찾을 수 없습니다.", { id: "scuad-toast" });
