@@ -54,13 +54,16 @@ const NotificationsPage = () => {
 
     switch (type) {
       case "AI_EVAL_COMPLETE":
-        navigate(`/applications/${refId}`);
+        navigate(`/applications/${refId}?tab=report`);
         break;
       case "RESUME_COMPLETE":
-        navigate(`/applications/${refId}/documents/resume`);
+        navigate(`/applications/${refId}/documents/resume?tab=report`);
         break;
       case "PORTFOLIO_COMPLETE":
-        navigate(`/applications/${refId}/documents/portfolio`);
+        navigate(`/applications/${refId}/documents/portfolio?tab=report`);
+        break;
+      case "JOB_POSTING_COMPLETE":
+        navigate(`/analysis?jobMasterId=${refId}`);
         break;
       default:
         toast.error("알 수 없는 알림 유형입니다.");

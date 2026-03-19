@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import client from "../api/client";
 import { ChevronLeft, Bell } from "lucide-react";
@@ -15,10 +15,9 @@ const JobAnalysis = () => {
   const [loading, setLoading] = useState(false); // Analysis Loading
   const [confirmLoading, setConfirmLoading] = useState(false); // Save Loading
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [showErrorModal, setShowErrorModal] = useState(false);
   const [error, setError] = useState("");
-  const [modalError, setModalError] = useState(""); // Separate state for modal message
-  const [redirectTarget, setRedirectTarget] = useState(null);
+  const [searchParams] = useSearchParams();
+  const jobMasterIdParam = searchParams.get("jobMasterId");
 
   const isConfirmedRef = useRef(false);
   const resultRef = useRef(null);
@@ -27,6 +26,49 @@ const JobAnalysis = () => {
   useEffect(() => {
     resultRef.current = result;
   }, [result]);
+
+  // Initial load if jobMasterId is provided (from notification)
+  useEffect(() => {
+    if (jobMasterIdParam) {
+      const fetchResult = async () => {
+        setLoading(true);
+        try {
+          const response = await client.get(
+            `/api/v1/job-postings/${jobMasterIdParam}`,
+          );
+          const data = response.data.data;
+
+          // If already confirmed (registered), redirect to detail page immediately
+          if (data.registrationStatus === "CONFIRMED") {
+            navigate(`/jobs/${jobMasterIdParam}`, { replace: true });
+            return;
+          }
+
+          // Map jobStatus to status for compatibility with the component's rendering logic
+          const mappedData = {
+            ...data,
+            status: data.jobStatus || data.status,
+          };
+          setResult(mappedData);
+          if (data.sourceUrl) setUrl(data.sourceUrl);
+        } catch (err) {
+          console.error("Failed to fetch job posting result:", err);
+          if (err.response?.status === 404) {
+            toast.error("만료된 분석 결과입니다. 다시 등록해 주세요.", {
+              id: "job-analysis-error",
+            });
+          } else {
+            toast.error("정보를 불러오는데 실패했습니다.", {
+              id: "job-analysis-error",
+            });
+          }
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchResult();
+    }
+  }, [jobMasterIdParam]);
 
   // Cleanup on unmount: If not confirmed and result exists, delete draft
   useEffect(() => {
@@ -77,20 +119,37 @@ const JobAnalysis = () => {
       const data = response.data.data;
 
       if (data.isExisting || data.existing) {
-        // Don't set inline 'error', only modal
-        setModalError("이미 등록된 공고입니다.");
-        setRedirectTarget(`/jobs/${data.jobMasterId}`);
-        setShowErrorModal(true);
+        toast.error("이미 등록된 공고입니다.", { id: "job-analysis-error" });
+        // Redirect to existing job detail after a short delay so toast is visible
+        setTimeout(() => {
+          navigate(`/jobs/${data.jobMasterId}`, { replace: true });
+        }, 1500);
+        return;
+      }
+
+      if (data.isProcessing) {
+        toast.success(
+          data.isAlreadyProcessing
+            ? "이미 분석이 진행 중입니다. 완료 시 알림을 드릴게요!"
+            : "분석 시작! 완료 시 알림으로 알려드릴게요.",
+          {
+            id: "job-analysis-processing",
+            duration: 4000,
+          },
+        );
+        setTimeout(() => {
+          navigate("/", { replace: true });
+        }, 3000);
         return;
       }
 
       setResult(data);
     } catch (err) {
       console.error(err);
-      setModalError(
+      toast.error(
         err.response?.data?.message || "정보를 불러오는데 실패했습니다.",
+        { id: "job-analysis-error" },
       );
-      setShowErrorModal(true);
     } finally {
       setLoading(false);
     }
@@ -147,14 +206,15 @@ const JobAnalysis = () => {
     } catch (err) {
       console.error(err);
       if (err.response?.status === 409) {
-        setModalError("이미 등록된 공고입니다.");
-        setRedirectTarget(`/jobs/${result.jobPostingId}`);
-        setShowErrorModal(true);
+        toast.error("이미 등록된 공고입니다.", { id: "job-analysis-error" });
+        setTimeout(() => {
+          navigate(`/jobs/${result.jobPostingId}`, { replace: true });
+        }, 1500);
       } else {
-        setModalError(
+        toast.error(
           err.response?.data?.message || "등록 저장에 실패했습니다.",
+          { id: "job-analysis-error" },
         );
-        setShowErrorModal(true);
       }
     } finally {
       setConfirmLoading(false);
@@ -369,33 +429,6 @@ const JobAnalysis = () => {
               <button
                 onClick={handleCancelConfirm}
                 className="flex-1 bg-[#101827] text-white font-bold py-3 rounded-xl text-sm hover:bg-[#1a263d] transition-colors"
-              >
-                확인
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Error (Analysis Fail) Modal */}
-      {showErrorModal && (
-        <div className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white rounded-[24px] w-full max-w-[320px] overflow-hidden shadow-2xl relative animate-scale-in">
-            <div className="p-8 pb-6 text-center">
-              <h2 className="text-xl font-extrabold text-gray-900 mb-4 whitespace-pre-wrap leading-tight">
-                {modalError || "정보를 불러오는데 실패했습니다."}
-              </h2>
-            </div>
-            <div className="p-6 pt-0">
-              <button
-                onClick={() => {
-                  setShowErrorModal(false);
-                  if (redirectTarget) {
-                    navigate(redirectTarget, { replace: true });
-                    setRedirectTarget(null);
-                  }
-                }}
-                className="w-full bg-[#101827] text-white font-bold py-4 rounded-2xl text-sm hover:bg-[#1a263d] transition-all active:scale-[0.98]"
               >
                 확인
               </button>

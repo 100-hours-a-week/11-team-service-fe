@@ -24,20 +24,22 @@ function App() {
         <AppRoutes />
         <Toaster
           position="top-center"
-          maxCount={1}
+          containerStyle={{
+            top: 16,
+          }}
           toastOptions={{
             style: {
               background: "#ffffff",
               color: "#111827",
               fontSize: "14px",
-              fontWeight: "600",
-              borderRadius: "12px",
-              padding: "14px 20px",
+              fontWeight: "700",
+              borderRadius: "20px",
+              padding: "16px 24px",
               textAlign: "center",
               wordBreak: "keep-all",
               textWrap: "balance",
               boxShadow:
-                "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05)",
+                "0 10px 40px -10px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05)",
             },
             success: {
               iconTheme: {

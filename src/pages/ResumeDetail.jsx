@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeft, FileText, ChevronRight, Loader2 } from "lucide-react";
 import client from "../api/client";
 import DocumentUploadModal from "../components/DocumentUploadModal";
@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 const ResumeDetail = () => {
   const { applicationId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isErrorHandled = useRef(false);
 
   const [application, setApplication] = useState(null);
@@ -64,9 +65,29 @@ const ResumeDetail = () => {
     }
   };
 
+  const fetchEvaluationReport = async () => {
+    try {
+      setLoading(true);
+      const response = await client.get(
+        `/api/v1/applications/${applicationId}/analyses`,
+      );
+      if (response.status === 200 && response.data.data) {
+        setAnalysisData(response.data.data);
+        setShowReportModal(true);
+      }
+    } catch (e) {
+      console.error("Failed to fetch evaluation report", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchApplicationDetail();
-  }, [applicationId]);
+    if (searchParams.get("tab") === "report") {
+      fetchEvaluationReport();
+    }
+  }, [applicationId, searchParams]);
 
   const handleOpenDocument = (doc) => {
     if (!doc || !doc.isRegistered) {
