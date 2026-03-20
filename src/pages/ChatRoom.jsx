@@ -218,9 +218,20 @@ const ChatRoom = () => {
       case "portfolio":
         openMemberDocument(member, "portfolio");
         break;
-      case "comparison":
-        setShowComparison(member);
+      case "comparison": {
+        const fullMember = members.find(
+          (m) => String(m.userId) === String(member.userId),
+        );
+        if (
+          !fullMember?.chatRoomMemberId ||
+          String(fullMember.userId) === String(user?.userId)
+        ) {
+          toast.error("멤버 정보를 찾을 수 없습니다.", { id: "scuad-toast" });
+          break;
+        }
+        setShowComparison(fullMember);
         break;
+      }
       case "kick":
         handleKickAction(member);
         break;
