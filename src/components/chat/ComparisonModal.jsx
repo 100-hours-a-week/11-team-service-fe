@@ -21,8 +21,13 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
         chatRoomId,
         member.chatRoomMemberId,
       );
-      setData(res.data.data);
-      setLoading(false);
+      const result = res.data.data;
+      if (result) {
+        setData(result);
+        setLoading(false);
+      } else {
+        pollTimerRef.current = setTimeout(pollComparison, 3000);
+      }
     } catch (e) {
       const code = e.response?.data?.code;
       if (code === "COMPARISON_RESULT_NOT_FOUND") {
