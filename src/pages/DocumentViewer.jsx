@@ -35,14 +35,33 @@ const DocumentViewer = () => {
 
   useEffect(() => {
     fetchDocumentUrl();
+
     if (activeTab === "report" && !reportFetched && !reportLoading) {
       setReportLoading(true);
       fetchReport();
     }
-    return () => {
-      if (pollingRef.current) clearTimeout(pollingRef.current);
+
+    // SSE 이벤트 리스너 등록
+    const handleSseNotification = (event) => {
+      const { type, refId } = event.detail;
+
+      // 내 지원서(applicationId)에 대한 이력서/포트폴리오 분석 완료 확인
+      const isRelevant =
+        Number(refId) === Number(applicationId) &&
+        (type === "RESUME_COMPLETE" || type === "PORTFOLIO_COMPLETE");
+
+      if (isRelevant) {
+        console.log("SSE: Report completion detected, refreshing...");
+        fetchReport();
+      }
     };
-  }, [applicationId, docType]);
+
+    window.addEventListener("scuad-notification", handleSseNotification);
+
+    return () => {
+      window.removeEventListener("scuad-notification", handleSseNotification);
+    };
+  }, [applicationId, docType, activeTab, reportFetched, reportLoading]);
 
   const fetchDocumentUrl = async () => {
     try {
@@ -100,13 +119,13 @@ const DocumentViewer = () => {
         setReportLoading(false);
         setReportFetched(true);
       } else if (response.status === 202) {
-        // axios는 202를 에러로 던지지 않으므로 여기서 처리
-        pollingRef.current = setTimeout(fetchReport, 3000);
+        // 분석 중 - SSE 대기
+        setReportLoading(true);
       }
     } catch (e) {
       if (e.response?.status === 202) {
-        // 분석 중 - 3초 후 재시도
-        pollingRef.current = setTimeout(fetchReport, 3000);
+        // 분석 중
+        setReportLoading(true);
       } else {
         setReportLoading(false);
         setReportFetched(true);

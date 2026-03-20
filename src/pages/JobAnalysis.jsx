@@ -4,7 +4,6 @@ import toast from "react-hot-toast";
 import client from "../api/client";
 import { ChevronLeft, Bell } from "lucide-react";
 import UserMenu from "../components/UserMenu";
-import JobAnalysisProgressModal from "../components/JobAnalysisProgressModal";
 
 const JobAnalysis = () => {
   const navigate = useNavigate();
@@ -436,9 +435,6 @@ const JobAnalysis = () => {
           </div>
         </div>
       )}
-
-      {/* Analysis Progress Modal */}
-      <JobAnalysisProgressModal isOpen={loading} />
     </div>
   );
 };

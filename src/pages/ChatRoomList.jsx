@@ -78,14 +78,25 @@ const ChatRoomList = () => {
   }, [id]);
 
   useEffect(() => {
-    let intervalId;
     if (isEvaluating) {
-      intervalId = setInterval(() => {
-        checkMyScore(true);
-      }, 3000);
+      const handleSseNotification = (event) => {
+        const { type, refId } = event.detail;
+
+        if (
+          type === "AI_EVAL_COMPLETE" &&
+          Number(refId) === Number(currentApplicationId)
+        ) {
+          checkMyScore(true);
+        }
+      };
+
+      window.addEventListener("scuad-notification", handleSseNotification);
+
+      return () => {
+        window.removeEventListener("scuad-notification", handleSseNotification);
+      };
     }
-    return () => clearInterval(intervalId);
-  }, [isEvaluating, activeTab]);
+  }, [isEvaluating, currentApplicationId, activeTab]);
 
   const checkMyScore = async (force = false) => {
     if (!force && myScore !== null && !isEvaluating)
@@ -97,14 +108,6 @@ const ChatRoomList = () => {
         `/api/v1/job-postings/${id}/my-application`,
       );
 
-      if (response.status === 202) {
-        setMyScore(0);
-        setAnalysisData(null);
-        setHasApplied(true);
-        setIsEvaluating(true);
-        return { score: 0, applied: true, isEvaluating: true };
-      }
-
       const data = response.data.data;
 
       if (!data) {
@@ -114,11 +117,24 @@ const ChatRoomList = () => {
         setIsEvaluating(false);
         return { score: null, applied: false, isEvaluating: false };
       } else {
-        setMyScore(data.overallScore || 0);
-        setAnalysisData(data);
         if (data.jobApplicationId) {
           setCurrentApplicationId(data.jobApplicationId);
         }
+
+        if (
+          data.status === "PROCESSING" ||
+          data.status === "PENDING" ||
+          response.status === 202
+        ) {
+          setMyScore(0);
+          setAnalysisData(null);
+          setHasApplied(true);
+          setIsEvaluating(true);
+          return { score: 0, applied: true, isEvaluating: true };
+        }
+
+        setMyScore(data.overallScore || 0);
+        setAnalysisData(data);
         setHasApplied(true);
         setIsEvaluating(false);
         if (isEvaluating && activeTab !== "SCORE") {

@@ -12,7 +12,6 @@ const EvaluationProgressModal = ({
   const navigate = useNavigate();
   const [status, setStatus] = useState("REQUESTED"); // REQUESTED | PROGRESS | FAILED | SUCCESS
   const [errorDetails, setErrorDetails] = useState("");
-  const pollTimerRef = useRef(null);
 
   // Status Texts
   const STATUS_CONFIG = {
@@ -44,69 +43,53 @@ const EvaluationProgressModal = ({
 
   useEffect(() => {
     if (isOpen && applicationId) {
-      setStatus("REQUESTED");
-      setErrorDetails("");
-      // First check might be "Requested" -> "Progress" transition
-      // But practically we can start polling immediately.
-      // Let's show "REQUESTED" for a brief moment or until first 202 response?
-      // User said: "분석요청이면... 요청했습니다. 분석중이면... 진행중입니다."
-
-      // We can simulate transition or rely on API.
-      // Assuming 'applicationId' existing means request IS sent.
-      // So immediate state is PROGRESS basically.
-      // But to satisfy "Requested" text, we can show it for first cycle.
-
       setStatus("PROGRESS");
-      // Actually user distinguishes "Requesting" (API call to start) vs "In Progress" (Polling).
-      // Since this modal opens AFTER apply (which triggers start), we are in PROGRESS.
-      // But maybe user wants to see "Requested" -> "Progress"?
-      // Let's stick to "PROGRESS" as default for polling, but maybe "REQUESTED" if we were passing a "loading" prop?
-      // The user says "분석요청하고 비동기잖아. 그래서 분석요청중이면 모달로 분석을 요청했습니다."
-      // Maybe they mean the initial POST call?
-      // ApplyModal handles the POST call. ApplyModal says "성공적으로 제출되었습니다".
-      // Then this modal opens?
+      setErrorDetails("");
 
-      // Let's implement the polling logic.
-      checkAnalysisStatus();
+      // SSE 이벤트 리스너 등록
+      const handleSseNotification = (event) => {
+        const { type, refId } = event.detail;
+
+        // 내 지원서(applicationId)에 대한 AI 평가가 완료되었는지 확인
+        if (
+          type === "AI_EVAL_COMPLETE" &&
+          Number(refId) === Number(applicationId)
+        ) {
+          // 최신 결과를 가져오기 위해 서버 재조회 (이미 완료된 상태이므로 즉시 반환될 것)
+          fetchFinalResult();
+        }
+      };
+
+      window.addEventListener("scuad-notification", handleSseNotification);
+
+      // 초기 상태 확인 (이미 완료되었을 수도 있음)
+      fetchFinalResult();
+
+      return () => {
+        window.removeEventListener("scuad-notification", handleSseNotification);
+      };
     }
-
-    return () => {
-      stopPolling();
-    };
   }, [isOpen, applicationId]);
 
-  const stopPolling = () => {
-    if (pollTimerRef.current) {
-      clearTimeout(pollTimerRef.current);
-      pollTimerRef.current = null;
-    }
-  };
-
-  // 종합평가만 폴링 - 완료 즉시 결과 표시
-  const checkAnalysisStatus = async () => {
+  const fetchFinalResult = async () => {
     if (!applicationId) return;
-
     try {
       const response = await client.get(
         `/api/v1/applications/${applicationId}/analyses`,
       );
 
       if (response.status === 200 && response.data.data) {
-        // 종합평가 완료 → 바로 결과 표시 (이력서/포트폴리오는 DocumentViewer에서 별도 폴링)
         setStatus("SUCCESS");
         onAnalysisComplete(response.data.data);
       } else if (response.status === 202) {
         setStatus("PROGRESS");
-        pollTimerRef.current = setTimeout(checkAnalysisStatus, 3000);
       }
     } catch (err) {
       if (err.response?.status === 202) {
         setStatus("PROGRESS");
-        pollTimerRef.current = setTimeout(checkAnalysisStatus, 3000);
-      } else {
-        console.error("Polling error:", err);
-        setStatus("FAILED");
-        setErrorDetails(err.response?.data?.message || "");
+      } else if (err.response?.status !== 202) {
+        console.error("Fetch status error:", err);
+        // Do not fail immediately, wait for SSE
       }
     }
   };
