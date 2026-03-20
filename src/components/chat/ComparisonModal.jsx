@@ -60,7 +60,7 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
     <div className="fixed inset-0 z-[500] flex items-end justify-center">
       <div
         className="absolute inset-0 bg-black/60 animate-fade-in"
-        onClick={loading ? undefined : onClose}
+        onClick={onClose}
       />
       <div className="relative w-full max-w-[480px] bg-white rounded-t-3xl animate-slide-up max-h-[85vh] overflow-y-auto">
         {/* Header */}
