@@ -4,7 +4,6 @@ import toast from "react-hot-toast";
 import client from "../api/client";
 import { ChevronLeft, Bell } from "lucide-react";
 import UserMenu from "../components/UserMenu";
-import JobAnalysisProgressModal from "../components/JobAnalysisProgressModal";
 
 const JobAnalysis = () => {
   const navigate = useNavigate();
@@ -264,7 +263,7 @@ const JobAnalysis = () => {
         {/* 안내 문구 */}
         <div className="mb-4 flex justify-center">
           <p className="text-sm font-extrabold text-[#101827]">
-            현재는 사람인, 원티드 링크만 등록 가능해요
+            현재는 원티드 링크만 등록 가능해요
           </p>
         </div>
 
@@ -436,9 +435,6 @@ const JobAnalysis = () => {
           </div>
         </div>
       )}
-
-      {/* Analysis Progress Modal */}
-      <JobAnalysisProgressModal isOpen={loading} />
     </div>
   );
 };

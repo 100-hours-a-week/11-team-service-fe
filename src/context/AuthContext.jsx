@@ -241,6 +241,10 @@ export const AuthProvider = ({ children }) => {
 
                   refreshUnreadCount();
 
+                  window.dispatchEvent(
+                    new CustomEvent("scuad-notification", { detail: data }),
+                  );
+
                   if (data.title || data.body) {
                     toast(
                       (t) => (
