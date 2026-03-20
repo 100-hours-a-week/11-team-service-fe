@@ -25,5 +25,3 @@ This project is initialized with:
    ```bash
    npm run build
    ```
-
-   #
