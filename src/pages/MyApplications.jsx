@@ -167,24 +167,32 @@ const MyApplications = () => {
   };
 
   const handleAction = (app, type) => {
-    if (type === "RESUME" || type === "PORTFOLIO") {
-      // 해당 서류 등록 여부 확인
-      const isRegistered =
-        type === "RESUME" ? app.resumeRegistered : app.portfolioRegistered;
+    // 분석 결과가 있거나 점수가 있는 경우 (백엔드 데이터 지연 대비 안전장치)
+    const hasResult =
+      app.overallScore > 0 || app.resumeAnalyzed || app.portfolioAnalyzed;
 
-      if (!isRegistered) {
-        // 미등록 시 업로드 모달 먼저 띄우고, 완료 후 분석 트리거 예약
-        setSelectedApp(app);
-        setSelectedDocType(type);
-        setTriggerAnalysisAfterUpload(true);
-        setIsUploadModalOpen(true);
-        toast.info(
-          `${type === "RESUME" ? "이력서" : "포트폴리오"}를 먼저 등록해주세요.`,
+    if (type === "RESUME" || type === "PORTFOLIO") {
+      // 분석 결과가 있다면 등록 여부와 상관없이 즉시 리포트 페이지로 이동
+      if (hasResult) {
+        navigate(
+          `/applications/${app.id}/documents/${type.toLowerCase()}?tab=report`,
         );
         return;
       }
 
-      // 해당 서류 리포트 공유 탭으로 바로 이동
+      // 그 외의 경우에만 등록 여부 확인
+      const isRegistered =
+        type === "RESUME" ? app.resumeRegistered : app.portfolioRegistered;
+
+      if (!isRegistered) {
+        setSelectedApp(app);
+        setSelectedDocType(type);
+        setIsUploadModalOpen(true);
+        setTriggerAnalysisAfterUpload(true);
+        return;
+      }
+
+      // 이미 등록된 경우 리포트 페이지로 이동
       navigate(
         `/applications/${app.id}/documents/${type.toLowerCase()}?tab=report`,
       );
@@ -353,19 +361,21 @@ const MyApplications = () => {
 
                     {/* 점수 표시 부분 - 눈에 띄게 */}
                     {app.isProcessing ? (
-                      <div className="flex items-center justify-center bg-[#101827]/5 animate-pulse rounded-2xl px-5 h-[72px] border border-[#101827]/10 shadow-sm transition-all duration-500">
-                        <div className="flex flex-col items-center gap-1">
-                          <Loader2 className="w-5 h-5 text-[#101827]/40 animate-spin" />
-                          <span className="text-[10px] font-bold text-[#101827]/60 tracking-tight">
+                      <div className="flex items-center justify-center bg-blue-50/80 backdrop-blur-sm animate-pulse rounded-2xl px-5 h-[72px] border border-blue-200/50 shadow-[0_4px_12px_rgba(59,130,246,0.08)] transition-all duration-500">
+                        <div className="flex flex-col items-center gap-1.5">
+                          <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                          <span className="text-[10px] font-bold text-blue-600 tracking-tight">
                             분석 중...
                           </span>
                         </div>
                       </div>
-                    ) : app.overallScore ? (
+                    ) : app.overallScore > 0 ||
+                      app.resumeAnalyzed ||
+                      app.portfolioAnalyzed ? (
                       <div className="flex items-center justify-center bg-white/40 backdrop-blur-sm rounded-2xl px-5 h-[72px] border border-white shadow-[0_8px_20px_rgba(0,0,0,0.03),inset_0_-2px_6px_rgba(16,24,39,0.02),inset_0_2px_6px_rgba(255,255,255,0.8)]">
                         <div className="flex items-baseline">
                           <span className="text-3xl font-[900] text-[#101827] tracking-tighter drop-shadow-sm">
-                            {app.overallScore}
+                            {app.overallScore || "-"}
                           </span>
                           <span className="text-[14px] font-black text-[#101827]/30 ml-1.5 transition-colors">
                             점
