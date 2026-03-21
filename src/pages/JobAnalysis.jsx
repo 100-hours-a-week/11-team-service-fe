@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import client from "../api/client";
-import { ChevronLeft, Bell } from "lucide-react";
+import { ChevronLeft, Bell, Sparkles } from "lucide-react";
 import UserMenu from "../components/UserMenu";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const JobAnalysis = () => {
   const navigate = useNavigate();
@@ -252,138 +254,210 @@ const JobAnalysis = () => {
         <button onClick={handleBackClick} className="p-2 -ml-2">
           <ChevronLeft className="w-6 h-6 text-gray-900" />
         </button>
-        <h1 className="font-bold text-gray-900 text-lg">공고 등록</h1>
+        <h1 className="font-bold text-gray-900 text-lg truncate px-2">
+          {result ? result.companyName : "공고 등록"}
+        </h1>
         <div className="w-10 flex justify-end">
           <UserMenu />
         </div>
       </div>
 
       <div className="p-5 flex-1 relative">
-        {/* 1. URL Input Section (Step 1) */}
-        {/* 안내 문구 */}
-        <div className="mb-4 flex justify-center">
-          <p className="text-sm font-extrabold text-[#101827]">
-            현재는 원티드 링크만 등록 가능해요
-          </p>
-        </div>
+        {/* 1. URL Input Section (Step 1) - Only shown if no result */}
+        {!result && (
+          <>
+            {/* 안내 문구 */}
+            <div className="mb-4 flex justify-center">
+              <p className="text-sm font-extrabold text-[#101827]">
+                현재는 원티드 링크만 등록 가능해요
+              </p>
+            </div>
 
-        <div className="relative">
-          <div
-            className={`bg-gray-50 rounded-xl p-1 flex items-center pr-2 ${error ? "border border-red-500" : ""}`}
-          >
-            <input
-              type="text"
-              placeholder={url ? "" : "채용공고 링크를 입력하세요"} // Placeholder logic
-              className="bg-transparent border-none focus:outline-none focus:ring-0 w-full text-sm px-3 py-3 text-gray-900 placeholder-gray-500"
-              value={url}
-              onChange={(e) => {
-                setUrl(e.target.value);
-                if (validateUrl(e.target.value)) setError("");
-              }}
-              disabled={!!result} // Keep input visually but disabled if analyzed? Spec says "URL 입력 영역은 유지된다... prefill... disabled 언급은 없음"
-              // Actually spec says "URL 분석 1회 이상 수행하여... 공고 정보가 표시된 상태에서도 URL 입력 영역은 유지된다... URL을 다시 등록하여 갱신할 수 있다."
-              // So DO NOT disable input.
-            />
-            <button
-              onClick={handleAnalyze}
-              disabled={!url || !validateUrl(url) || loading}
-              className={`text-xs font-bold px-4 py-2 rounded-lg whitespace-nowrap transition-colors flex-shrink-0
-                                ${
-                                  !url || !validateUrl(url) || loading
-                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                    : "bg-[#101827] text-white hover:bg-[#1a263d]"
-                                }`}
-            >
-              {loading ? "분석중" : "등록"}
-            </button>
-          </div>
-        </div>
+            <div className="relative">
+              <div
+                className={`bg-white/80 backdrop-blur-md rounded-[20px] p-1 flex items-center pr-2 border border-gray-100 shadow-sm focus-within:shadow-[0_12px_40px_rgba(0,0,0,0.08)] focus-within:border-gray-200 transition-all duration-300 ${error ? "border-red-500" : ""}`}
+              >
+                <input
+                  type="text"
+                  placeholder={url ? "" : "채용공고 링크를 입력하세요"}
+                  className="bg-transparent border-none focus:outline-none focus:ring-0 w-full text-sm px-4 py-3.5 text-gray-900 placeholder-gray-400"
+                  value={url}
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                    if (validateUrl(e.target.value)) setError("");
+                  }}
+                />
+                <button
+                  onClick={handleAnalyze}
+                  disabled={!url || !validateUrl(url) || loading}
+                  className={`text-xs font-bold px-5 py-2.5 rounded-[12px] whitespace-nowrap transition-all flex-shrink-0 active:scale-95
+                                    ${
+                                      !url || !validateUrl(url) || loading
+                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                        : "bg-[#101827] text-white hover:bg-black shadow-sm"
+                                    }`}
+                >
+                  {loading ? "분석중" : "분석 시작"}
+                </button>
+              </div>
+            </div>
 
-        {/* Error Message Inline */}
-        {error && <p className="text-red-500 text-xs mt-1.5 ml-1">{error}</p>}
+            {/* Error Message Inline */}
+            {error && (
+              <p className="text-red-500 text-xs mt-1.5 ml-1">{error}</p>
+            )}
+          </>
+        )}
 
         {/* 2. Analysis Result (Step 3) - Only shown after analysis */}
         {result && (
-          <div className="mt-8 pb-24 animate-fade-in-up">
-            {/* Wrapper for the result fields */}
-            <div className="p-1 relative">
-              {/* AI Summary (moved to top) */}
-              <section className="mb-8">
-                <div className="mb-2 text-xs text-gray-900 font-bold">
-                  AI공고 요약
+          <div className="max-w-2xl mx-auto mt-8 pb-32 animate-fade-in-up">
+            {/* Bento Grid Wrapper */}
+            <div className="space-y-6">
+              {/* AI Summary Card - Flagship Bento Box (Highlighted) */}
+              <section className="bg-indigo-50/40 rounded-[24px] p-8 border border-indigo-100/50 shadow-sm">
+                <div className="mb-6">
+                  <span className="text-[12px] font-bold text-indigo-900 uppercase tracking-wider">
+                    AI 공고 분석 결과
+                  </span>
                 </div>
-                <div className="bg-gray-100 rounded-xl p-4 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap break-words min-h-[120px]">
-                  {result.aiSummary || "AI 요약 정보가 없습니다."}
+                <div className="text-[15px] text-gray-900 leading-[1.8] font-medium whitespace-pre-wrap">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ node, ...props }) => (
+                        <p className="mb-4 last:mb-0" {...props} />
+                      ),
+                      strong: ({ node, ...props }) => (
+                        <strong
+                          className="text-indigo-700 font-bold underline decoration-indigo-200 decoration-2 underline-offset-4"
+                          {...props}
+                        />
+                      ),
+                      ul: ({ node, ...props }) => (
+                        <ul
+                          className="list-disc ml-5 space-y-2 mb-4"
+                          {...props}
+                        />
+                      ),
+                      li: ({ node, ...props }) => (
+                        <li className="pl-1" {...props} />
+                      ),
+                      h1: ({ node, ...props }) => (
+                        <h1
+                          className="text-lg font-bold mb-4 text-indigo-950"
+                          {...props}
+                        />
+                      ),
+                      h2: ({ node, ...props }) => (
+                        <h2
+                          className="text-base font-bold mb-3 text-indigo-900"
+                          {...props}
+                        />
+                      ),
+                    }}
+                  >
+                    {result.aiSummary?.replace(/\. +(?=[^0-9])/g, ".\n\n") ||
+                      "AI 요약 정보가 없습니다."}
+                  </ReactMarkdown>
                 </div>
               </section>
 
-              <div className="grid grid-cols-2 gap-y-6 gap-x-4 mb-8">
-                {/* Company */}
-                <div className="flex flex-col">
-                  <div className="text-xs text-gray-900 font-bold mb-2">
+              {/* Basic Info Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Company Name */}
+                <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm flex flex-col justify-center min-h-[90px]">
+                  <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
                     기업명
                   </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-sm text-gray-700 font-medium break-words flex-1 flex items-center">
+                  <div className="text-[16px] font-semibold text-gray-900 break-words leading-tight">
                     {result.companyName || "-"}
                   </div>
                 </div>
+
                 {/* Job Title */}
-                <div className="flex flex-col">
-                  <div className="text-xs text-gray-900 font-bold mb-2">
-                    직무 명
+                <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm flex flex-col justify-center min-h-[90px]">
+                  <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+                    직무명
                   </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-sm text-gray-700 font-medium break-words flex-1 flex items-center">
+                  <div className="text-[16px] font-semibold text-gray-900 break-words leading-tight">
                     {result.jobTitle || "-"}
                   </div>
                 </div>
 
-                {/* Main Tasks */}
-                <div className="col-span-1 flex flex-col">
-                  <div className="text-xs text-gray-900 font-bold mb-2">
-                    주요 업무
-                  </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-medium flex-1 flex flex-col gap-1.5 break-words">
-                    {result.mainTasks && result.mainTasks.length > 0
-                      ? result.mainTasks.map((task, index) => (
-                          <div key={index}>- {task}</div>
-                        ))
-                      : "-"}
-                  </div>
-                </div>
-                {/* Tech Stack */}
-                <div className="col-span-1 flex flex-col">
-                  <div className="text-xs text-gray-900 font-bold mb-2">
-                    필요기술스택
-                  </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-medium flex-1 flex flex-col gap-1.5 break-words">
-                    {result.skills && result.skills.length > 0
-                      ? result.skills.map((skill, index) => (
-                          <div key={index}>- {skill}</div>
-                        ))
-                      : "-"}
-                  </div>
-                </div>
-
                 {/* Status */}
-                <div className="col-span-2 flex flex-col">
-                  <div className="text-xs text-gray-900 font-bold mb-2">
+                <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm flex flex-col justify-center min-h-[90px]">
+                  <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
                     모집상태
                   </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-sm text-gray-700 font-medium">
+                  <div className="text-[15px] font-bold text-indigo-500">
                     {result.status === "OPEN" ? "모집중" : "마감"}
                   </div>
                 </div>
+
                 {/* Period */}
-                <div className="col-span-2 flex flex-col">
-                  <div className="text-xs text-gray-900 font-bold mb-2">
-                    모집 기간
+                <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm flex flex-col justify-center min-h-[90px]">
+                  <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+                    모집기간
                   </div>
-                  <div className="bg-gray-100 rounded-lg px-3 py-2.5 text-xs text-gray-700 font-medium">
+                  <div className="text-[14px] font-semibold text-gray-600">
                     {result.startDate && result.endDate
                       ? `${result.startDate.replaceAll("-", ".")} ~ ${result.endDate.replaceAll("-", ".")}`
                       : "-"}
                   </div>
                 </div>
+              </div>
+
+              {/* Main Tasks & Skills - Larger Bento Boxes */}
+              <div className="grid grid-cols-1 gap-4">
+                {/* Main Tasks */}
+                <section className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm">
+                  <div className="text-[12px] font-bold text-gray-800 uppercase tracking-wider mb-6">
+                    주요 업무
+                  </div>
+                  <div className="space-y-5">
+                    {result.mainTasks && result.mainTasks.length > 0 ? (
+                      result.mainTasks.map((task, index) => (
+                        <div
+                          key={index}
+                          className="flex gap-4 items-start group"
+                        >
+                          <div className="mt-[10px] w-1 h-1 rounded-full bg-gray-300 group-hover:bg-indigo-400 transition-colors shrink-0" />
+                          <span className="text-[15px] font-medium text-gray-700 leading-relaxed">
+                            {task}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400 italic">
+                        정보가 없습니다.
+                      </p>
+                    )}
+                  </div>
+                </section>
+
+                {/* Tech Stack */}
+                <section className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm">
+                  <div className="text-[12px] font-bold text-gray-800 uppercase tracking-wider mb-6">
+                    필요 기술 스택
+                  </div>
+                  <div className="flex flex-wrap gap-2.5">
+                    {result.skills && result.skills.length > 0 ? (
+                      result.skills.map((skill, index) => (
+                        <span
+                          key={index}
+                          className="px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-[13px] font-medium text-gray-600 hover:bg-white hover:border-gray-200 transition-all cursor-default"
+                        >
+                          {skill}
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-400 italic">
+                        정보가 없습니다.
+                      </p>
+                    )}
+                  </div>
+                </section>
               </div>
             </div>
           </div>

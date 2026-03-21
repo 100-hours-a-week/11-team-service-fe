@@ -25,6 +25,8 @@ export const AuthProvider = ({ children }) => {
   });
 
   const abortControllerRef = useRef(null);
+  const retryCountRef = useRef(0);
+  const retryTimeoutRef = useRef(null);
 
   const fetchUser = useCallback(async () => {
     try {
@@ -180,89 +182,62 @@ export const AuthProvider = ({ children }) => {
     let isActive = true;
 
     const connectSSE = async () => {
+      // 이미 인증되지 않은 상태면 중단
+      if (!isAuthenticated || !isActive) return;
+
       try {
+        if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+
         await refreshUnreadCount();
+
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
 
         await fetchEventSource(
           `${import.meta.env.VITE_API_BASE_URL}/api/v1/notifications/subscribe`,
           {
             method: "GET",
             headers: {
-              Authorization: `Bearer ${accessToken}`,
+              Authorization: `Bearer ${token}`,
               Accept: "text/event-stream",
             },
             signal: abortController.signal,
             openWhenHidden: true,
 
             async onopen(response) {
-              const contentType = response.headers.get("content-type") || "";
-
-              console.log(
-                "SSE onopen status:",
-                response.status,
-                "content-type:",
-                contentType,
-              );
-
               if (response.status === 401 || response.status === 403) {
                 console.error("SSE 인증 실패:", response.status);
-
                 logout();
                 openSessionExpiredModal(
-                  "세션이 만료되었거나 인증에 실패했습니다. 다시 로그인해주세요.",
+                  "세션이 만료되었거나 인증에 실패했습니다.",
                 );
-
-                // 인증 실패 시 재시도 막기
                 throw new Error("SSE_UNAUTHORIZED");
               }
 
               if (!response.ok) {
-                console.error("SSE 연결 실패:", response.status);
-                throw new Error(`SSE_CONNECTION_FAILED_${response.status}`);
-              }
-
-              if (!contentType.startsWith("text/event-stream")) {
-                console.error("SSE content-type 이상:", contentType);
-                throw new Error("SSE_INVALID_CONTENT_TYPE");
+                throw new Error(`SSE_SERVER_ERROR_${response.status}`);
               }
 
               console.log("SSE 연결 성공!");
+              retryCountRef.current = 0; // 연결 성공 시 재시도 횟수 초기화
             },
 
             onmessage(event) {
               if (!isActive) return;
-
-              console.log("SSE Message Received:", event);
-
               if (event.event === "notification") {
                 try {
-                  const data = JSON.parse(event.data);
-                  console.log("Parsed Notification Data:", data);
-
+                  const data = JSON.parse(event.data); // Parse data here
+                  console.log("SSE Notification received:", data);
                   refreshUnreadCount();
-
                   window.dispatchEvent(
                     new CustomEvent("scuad-notification", { detail: data }),
                   );
 
                   if (data.title || data.body) {
-                    toast(
-                      (t) => (
-                        <div className="flex flex-col items-center justify-center cursor-default">
-                          <p className="text-[15px] font-bold text-gray-900 mb-1 leading-snug">
-                            {data.title}
-                          </p>
-                          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed font-medium">
-                            {data.body}
-                          </p>
-                        </div>
-                      ),
-                      {
-                        duration: 5000,
-                        position: "top-center",
-                        id: "scuad-toast",
-                      },
-                    );
+                    toast.success(`${data.title}: ${data.body}`, {
+                      position: "top-center",
+                      id: "scuad-toast",
+                    });
                   }
                 } catch (err) {
                   console.error("Failed to parse notification JSON:", err);
@@ -273,49 +248,54 @@ export const AuthProvider = ({ children }) => {
             },
 
             onclose() {
-              console.log(
-                "SSE 연결 종료 (서버에 의한 정상 종료) -> 자동 재연결 시도",
-              );
-              // fetch-event-source는 onclose에서 에러를 던져야만 재시작(retry)합니다.
-              throw new Error("SERVER_CLOSED_CONNECTION_RETRY");
+              console.log("SSE 연결 종료 -> 재연결 준비");
+              handleRetry();
             },
 
             onerror(err) {
               console.error("SSE 연결 장애:", err);
 
-              // abort된 경우는 정상 종료로 간주
-              if (abortController.signal.aborted) {
-                console.log("SSE aborted intentionally");
-                return;
-              }
+              if (abortController.signal.aborted) return;
 
-              // 인증 실패는 재시도하지 않도록 에러 throw
-              if (
-                err?.message === "SSE_UNAUTHORIZED" ||
-                String(err?.message).includes("SSE_UNAUTHORIZED")
-              ) {
-                throw err;
-              }
+              // 인증 에러는 재시도하지 않음
+              if (err?.message === "SSE_UNAUTHORIZED") throw err;
 
-              // 나머지는 fetch-event-source 기본 재시도에 맡김
+              handleRetry();
+              // fetch-event-source가 내부적으로 다시 fetch를 던지지 않도록
+              // 에러가 아닌 null류를 던지거나 handleRetry에서 수동 관리
+              throw err;
             },
           },
         );
       } catch (err) {
-        if (abortController.signal.aborted) {
-          console.log("SSE fetch cancelled");
-          return;
+        if (err?.message !== "SSE_UNAUTHORIZED" && isActive) {
+          handleRetry();
         }
-
-        console.error("SSE connectSSE fatal error:", err);
       }
+    };
+
+    const handleRetry = () => {
+      if (!isActive || !isAuthenticated) return;
+      if (retryTimeoutRef.current) return;
+
+      // 지수 백오프 적용 (최대 30초)
+      const delay = Math.min(1000 * Math.pow(2, retryCountRef.current), 30000);
+      console.log(
+        `SSE ${delay}ms 후 재연결 시도... (시도 횟수: ${retryCountRef.current + 1})`,
+      );
+
+      retryTimeoutRef.current = setTimeout(() => {
+        retryTimeoutRef.current = null;
+        retryCountRef.current += 1;
+        connectSSE();
+      }, delay);
     };
 
     connectSSE();
 
     return () => {
       isActive = false;
-
+      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
         abortControllerRef.current = null;

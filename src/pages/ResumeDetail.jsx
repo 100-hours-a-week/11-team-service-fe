@@ -25,6 +25,7 @@ const ResumeDetail = () => {
   const [showEvaluationModal, setShowEvaluationModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [analysisData, setAnalysisData] = useState(null);
+  const isRedirectingRef = useRef(false);
 
   // Alert State
   const [alertConfig, setAlertConfig] = useState({
@@ -112,12 +113,22 @@ const ResumeDetail = () => {
     if (!application) return;
     try {
       setLoading(true);
+      isRedirectingRef.current = true; // 리다이렉트 중임을 표시
+
       await client.post(`/api/v1/applications/${applicationId}/analyses`, {
-        analysis_type: "ALL",
+        analysis_type: "EVALUATION",
       });
-      setShowEvaluationModal(true);
-      // 폴링은 EvaluationProgressModal이 전담
+
+      // 재분석인 경우 혹은 상세 페이지에서는 바로 목록으로 이동 (사용자 요청)
+      toast.success("분석이 요청되었습니다. 잠시만 기다려주세요.");
+
+      // 알림을 보여준 뒤 조금 있다가 모달을 닫고 목록으로 이동
+      setTimeout(() => {
+        setShowReportModal(false);
+        navigate("/resume");
+      }, 1200);
     } catch (e) {
+      isRedirectingRef.current = false;
       setShowEvaluationModal(false);
       toast.error(
         e.response?.data?.message || "분석 요청 중 오류가 발생했습니다.",
@@ -328,9 +339,19 @@ const ResumeDetail = () => {
         isOpen={showReportModal}
         onClose={() => {
           setShowReportModal(false);
-          fetchApplicationDetail();
+          // 리다이렉트 중이 아닐 때만 기존 뒤로가기 로직 수행
+          if (
+            !isRedirectingRef.current &&
+            searchParams.get("tab") === "report"
+          ) {
+            navigate(-1);
+          } else if (!isRedirectingRef.current) {
+            fetchApplicationDetail();
+          }
         }}
         result={analysisData}
+        onReanalyze={handleRequestAnalysis}
+        zIndex={300}
       />
 
       <AlertModal

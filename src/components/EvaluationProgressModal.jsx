@@ -8,6 +8,8 @@ const EvaluationProgressModal = ({
   onClose,
   applicationId,
   onAnalysisComplete,
+  analysisType = "EVALUATION", // EVALUATION | RESUME | PORTFOLIO
+  zIndex = 300,
 }) => {
   const navigate = useNavigate();
   const [status, setStatus] = useState("REQUESTED"); // REQUESTED | PROGRESS | FAILED | SUCCESS
@@ -74,8 +76,10 @@ const EvaluationProgressModal = ({
   const fetchFinalResult = async () => {
     if (!applicationId) return;
     try {
+      const typePath =
+        analysisType === "EVALUATION" ? "" : `/${analysisType.toLowerCase()}`;
       const response = await client.get(
-        `/api/v1/applications/${applicationId}/analyses`,
+        `/api/v1/applications/${applicationId}/analyses${typePath}`,
       );
 
       if (response.status === 200 && response.data.data) {
@@ -99,7 +103,10 @@ const EvaluationProgressModal = ({
   const currentConfig = STATUS_CONFIG[status] || STATUS_CONFIG.PROGRESS;
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-[300] flex items-center justify-center p-4 animate-fade-in backdrop-blur-sm">
+    <div
+      className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 animate-fade-in backdrop-blur-sm"
+      style={{ zIndex }}
+    >
       <div className="bg-white rounded-[24px] w-full max-w-[340px] overflow-hidden shadow-2xl relative animate-scale-in">
         <div className="p-8 pb-6 text-center">
           <div

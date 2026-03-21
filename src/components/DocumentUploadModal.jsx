@@ -10,6 +10,9 @@ const DocumentUploadModal = ({
   applicationId,
   docType = "RESUME", // RESUME or PORTFOLIO
   onSuccess,
+  successTitle = "업로드 완료!",
+  successMessage,
+  zIndex = 200,
 }) => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -88,7 +91,10 @@ const DocumentUploadModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4 animate-fade-in">
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 animate-fade-in"
+      style={{ zIndex }}
+    >
       <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl relative animate-scale-in">
         {/* Close Button */}
         {!success && (
@@ -106,10 +112,10 @@ const DocumentUploadModal = ({
               <CheckCircle className="w-8 h-8 text-[#101827]" />
             </div>
             <h2 className="text-xl font-bold text-[#101827] mb-2">
-              업로드 완료!
+              {successTitle}
             </h2>
             <p className="text-gray-500 text-sm">
-              {docTypeName}가 성공적으로 등록되었습니다.
+              {successMessage || `${docTypeName}가 성공적으로 등록되었습니다.`}
             </p>
           </div>
         ) : (
