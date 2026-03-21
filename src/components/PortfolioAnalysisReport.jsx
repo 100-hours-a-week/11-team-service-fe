@@ -1,3 +1,6 @@
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 const SCORE_ITEMS = [
   { key: "problemSolvingScore", label: "문제 해결 능력" },
   { key: "contributionClarityScore", label: "기여도 및 역할 명확성" },
@@ -17,9 +20,11 @@ const PortfolioAnalysisReport = ({ data }) => {
           </span>
         </div>
         <div className="bg-white px-5 py-5">
-          <p className="text-sm text-gray-700 leading-[1.9] whitespace-pre-wrap">
-            {data.aiAnalysisReport || "분석 결과가 없습니다."}
-          </p>
+          <div className="text-sm text-gray-700 leading-[1.9] markdown-content">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {data.aiAnalysisReport || "분석 결과가 없습니다."}
+            </ReactMarkdown>
+          </div>
         </div>
       </div>
 
@@ -40,9 +45,11 @@ const PortfolioAnalysisReport = ({ data }) => {
                   {label}
                 </span>
               </div>
-              <p className="text-sm text-gray-600 leading-6 pl-3">
-                {data[key] || "평가 내용이 없습니다."}
-              </p>
+              <div className="text-sm text-gray-600 leading-6 pl-3 markdown-content">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {data[key] || "평가 내용이 없습니다."}
+                </ReactMarkdown>
+              </div>
             </div>
           ))}
         </div>

@@ -153,13 +153,13 @@ const Dashboard = () => {
         {/* Control Area: Standard search-first hierarchy */}
         <div className="px-5 mt-4 space-y-5">
           {/* Search Bar (Now prominent at the top) */}
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+              <Search className="h-5 w-5 text-gray-400 group-focus-within:text-gray-900 transition-colors" />
             </div>
             <input
               type="text"
-              className="block w-full pl-10 pr-3 py-3.5 bg-gray-50 border border-transparent focus:border-gray-200 rounded-2xl text-sm placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-100 transition-all font-medium"
+              className="block w-full pl-12 pr-4 py-4 bg-white/80 backdrop-blur-md border border-gray-100 rounded-[20px] text-sm placeholder-gray-400 focus:outline-none focus:shadow-[0_12px_40px_rgba(0,0,0,0.08)] focus:border-gray-200 transition-all font-medium"
               placeholder="기업명 또는 직무명 검색"
               value={keyword}
               onChange={handleKeywordChange}
