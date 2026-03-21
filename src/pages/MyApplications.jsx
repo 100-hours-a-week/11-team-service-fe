@@ -167,35 +167,13 @@ const MyApplications = () => {
   };
 
   const handleAction = (app, type) => {
-    // 분석 결과가 있거나 점수가 있는 경우 (백엔드 데이터 지연 대비 안전장치)
-    const hasResult =
-      app.overallScore > 0 || app.resumeAnalyzed || app.portfolioAnalyzed;
-
+    // [프론트엔드 연결 강제화]
+    // 백엔드 데이터(isRegistered 등)가 develop 서버에서 일시적으로 늦게 반영되더라도
+    // 사용자가 리포트 버튼을 눌렀다면 무조건 해당 리포트 페이지로 이동시킵니다.
     if (type === "RESUME" || type === "PORTFOLIO") {
-      // 분석 결과가 있다면 등록 여부와 상관없이 즉시 리포트 페이지로 이동
-      if (hasResult) {
-        navigate(
-          `/applications/${app.id}/documents/${type.toLowerCase()}?tab=report`,
-        );
-        return;
-      }
-
-      // 그 외의 경우에만 등록 여부 확인
-      const isRegistered =
-        type === "RESUME" ? app.resumeRegistered : app.portfolioRegistered;
-
-      if (!isRegistered) {
-        setSelectedApp(app);
-        setSelectedDocType(type);
-        setIsUploadModalOpen(true);
-        setTriggerAnalysisAfterUpload(true);
-        return;
-      }
-
-      // 이미 등록된 경우 리포트 페이지로 이동
-      navigate(
-        `/applications/${app.id}/documents/${type.toLowerCase()}?tab=report`,
-      );
+      const targetPath = `/applications/${app.id}/documents/${type.toLowerCase()}?tab=report`;
+      console.log(`[Navigation] Force moving to: ${targetPath}`);
+      navigate(targetPath);
     } else if (type === "EDIT_RESUME") {
       setSelectedApp(app);
       setSelectedDocType("RESUME");
