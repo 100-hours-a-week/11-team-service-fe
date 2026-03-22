@@ -234,10 +234,23 @@ export const AuthProvider = ({ children }) => {
                   );
 
                   if (data.title || data.body) {
-                    toast.success(`${data.title}: ${data.body}`, {
-                      position: "top-center",
-                      id: "scuad-toast",
-                    });
+                    const message = `${data.title}\n${data.body}`;
+                    if (data.type === "CHAT_ROOM_KICKED") {
+                      toast.error(message, {
+                        position: "top-center",
+                        id: "scuad-toast",
+                      });
+                    } else if (data.type === "CHAT_ROOM_CLOSED") {
+                      toast(message, {
+                        position: "top-center",
+                        id: "scuad-toast",
+                      });
+                    } else {
+                      toast.success(message, {
+                        position: "top-center",
+                        id: "scuad-toast",
+                      });
+                    }
                   }
                 } catch (err) {
                   console.error("Failed to parse notification JSON:", err);

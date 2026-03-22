@@ -143,6 +143,26 @@ const ChatRoom = () => {
     navigate(-1);
   };
 
+  // SSE: 강퇴/채팅방 종료 이벤트 수신 시 강제 이탈
+  useEffect(() => {
+    const handleNotification = (event) => {
+      const data = event.detail;
+      if (!data || !data.refId) return;
+      if (String(data.refId) !== String(chatRoomId)) return;
+
+      if (
+        data.type === "CHAT_ROOM_KICKED" ||
+        data.type === "CHAT_ROOM_CLOSED"
+      ) {
+        navigate("/chat", { replace: true });
+      }
+    };
+
+    window.addEventListener("scuad-notification", handleNotification);
+    return () =>
+      window.removeEventListener("scuad-notification", handleNotification);
+  }, [chatRoomId, navigate]);
+
   const handleLeaveRoom = async () => {
     const msg = isHost
       ? "방장이 나가면 채팅방이 종료됩니다. 나가시겠습니까?"
