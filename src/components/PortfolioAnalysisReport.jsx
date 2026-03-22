@@ -3,9 +3,21 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 const SCORE_ITEMS = [
-  { key: "problemSolvingScore", label: "문제 해결 능력", icon: <Zap className="w-4 h-4 text-[#101827]" /> },
-  { key: "contributionClarityScore", label: "기여도 및 역할 명확성", icon: <Target className="w-4 h-4 text-[#101827]" /> },
-  { key: "technicalDepthScore", label: "기술 깊이 및 실무성", icon: <Sparkles className="w-4 h-4 text-[#101827]" /> },
+  {
+    key: "problemSolvingScore",
+    label: "문제 해결 능력",
+    icon: <Zap className="w-4 h-4 text-[#101827]" />,
+  },
+  {
+    key: "contributionClarityScore",
+    label: "기여도 및 역할 명확성",
+    icon: <Target className="w-4 h-4 text-[#101827]" />,
+  },
+  {
+    key: "technicalDepthScore",
+    label: "기술 깊이 및 실무성",
+    icon: <Sparkles className="w-4 h-4 text-[#101827]" />,
+  },
 ];
 
 const PortfolioAnalysisReport = ({ data }) => {

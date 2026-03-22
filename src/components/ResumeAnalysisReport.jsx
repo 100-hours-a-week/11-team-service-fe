@@ -3,9 +3,21 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 const SCORE_ITEMS = [
-  { key: "jobFitScore", label: "직무 적합도", icon: <Target className="w-4 h-4 text-[#101827]" /> },
-  { key: "experienceClarityScore", label: "경력 및 성과 명확성", icon: <Award className="w-4 h-4 text-[#101827]" /> },
-  { key: "readabilityScore", label: "가독성 및 신뢰도", icon: <Zap className="w-4 h-4 text-[#101827]" /> },
+  {
+    key: "jobFitScore",
+    label: "직무 적합도",
+    icon: <Target className="w-4 h-4 text-[#101827]" />,
+  },
+  {
+    key: "experienceClarityScore",
+    label: "경력 및 성과 명확성",
+    icon: <Award className="w-4 h-4 text-[#101827]" />,
+  },
+  {
+    key: "readabilityScore",
+    label: "가독성 및 신뢰도",
+    icon: <Zap className="w-4 h-4 text-[#101827]" />,
+  },
 ];
 
 const ResumeAnalysisReport = ({ data }) => {
