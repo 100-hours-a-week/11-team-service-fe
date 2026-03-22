@@ -65,6 +65,13 @@ const NotificationsPage = () => {
       case "JOB_POSTING_COMPLETE":
         navigate(`/analysis?jobMasterId=${refId}`);
         break;
+      case "COMPARISON_COMPLETE":
+        navigate(`/applications/${refId}?tab=report`);
+        break;
+      case "CHAT_ROOM_KICKED":
+      case "CHAT_ROOM_CLOSED":
+        navigate("/chat");
+        break;
       default:
         toast.error("알 수 없는 알림 유형입니다.");
     }
