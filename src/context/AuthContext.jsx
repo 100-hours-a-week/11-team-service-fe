@@ -235,9 +235,7 @@ export const AuthProvider = ({ children }) => {
 
                   if (data.title || data.body) {
                     const message = `${data.title}\n${data.body}`;
-                    if (
-                      data.type === "CHAT_ROOM_KICKED"
-                    ) {
+                    if (data.type === "CHAT_ROOM_KICKED") {
                       toast.error(message, {
                         position: "top-center",
                         id: "scuad-toast",
