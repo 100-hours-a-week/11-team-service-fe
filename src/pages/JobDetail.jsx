@@ -68,7 +68,7 @@ const JobDetail = () => {
       <div className="sticky top-0 bg-white border-b border-gray-100 pt-safe z-10">
         <div className="h-14 flex items-center justify-center px-4 relative mt-2">
           <div className="absolute left-4">
-            <button onClick={() => navigate(-1)} className="p-2 -ml-2">
+            <button onClick={() => navigate("/")} className="p-2 -ml-2">
               <ChevronLeft className="w-6 h-6 text-gray-900" />
             </button>
           </div>
