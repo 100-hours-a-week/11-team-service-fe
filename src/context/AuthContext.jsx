@@ -224,6 +224,11 @@ export const AuthProvider = ({ children }) => {
 
             onmessage(event) {
               if (!isActive) return;
+              // [DEBUG] 수신되는 모든 SSE 이벤트 확인용 — 확인 후 제거
+              console.log("[SSE raw]", {
+                event: event.event,
+                data: event.data,
+              });
               if (event.event === "chat-room-update") {
                 try {
                   const data = JSON.parse(event.data);
