@@ -3,9 +3,11 @@ import { X, Loader2, TrendingUp, TrendingDown, Brain } from "lucide-react";
 import toast from "react-hot-toast";
 import { postMemberComparison, getMemberComparison } from "../../api/chatApi";
 
+// phase: 'checking' | 'idle' | 'loading' | 'done'
+
 const ComparisonModal = ({ chatRoomId, member, onClose }) => {
+  const [phase, setPhase] = useState("checking");
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const pollTimerRef = useRef(null);
 
   const stopPolling = () => {
@@ -15,7 +17,7 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
     }
   };
 
-  const pollComparison = async () => {
+  const poll = async () => {
     try {
       const res = await getMemberComparison(
         chatRoomId,
@@ -24,42 +26,82 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
       const result = res.data.data;
       if (result) {
         setData(result);
-        setLoading(false);
+        setPhase("done");
       } else {
-        pollTimerRef.current = setTimeout(pollComparison, 3000);
+        pollTimerRef.current = setTimeout(poll, 3000);
       }
     } catch (e) {
       const code = e.response?.data?.code;
       if (code === "COMPARISON_RESULT_NOT_FOUND") {
-        pollTimerRef.current = setTimeout(pollComparison, 3000);
+        pollTimerRef.current = setTimeout(poll, 3000);
       } else if (code === "AI_SERVICE_ERROR") {
         toast.error("분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", {
           id: "scuad-toast",
         });
-        onClose();
+        setPhase("idle");
       } else if (code === "CHAT_MEMBER_NOT_FOUND") {
         toast.error("멤버 정보를 찾을 수 없습니다.", { id: "scuad-toast" });
         onClose();
       } else {
         toast.error("비교 결과를 불러오지 못했습니다.", { id: "scuad-toast" });
-        onClose();
+        setPhase("idle");
       }
     }
   };
 
+  // 모달 열릴 때 기존 결과 확인
   useEffect(() => {
-    const requestComparison = async () => {
+    const checkExisting = async () => {
       try {
-        await postMemberComparison(chatRoomId, member.chatRoomMemberId);
+        const res = await getMemberComparison(
+          chatRoomId,
+          member.chatRoomMemberId,
+        );
+        const result = res.data.data;
+        if (result) {
+          setData(result);
+          setPhase("done");
+        } else {
+          setPhase("idle");
+        }
       } catch (e) {
-        // 이미 처리 중인 경우(202 외 응답)에도 폴링 진행
+        const code = e.response?.data?.code;
+        if (code === "COMPARISON_RESULT_NOT_FOUND") {
+          setPhase("idle");
+        } else if (code === "CHAT_MEMBER_NOT_FOUND") {
+          toast.error("멤버 정보를 찾을 수 없습니다.", { id: "scuad-toast" });
+          onClose();
+        } else {
+          toast.error("비교 정보를 불러오지 못했습니다.", {
+            id: "scuad-toast",
+          });
+          onClose();
+        }
       }
-      pollComparison();
     };
-    requestComparison();
-
+    checkExisting();
     return () => stopPolling();
   }, [chatRoomId, member.chatRoomMemberId]);
+
+  const startAnalysis = async () => {
+    setPhase("loading");
+    setData(null);
+    try {
+      await postMemberComparison(chatRoomId, member.chatRoomMemberId);
+    } catch (e) {
+      const status = e.response?.status;
+      if (status !== 409) {
+        // 409는 이미 진행 중 → 폴링만 하면 됨
+        // 그 외 에러는 idle로 복귀
+        toast.error(e.response?.data?.message || "분석 요청에 실패했습니다.", {
+          id: "scuad-toast",
+        });
+        setPhase("idle");
+        return;
+      }
+    }
+    poll();
+  };
 
   return (
     <div className="fixed inset-0 z-[500] flex items-end justify-center">
@@ -76,14 +118,51 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
               나 vs {member.nickname}
             </p>
           </div>
-          {!loading && (
+          {phase !== "loading" && (
             <button onClick={onClose} className="p-1">
               <X className="w-5 h-5 text-gray-400" />
             </button>
           )}
         </div>
 
-        {loading ? (
+        {/* checking */}
+        {phase === "checking" && (
+          <div className="flex justify-center items-center py-16">
+            <Loader2 className="w-6 h-6 text-gray-300 animate-spin" />
+          </div>
+        )}
+
+        {/* idle: 분석 시작 전 */}
+        {phase === "idle" && (
+          <div className="flex flex-col items-center justify-center py-16 space-y-4 px-5">
+            <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center">
+              <Brain className="w-8 h-8 text-gray-400" />
+            </div>
+            <div className="text-center space-y-1.5">
+              <p className="text-sm font-bold text-gray-900">
+                AI 비교 분석을 시작하세요
+              </p>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                나와 {member.nickname}의 역량을 AI가 비교해드립니다
+              </p>
+            </div>
+            <button
+              onClick={startAnalysis}
+              className="w-full py-4 bg-[#101827] text-white font-bold rounded-2xl text-sm"
+            >
+              분석 시작
+            </button>
+            <button
+              onClick={onClose}
+              className="w-full py-3 bg-gray-100 text-gray-600 font-bold rounded-2xl text-sm"
+            >
+              닫기
+            </button>
+          </div>
+        )}
+
+        {/* loading: 분석 중 */}
+        {phase === "loading" && (
           <div className="flex flex-col items-center justify-center py-16 space-y-4 px-5">
             <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center">
               <Brain className="w-8 h-8 text-gray-400 animate-pulse" />
@@ -99,7 +178,10 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
             </div>
             <Loader2 className="w-5 h-5 text-gray-300 animate-spin" />
           </div>
-        ) : data ? (
+        )}
+
+        {/* done: 결과 표시 */}
+        {phase === "done" && data && (
           <div className="p-5 space-y-6 pb-8">
             {/* Metrics */}
             {data.comparisonMetrics?.length > 0 && (
@@ -190,13 +272,19 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
             )}
 
             <button
-              onClick={onClose}
+              onClick={startAnalysis}
               className="w-full py-4 bg-gray-100 text-gray-600 font-bold rounded-2xl text-sm"
+            >
+              재시도
+            </button>
+            <button
+              onClick={onClose}
+              className="w-full py-3 bg-gray-100 text-gray-600 font-bold rounded-2xl text-sm"
             >
               닫기
             </button>
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   );
