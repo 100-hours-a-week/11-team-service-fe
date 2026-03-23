@@ -197,6 +197,9 @@ const ChatRoom = () => {
           }
           break;
         case "ROOM_CLOSED":
+          setRoomDetail((prev) =>
+            prev ? { ...prev, status: "CLOSED" } : prev,
+          );
           navigate("/chat", { replace: true });
           break;
       }
@@ -455,7 +458,9 @@ const ChatRoom = () => {
         {/* Input */}
         {isClosed ? (
           <div className="border-t border-gray-100 bg-gray-50 px-4 py-4 text-center">
-            <p className="text-sm text-gray-400">종료된 채팅방입니다</p>
+            <p className="text-sm text-gray-400">
+              종료된 채팅방입니다. 채팅을 전송할 수 없습니다.
+            </p>
           </div>
         ) : (
           <ChatInput
