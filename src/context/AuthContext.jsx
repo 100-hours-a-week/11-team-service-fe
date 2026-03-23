@@ -224,7 +224,16 @@ export const AuthProvider = ({ children }) => {
 
             onmessage(event) {
               if (!isActive) return;
-              if (event.event === "notification") {
+              if (event.event === "chat-room-update") {
+                try {
+                  const data = JSON.parse(event.data);
+                  window.dispatchEvent(
+                    new CustomEvent("scuad-chat-room-update", { detail: data }),
+                  );
+                } catch (err) {
+                  console.error("Failed to parse chat-room-update JSON:", err);
+                }
+              } else if (event.event === "notification") {
                 try {
                   const data = JSON.parse(event.data); // Parse data here
                   console.log("SSE Notification received:", data);

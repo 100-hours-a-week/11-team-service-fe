@@ -259,6 +259,28 @@ const ChatRoomList = () => {
     fetchRooms();
   };
 
+  useEffect(() => {
+    const handleChatRoomUpdate = (event) => {
+      const { type, chatRoomId, currentParticipants } = event.detail;
+      setRooms((prev) =>
+        prev.map((room) => {
+          if (String(room.chatRoomId) !== String(chatRoomId)) return room;
+          if (type === "ROOM_CLOSED") {
+            return { ...room, status: "CLOSED" };
+          }
+          return { ...room, currentParticipants };
+        }),
+      );
+    };
+
+    window.addEventListener("scuad-chat-room-update", handleChatRoomUpdate);
+    return () =>
+      window.removeEventListener(
+        "scuad-chat-room-update",
+        handleChatRoomUpdate,
+      );
+  }, []);
+
   return (
     <div className="bg-white min-h-screen pb-safe flex flex-col relative">
       {/* Header */}
