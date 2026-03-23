@@ -143,7 +143,7 @@ const ChatRoom = () => {
     navigate(-1);
   };
 
-  // SSE: 강퇴/채팅방 종료 이벤트 수신 시 강제 이탈
+  // SSE: 강퇴/채팅방 종료 알림 수신 시 강제 이탈 (notification 이벤트)
   useEffect(() => {
     const handleNotification = (event) => {
       const data = event.detail;
@@ -162,6 +162,53 @@ const ChatRoom = () => {
     return () =>
       window.removeEventListener("scuad-notification", handleNotification);
   }, [chatRoomId, navigate]);
+
+  const refreshMembers = useCallback(async () => {
+    try {
+      const res = await getMembers(chatRoomId);
+      const memberList = res.data.data.members || [];
+      setMembers(memberList);
+      if (user?.userId) {
+        setMyMembership(
+          memberList.find((m) => m.userId === user.userId) || null,
+        );
+      }
+    } catch (e) {
+      console.error("Failed to refresh members:", e);
+    }
+  }, [chatRoomId, user?.userId]);
+
+  // SSE: 멤버 입장/퇴장/강퇴/채팅방 종료 실시간 처리 (chat-room-update 이벤트)
+  useEffect(() => {
+    const handleChatRoomUpdate = (event) => {
+      const { type, chatRoomId: roomId, kickedUserId } = event.detail;
+      if (String(roomId) !== String(chatRoomId)) return;
+
+      switch (type) {
+        case "MEMBER_JOINED":
+        case "MEMBER_LEFT":
+          refreshMembers();
+          break;
+        case "MEMBER_KICKED":
+          if (user?.userId && String(kickedUserId) === String(user.userId)) {
+            navigate("/chat", { replace: true });
+          } else {
+            refreshMembers();
+          }
+          break;
+        case "ROOM_CLOSED":
+          navigate("/chat", { replace: true });
+          break;
+      }
+    };
+
+    window.addEventListener("scuad-chat-room-update", handleChatRoomUpdate);
+    return () =>
+      window.removeEventListener(
+        "scuad-chat-room-update",
+        handleChatRoomUpdate,
+      );
+  }, [chatRoomId, user?.userId, navigate, refreshMembers]);
 
   const handleLeaveRoom = async () => {
     const msg = isHost
