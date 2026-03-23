@@ -15,7 +15,6 @@ import ScoreCheckModal from "../components/ScoreCheckModal";
 import UserMenu from "../components/UserMenu";
 import ApplyModal from "../components/ApplyModal";
 import EvaluationProgressModal from "../components/EvaluationProgressModal";
-import JoinConfirmModal from "../components/JoinConfirmModal";
 import AnalysisResultModal from "../components/AnalysisResultModal";
 import ScoreReport from "../components/ScoreReport";
 import RoomCard from "../components/chat/RoomCard";
@@ -38,7 +37,6 @@ const ChatRoomList = () => {
   const [loadingScore, setLoadingScore] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [showEvaluationModal, setShowEvaluationModal] = useState(false);
-  const [showJoinConfirmModal, setShowJoinConfirmModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [currentApplicationId, setCurrentApplicationId] = useState(null);
@@ -204,7 +202,7 @@ const ChatRoomList = () => {
     }
 
     setSelectedRoom(room);
-    setShowJoinConfirmModal(true);
+    handleConfirmJoin(room);
   };
 
   const handleCreateRoom = async () => {
@@ -223,28 +221,21 @@ const ChatRoomList = () => {
     navigate(`/chat/${room.chatRoomId}`);
   };
 
-  const handleConfirmJoin = async () => {
-    if (!selectedRoom) return;
+  const handleConfirmJoin = async (room) => {
+    const target = room || selectedRoom;
+    if (!target) return;
 
     try {
-      await client.post(
-        `/api/v1/chat-rooms/${selectedRoom.chatRoomId}/members`,
-      );
-      setShowJoinConfirmModal(false);
-      setSelectedRoom(null);
-      navigate(`/chat/${selectedRoom.chatRoomId}`);
+      await client.post(`/api/v1/chat-rooms/${target.chatRoomId}/members`);
+      navigate(`/chat/${target.chatRoomId}`);
     } catch (err) {
       console.error("Failed to join chat room:", err);
       const code = err.response?.data?.code;
       if (code === "CHAT_ROOM_ALREADY_JOINED") {
-        setShowJoinConfirmModal(false);
-        navigate(`/chat/${selectedRoom.chatRoomId}`);
+        navigate(`/chat/${target.chatRoomId}`);
         return;
       }
-      toast.error(err.response?.data?.message || "입장 신청에 실패했습니다.");
-      if (err.response?.status !== 401) {
-        setShowJoinConfirmModal(false);
-      }
+      toast.error(err.response?.data?.message || "입장에 실패했습니다.");
     }
   };
 
@@ -461,16 +452,6 @@ const ChatRoomList = () => {
         onClose={() => {
           setShowEvaluationModal(false);
         }}
-      />
-
-      <JoinConfirmModal
-        isOpen={showJoinConfirmModal}
-        onClose={() => {
-          setShowJoinConfirmModal(false);
-          setSelectedRoom(null);
-        }}
-        onConfirm={handleConfirmJoin}
-        roomTitle={selectedRoom?.roomName}
       />
 
       <AnalysisResultModal
