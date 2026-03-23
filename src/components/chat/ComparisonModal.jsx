@@ -5,6 +5,16 @@ import { postMemberComparison, getMemberComparison } from "../../api/chatApi";
 
 // phase: 'checking' | 'idle' | 'loading' | 'done'
 
+// 리포트 텍스트를 문장 단위로 분리 (줄바꿈 우선, 없으면 ". " 기준)
+const splitReport = (text) => {
+  const byNewline = text.split(/\n+/).filter((s) => s.trim());
+  if (byNewline.length > 1) return byNewline;
+  return text
+    .split(/\.\s+/)
+    .map((s, i, arr) => (i < arr.length - 1 ? s + "." : s))
+    .filter((s) => s.trim());
+};
+
 const ComparisonModal = ({ chatRoomId, member, onClose }) => {
   const [phase, setPhase] = useState("checking");
   const [data, setData] = useState(null);
@@ -252,9 +262,16 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
                     내가 강한 점
                   </h3>
                 </div>
-                <p className="text-sm text-green-800 leading-relaxed">
-                  {data.strengthsReport}
-                </p>
+                <div className="space-y-2">
+                  {splitReport(data.strengthsReport).map((sentence, i) => (
+                    <p
+                      key={i}
+                      className="text-sm text-green-800 leading-relaxed"
+                    >
+                      {sentence}
+                    </p>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -267,9 +284,16 @@ const ComparisonModal = ({ chatRoomId, member, onClose }) => {
                     보완이 필요한 점
                   </h3>
                 </div>
-                <p className="text-sm text-orange-800 leading-relaxed">
-                  {data.weaknessesReport}
-                </p>
+                <div className="space-y-2">
+                  {splitReport(data.weaknessesReport).map((sentence, i) => (
+                    <p
+                      key={i}
+                      className="text-sm text-orange-800 leading-relaxed"
+                    >
+                      {sentence}
+                    </p>
+                  ))}
+                </div>
               </div>
             )}
 
