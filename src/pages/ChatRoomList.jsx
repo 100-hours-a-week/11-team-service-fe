@@ -464,6 +464,7 @@ const ChatRoomList = () => {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         jobMasterId={id}
+        myScore={myScore}
         onSuccess={handleRoomCreated}
       />
     </div>

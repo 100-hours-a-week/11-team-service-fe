@@ -1,16 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import clsx from "clsx";
 import { createChatRoom } from "../../api/chatApi";
 
-const CreateRoomModal = ({ isOpen, onClose, jobMasterId, onSuccess }) => {
+const CreateRoomModal = ({
+  isOpen,
+  onClose,
+  jobMasterId,
+  myScore,
+  onSuccess,
+}) => {
+  const baseScore = myScore ?? 0;
+  const scoreMin = Math.max(0, baseScore - 10);
+  const scoreMax = Math.min(100, baseScore + 10);
+
   const [roomName, setRoomName] = useState("");
   const [maxParticipants, setMaxParticipants] = useState(5);
   const [roomGoal, setRoomGoal] = useState("DOCUMENT");
-  const [cutlineScore, setCutlineScore] = useState(0);
+  const [cutlineScore, setCutlineScore] = useState(baseScore);
   const [preferredConditions, setPreferredConditions] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  // 모달이 열릴 때마다 커트라인 점수를 내 점수로 초기화
+  useEffect(() => {
+    if (isOpen) {
+      setCutlineScore(baseScore);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -48,7 +65,7 @@ const CreateRoomModal = ({ isOpen, onClose, jobMasterId, onSuccess }) => {
     setRoomName("");
     setMaxParticipants(5);
     setRoomGoal("DOCUMENT");
-    setCutlineScore(0);
+    setCutlineScore(baseScore);
     setPreferredConditions("");
     setError("");
     onClose();
@@ -144,16 +161,16 @@ const CreateRoomModal = ({ isOpen, onClose, jobMasterId, onSuccess }) => {
             </label>
             <input
               type="range"
-              min={0}
-              max={100}
-              step={5}
+              min={scoreMin}
+              max={scoreMax}
+              step={1}
               value={cutlineScore}
               onChange={(e) => setCutlineScore(Number(e.target.value))}
               className="w-full accent-[#101827]"
             />
             <div className="flex justify-between text-xs text-gray-400 mt-1">
-              <span>0점</span>
-              <span>100점</span>
+              <span>{scoreMin}점</span>
+              <span>{scoreMax}점</span>
             </div>
           </div>
 
