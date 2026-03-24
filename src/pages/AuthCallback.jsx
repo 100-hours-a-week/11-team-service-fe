@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const AuthCallback = () => {
   const [searchParams] = useSearchParams();
@@ -8,6 +9,19 @@ const AuthCallback = () => {
   const { login } = useAuth();
 
   useEffect(() => {
+    const error = searchParams.get("error");
+    if (error) {
+      if (error === "WITHDRAWN_USER") {
+        toast.error("탈퇴한 계정입니다.", { id: "scuad-toast" });
+      } else {
+        toast.error("로그인에 실패했습니다. 다시 시도해주세요.", {
+          id: "scuad-toast",
+        });
+      }
+      navigate("/login");
+      return;
+    }
+
     const accessToken = searchParams.get("accessToken");
     // refreshToken은 HttpOnly 쿠키로 자동 저장됨
 

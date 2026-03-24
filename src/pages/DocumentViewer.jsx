@@ -1,16 +1,24 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeft, Loader2, Clock, AlertCircle } from "lucide-react";
 import client from "../api/client";
 import PDFViewer from "../components/PDFViewer";
 import ResumeAnalysisReport from "../components/ResumeAnalysisReport";
 import PortfolioAnalysisReport from "../components/PortfolioAnalysisReport";
+import AlertModal from "../components/AlertModal";
+import DocumentUploadModal from "../components/DocumentUploadModal";
+import EvaluationProgressModal from "../components/EvaluationProgressModal";
+import { Sparkles, FileEdit, FileText } from "lucide-react";
+import toast from "react-hot-toast";
 
 const DocumentViewer = () => {
   const { applicationId, docType } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState("detail"); // "detail" | "report"
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get("tab") === "detail" ? "detail" : "report",
+  ); // "report" | "detail"
   const [pdfUrl, setPdfUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [documentInfo, setDocumentInfo] = useState(null);
@@ -21,12 +29,49 @@ const DocumentViewer = () => {
   const [reportFetched, setReportFetched] = useState(false);
   const pollingRef = useRef(null);
 
+  // Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showEvaluationProgress, setShowEvaluationProgress] = useState(false);
+
+  // Alert State
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    message: "",
+    type: "info",
+    onClose: null,
+  });
+
   useEffect(() => {
     fetchDocumentUrl();
-    return () => {
-      if (pollingRef.current) clearTimeout(pollingRef.current);
+
+    if (activeTab === "report" && !reportFetched && !reportLoading) {
+      setReportLoading(true);
+      fetchReport();
+    }
+
+    // SSE 이벤트 리스너 등록
+    const handleSseNotification = (event) => {
+      const { type, refId } = event.detail;
+
+      // 내 지원서(applicationId)에 대한 분석 완료 확인
+      const isRelevant =
+        Number(refId) === Number(applicationId) &&
+        (type === "RESUME_COMPLETE" ||
+          type === "PORTFOLIO_COMPLETE" ||
+          type === "AI_EVAL_COMPLETE");
+
+      if (isRelevant) {
+        console.log("SSE: Analysis completion detected, refreshing...");
+        fetchReport();
+      }
     };
-  }, [applicationId, docType]);
+
+    window.addEventListener("scuad-notification", handleSseNotification);
+
+    return () => {
+      window.removeEventListener("scuad-notification", handleSseNotification);
+    };
+  }, [applicationId, docType, activeTab, reportFetched, reportLoading]);
 
   const fetchDocumentUrl = async () => {
     try {
@@ -41,8 +86,12 @@ const DocumentViewer = () => {
       );
 
       if (!doc || !doc.isRegistered) {
-        alert("등록된 파일이 없습니다.");
-        navigate(-1);
+        setAlertConfig({
+          isOpen: true,
+          message: "등록된 파일이 없습니다.",
+          type: "info",
+          onClose: () => navigate(-1),
+        });
         return;
       }
 
@@ -55,8 +104,12 @@ const DocumentViewer = () => {
       setPdfUrl(downloadUrl);
     } catch (e) {
       console.error("Failed to fetch document", e);
-      alert("파일을 불러오는데 실패했습니다.");
-      navigate(-1);
+      setAlertConfig({
+        isOpen: true,
+        message: "파일을 불러오는데 실패했습니다.",
+        type: "error",
+        onClose: () => navigate(-1),
+      });
     } finally {
       setLoading(false);
     }
@@ -77,13 +130,48 @@ const DocumentViewer = () => {
       }
     } catch (e) {
       if (e.response?.status === 202) {
-        // 분석 중 - 3초 후 재시도
-        pollingRef.current = setTimeout(fetchReport, 3000);
+        // 첫 분석 시 데이터 없음 -> 로딩 유지
+        setReportLoading(true);
       } else {
         setReportLoading(false);
         setReportFetched(true);
       }
     }
+  };
+
+  // 분석 중일 때 폴링 폴백 제거 (사용자 요청)
+
+  const handleRequestAnalysis = async () => {
+    try {
+      setLoading(true);
+      await client.post(`/api/v1/applications/${applicationId}/analyses`, {
+        analysis_type:
+          docType.toUpperCase() === "RESUME" ? "RESUME" : "PORTFOLIO",
+      });
+
+      // 만약 이미 데이터가 있다면(재분석이라면) 블로킹 모달을 띄우지 않고
+      // 즉시 목록으로 이동 (사용자 요청)
+      if (reportData) {
+        toast.success("분석이 요청되었습니다. 잠시만 기다려주세요.");
+        setTimeout(() => navigate("/resume"), 1200);
+      } else {
+        setShowEvaluationProgress(true);
+      }
+    } catch (e) {
+      toast.error(
+        e.response?.data?.message || "분석 요청 중 오류가 발생했습니다.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAnalysisComplete = (data) => {
+    setShowEvaluationProgress(false);
+    setReportData(data);
+    setReportFetched(true);
+    setActiveTab("report");
+    toast.success("분석이 완료되었습니다!");
   };
 
   const handleReportTabClick = () => {
@@ -118,16 +206,6 @@ const DocumentViewer = () => {
         {/* Tab Navigation */}
         <div className="flex border-b border-gray-200">
           <button
-            onClick={() => setActiveTab("detail")}
-            className={`flex-1 py-3 text-sm font-bold transition-colors ${
-              activeTab === "detail"
-                ? "text-[#101827] border-b-2 border-[#101827]"
-                : "text-gray-400 hover:text-gray-600"
-            }`}
-          >
-            상세보기
-          </button>
-          <button
             onClick={handleReportTabClick}
             className={`flex-1 py-3 text-sm font-bold transition-colors ${
               activeTab === "report"
@@ -137,7 +215,50 @@ const DocumentViewer = () => {
           >
             리포트
           </button>
+          <button
+            onClick={() => setActiveTab("detail")}
+            className={`flex-1 py-3 text-sm font-bold transition-colors ${
+              activeTab === "detail"
+                ? "text-[#101827] border-b-2 border-[#101827]"
+                : "text-gray-400 hover:text-gray-600"
+            }`}
+          >
+            상세보기
+          </button>
         </div>
+
+        {/* 상단 퀵 액션 바 (추가됨) */}
+        {!loading && (
+          <div className="px-5 py-3 flex items-center justify-end">
+            {activeTab === "report" ? (
+              <button
+                onClick={handleRequestAnalysis}
+                disabled={loading}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#101827] text-white rounded-lg text-xs font-bold hover:bg-black active:scale-[0.98] transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <span>분석 중...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3 h-3 text-indigo-300" />
+                    <span>분석 재요청</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsEditModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-50 active:scale-[0.98] transition-all shadow-sm"
+              >
+                <FileEdit className="w-3 h-3 text-gray-400" />
+                파일 수정
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Tab Content */}
@@ -174,11 +295,15 @@ const DocumentViewer = () => {
                 </p>
               </div>
             ) : reportData ? (
-              docType.toLowerCase() === "resume" ? (
-                <ResumeAnalysisReport data={reportData} />
-              ) : (
-                <PortfolioAnalysisReport data={reportData} />
-              )
+              <div className="p-5 space-y-8">
+                {/* 탭 전환에 따른 레포트 렌더링 */}
+
+                {docType.toLowerCase() === "resume" ? (
+                  <ResumeAnalysisReport data={reportData} />
+                ) : (
+                  <PortfolioAnalysisReport data={reportData} />
+                )}
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-20 gap-2 text-center">
                 <p className="text-sm font-bold text-gray-500">
@@ -192,6 +317,35 @@ const DocumentViewer = () => {
           </div>
         )}
       </div>
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        onClose={() => {
+          if (alertConfig.onClose) alertConfig.onClose();
+          setAlertConfig((prev) => ({ ...prev, isOpen: false }));
+        }}
+      />
+
+      <DocumentUploadModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        applicationId={applicationId}
+        docType={docType.toUpperCase()}
+        onSuccess={() => {
+          setIsEditModalOpen(false);
+          fetchDocumentUrl();
+        }}
+      />
+
+      <EvaluationProgressModal
+        isOpen={showEvaluationProgress}
+        onClose={() => setShowEvaluationProgress(false)}
+        applicationId={applicationId}
+        onAnalysisComplete={handleAnalysisComplete}
+        analysisType={docType.toUpperCase()}
+      />
     </div>
   );
 };

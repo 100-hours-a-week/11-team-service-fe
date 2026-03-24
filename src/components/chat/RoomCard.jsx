@@ -41,7 +41,7 @@ const RoomCard = ({ room, onJoin, onEnter }) => {
       };
     }
     return {
-      label: "입장 신청",
+      label: "입장",
       disabled: false,
       className: "bg-[#101827] text-white hover:bg-[#1a263d]",
     };

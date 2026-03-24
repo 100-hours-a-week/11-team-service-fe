@@ -143,6 +143,76 @@ const ChatRoom = () => {
     navigate(-1);
   };
 
+  // SSE: 강퇴/채팅방 종료 알림 수신 시 강제 이탈 (notification 이벤트)
+  useEffect(() => {
+    const handleNotification = (event) => {
+      const data = event.detail;
+      if (!data || !data.refId) return;
+      if (String(data.refId) !== String(chatRoomId)) return;
+
+      if (
+        data.type === "CHAT_ROOM_KICKED" ||
+        data.type === "CHAT_ROOM_CLOSED"
+      ) {
+        navigate("/chat", { replace: true });
+      }
+    };
+
+    window.addEventListener("scuad-notification", handleNotification);
+    return () =>
+      window.removeEventListener("scuad-notification", handleNotification);
+  }, [chatRoomId, navigate]);
+
+  const refreshMembers = useCallback(async () => {
+    try {
+      const res = await getMembers(chatRoomId);
+      const memberList = res.data.data.members || [];
+      setMembers(memberList);
+      if (user?.userId) {
+        setMyMembership(
+          memberList.find((m) => m.userId === user.userId) || null,
+        );
+      }
+    } catch (e) {
+      console.error("Failed to refresh members:", e);
+    }
+  }, [chatRoomId, user?.userId]);
+
+  // SSE: 멤버 입장/퇴장/강퇴/채팅방 종료 실시간 처리 (chat-room-update 이벤트)
+  useEffect(() => {
+    const handleChatRoomUpdate = (event) => {
+      const { type, chatRoomId: roomId, kickedUserId } = event.detail;
+      if (String(roomId) !== String(chatRoomId)) return;
+
+      switch (type) {
+        case "MEMBER_JOINED":
+        case "MEMBER_LEFT":
+          refreshMembers();
+          break;
+        case "MEMBER_KICKED":
+          if (user?.userId && String(kickedUserId) === String(user.userId)) {
+            navigate("/chat", { replace: true });
+          } else {
+            refreshMembers();
+          }
+          break;
+        case "ROOM_CLOSED":
+          setRoomDetail((prev) =>
+            prev ? { ...prev, status: "CLOSED" } : prev,
+          );
+          navigate("/chat", { replace: true });
+          break;
+      }
+    };
+
+    window.addEventListener("scuad-chat-room-update", handleChatRoomUpdate);
+    return () =>
+      window.removeEventListener(
+        "scuad-chat-room-update",
+        handleChatRoomUpdate,
+      );
+  }, [chatRoomId, user?.userId, navigate, refreshMembers]);
+
   const handleLeaveRoom = async () => {
     const msg = isHost
       ? "방장이 나가면 채팅방이 종료됩니다. 나가시겠습니까?"
@@ -218,9 +288,20 @@ const ChatRoom = () => {
       case "portfolio":
         openMemberDocument(member, "portfolio");
         break;
-      case "comparison":
-        setShowComparison(member);
+      case "comparison": {
+        const fullMember = members.find(
+          (m) => String(m.userId) === String(member.userId),
+        );
+        if (
+          !fullMember?.chatRoomMemberId ||
+          String(fullMember.userId) === String(user?.userId)
+        ) {
+          toast.error("멤버 정보를 찾을 수 없습니다.", { id: "scuad-toast" });
+          break;
+        }
+        setShowComparison(fullMember);
         break;
+      }
       case "kick":
         handleKickAction(member);
         break;
@@ -347,7 +428,7 @@ const ChatRoom = () => {
         <div
           ref={messageContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto bg-white py-2"
+          className="flex-1 overflow-y-auto overflow-x-hidden bg-white py-2"
         >
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
@@ -389,7 +470,9 @@ const ChatRoom = () => {
         {/* Input */}
         {isClosed ? (
           <div className="border-t border-gray-100 bg-gray-50 px-4 py-4 text-center">
-            <p className="text-sm text-gray-400">종료된 채팅방입니다</p>
+            <p className="text-sm text-gray-400">
+              종료된 채팅방입니다. 채팅을 전송할 수 없습니다.
+            </p>
           </div>
         ) : (
           <ChatInput

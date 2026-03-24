@@ -1,17 +1,21 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import axios from "axios";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 import {
   getMessages,
   sendTextMessage as apiSendText,
   sendFileMessage as apiSendFile,
 } from "../api/chatApi";
-import usePolling from "./usePolling";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 const useChatMessages = (chatRoomId) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-  const newestCursorRef = useRef(null);
   const initialLoadDone = useRef(false);
 
   // Initial load
@@ -20,7 +24,6 @@ const useChatMessages = (chatRoomId) => {
     initialLoadDone.current = false;
     setMessages([]);
     setLoading(true);
-    newestCursorRef.current = null;
 
     const load = async () => {
       try {
@@ -29,9 +32,6 @@ const useChatMessages = (chatRoomId) => {
         const msgs = data.messages || [];
         setMessages(msgs);
         setHasMore(data.pagination?.hasNext || false);
-        if (msgs.length > 0) {
-          newestCursorRef.current = msgs[msgs.length - 1].messageId;
-        }
         initialLoadDone.current = true;
       } catch (e) {
         console.error("Failed to load messages:", e);
@@ -42,34 +42,62 @@ const useChatMessages = (chatRoomId) => {
     load();
   }, [chatRoomId]);
 
-  // Poll for new messages
-  const pollNewMessages = useCallback(async () => {
-    if (!chatRoomId || !initialLoadDone.current) return;
+  // WebSocket connection
+  useEffect(() => {
+    if (!chatRoomId) return;
 
-    try {
-      const params = { size: 50 };
-      if (newestCursorRef.current) {
-        params.cursor = newestCursorRef.current;
-      }
-      const response = await getMessages(chatRoomId, params);
-      const data = response.data.data;
-      const newMsgs = data.messages || [];
+    let isDeactivating = false;
 
-      if (newMsgs.length > 0) {
-        setMessages((prev) => {
-          const existingIds = new Set(prev.map((m) => m.messageId));
-          const filtered = newMsgs.filter((m) => !existingIds.has(m.messageId));
-          if (filtered.length === 0) return prev;
-          return [...prev, ...filtered];
+    const client = new Client({
+      webSocketFactory: () => {
+        const token = localStorage.getItem("accessToken");
+        return new SockJS(`${API_BASE_URL}/ws?token=${token}`);
+      },
+      reconnectDelay: 5000,
+      onConnect: () => {
+        client.subscribe(`/topic/chat-rooms/${chatRoomId}`, (message) => {
+          const newMessage = JSON.parse(message.body);
+          setMessages((prev) => {
+            if (prev.some((m) => m.messageId === newMessage.messageId))
+              return prev;
+            return [...prev, newMessage];
+          });
         });
-        newestCursorRef.current = newMsgs[newMsgs.length - 1].messageId;
-      }
-    } catch (e) {
-      console.error("Failed to poll messages:", e);
-    }
-  }, [chatRoomId]);
+      },
+      onWebSocketClose: () => {
+        if (isDeactivating) return;
+        // Try to refresh token so the next reconnect uses a fresh token
+        axios
+          .post(
+            `${API_BASE_URL}/api/v1/auth/refresh`,
+            {},
+            { withCredentials: true },
+          )
+          .then(({ data }) => {
+            localStorage.setItem("accessToken", data.data.accessToken);
+          })
+          .catch(() => {
+            // Refresh token also expired — stop reconnecting and signal session end
+            client.deactivate();
+            window.dispatchEvent(
+              new CustomEvent("scuad-auth-event", {
+                detail: { type: "SESSION_EXPIRED" },
+              }),
+            );
+          });
+      },
+      onStompError: (frame) => {
+        console.error("STOMP error:", frame);
+      },
+    });
 
-  usePolling(pollNewMessages, 3000, !!chatRoomId && initialLoadDone.current);
+    client.activate();
+
+    return () => {
+      isDeactivating = true;
+      client.deactivate();
+    };
+  }, [chatRoomId]);
 
   const sendTextMessage = useCallback(
     async (content) => {
@@ -82,7 +110,6 @@ const useChatMessages = (chatRoomId) => {
             if (prev.some((m) => m.messageId === msg.messageId)) return prev;
             return [...prev, msg];
           });
-          newestCursorRef.current = msg.messageId;
         }
       } finally {
         setSending(false);
@@ -102,7 +129,6 @@ const useChatMessages = (chatRoomId) => {
             if (prev.some((m) => m.messageId === msg.messageId)) return prev;
             return [...prev, msg];
           });
-          newestCursorRef.current = msg.messageId;
         }
       } finally {
         setSending(false);

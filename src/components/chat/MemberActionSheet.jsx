@@ -1,6 +1,13 @@
 import { FileText, Briefcase, BarChart2, UserMinus } from "lucide-react";
 
-const MemberActionSheet = ({ isOpen, onClose, member, myUserId, onAction }) => {
+const MemberActionSheet = ({
+  isOpen,
+  onClose,
+  member,
+  myUserId,
+  isHost,
+  onAction,
+}) => {
   if (!isOpen || !member) return null;
 
   const isSelf =
@@ -29,12 +36,16 @@ const MemberActionSheet = ({ isOpen, onClose, member, myUserId, onAction }) => {
           },
         ]
       : []),
-    {
-      key: "kick",
-      label: "강제 퇴장",
-      icon: UserMinus,
-      color: "text-red-500",
-    },
+    ...(isHost && !isSelf
+      ? [
+          {
+            key: "kick",
+            label: "강제 퇴장",
+            icon: UserMinus,
+            color: "text-red-500",
+          },
+        ]
+      : []),
   ];
 
   return (

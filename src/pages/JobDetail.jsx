@@ -10,7 +10,10 @@ import {
   Briefcase,
   Calendar,
   CheckCircle,
+  Sparkles,
 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import ApplyModal from "../components/ApplyModal";
 import EvaluationProgressModal from "../components/EvaluationProgressModal";
 import AiAnalysisReportModal from "../components/AiAnalysisReportModal";
@@ -62,105 +65,172 @@ const JobDetail = () => {
 
   return (
     <div className="bg-white min-h-screen pb-safe">
-      {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-100 px-4 h-14 flex items-center justify-between z-10">
-        <button onClick={() => navigate(-1)} className="p-2 -ml-2">
-          <ChevronLeft className="w-6 h-6 text-gray-900" />
-        </button>
-        <h1 className="font-bold text-gray-900 text-lg">채용공고 상세</h1>
-        <div className="w-10 flex justify-end">
-          <UserMenu />
+      <div className="sticky top-0 bg-white border-b border-gray-100 pt-safe z-10">
+        <div className="h-14 flex items-center justify-center px-4 relative mt-2">
+          <div className="absolute left-4">
+            <button onClick={() => navigate("/")} className="p-2 -ml-2">
+              <ChevronLeft className="w-6 h-6 text-gray-900" />
+            </button>
+          </div>
+          <h1 className="font-bold text-gray-900 text-lg truncate px-2">
+            {job?.companyName || "채용공고 상세"}
+          </h1>
+          <div className="absolute right-4">
+            <UserMenu />
+          </div>
         </div>
       </div>
 
-      <div className="p-5">
-        {/* 1. AI Summary (moved to top) */}
-        <section className="mb-8">
-          <div className="mb-2 text-xs font-bold text-gray-900">
-            AI공고 요약
+      <div className="max-w-2xl mx-auto p-6 space-y-6">
+        {/* 1. AI Summary Card - Flagship Bento Box (Highlighted) */}
+        <section className="bg-indigo-50/40 rounded-[24px] p-8 border border-indigo-100/50 shadow-sm animate-fade-in-up">
+          <div className="mb-6">
+            <span className="text-[12px] font-bold text-indigo-900 uppercase tracking-wider">
+              AI 공고 요약
+            </span>
           </div>
-          <div className="bg-[#F9FAFB] rounded-xl p-6 text-sm text-gray-700 leading-loose whitespace-pre-wrap min-h-[150px] break-words border border-gray-100">
-            {job.aiSummary || "AI 요약 정보가 없습니다."}
+          <div className="text-[15px] text-gray-900 leading-[1.8] font-medium whitespace-pre-wrap">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                p: ({ node, ...props }) => (
+                  <p className="mb-4 last:mb-0" {...props} />
+                ),
+                strong: ({ node, ...props }) => (
+                  <strong
+                    className="text-indigo-700 font-bold underline decoration-indigo-200 decoration-2 underline-offset-4"
+                    {...props}
+                  />
+                ),
+                ul: ({ node, ...props }) => (
+                  <ul className="list-disc ml-5 space-y-2 mb-4" {...props} />
+                ),
+                li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+                h1: ({ node, ...props }) => (
+                  <h1
+                    className="text-lg font-bold mb-4 text-indigo-950"
+                    {...props}
+                  />
+                ),
+                h2: ({ node, ...props }) => (
+                  <h2
+                    className="text-base font-bold mb-3 text-indigo-900"
+                    {...props}
+                  />
+                ),
+              }}
+            >
+              {job.aiSummary?.replace(/\. +(?=[^0-9])/g, ".\n\n") ||
+                "AI 요약 정보가 없습니다."}
+            </ReactMarkdown>
           </div>
         </section>
 
         {/* 2. Basic Info Grid */}
-        <div className="grid grid-cols-2 gap-y-6 gap-x-4 mb-8">
-          {/* Row 1: Company & Job Title */}
-          <div className="flex flex-col">
-            <div className="mb-2 text-xs font-bold text-gray-900">기업명</div>
-            <div className="bg-[#F9FAFB] rounded-xl px-4 py-3.5 text-sm font-bold text-gray-900 border border-gray-100 flex-1 flex items-center min-h-[52px]">
-              <span className="w-full break-keep">{job.companyName}</span>
+        <div className="grid grid-cols-2 gap-4 animate-fade-in-up delay-100">
+          {/* Company Name */}
+          <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm flex flex-col justify-center min-h-[90px]">
+            <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+              기업명
             </div>
-          </div>
-          <div className="flex flex-col">
-            <div className="mb-2 text-xs font-bold text-gray-900">직무명</div>
-            <div className="bg-[#F9FAFB] rounded-xl px-4 py-3.5 text-sm font-bold text-gray-900 border border-gray-100 flex-1 flex items-center min-h-[52px]">
-              <span className="w-full break-keep">{job.jobTitle}</span>
+            <div className="text-[16px] font-semibold text-gray-900 break-words leading-tight">
+              {job.companyName || "-"}
             </div>
           </div>
 
-          {/* Row 2: Status & Period */}
-          <div className="flex flex-col">
-            <div className="mb-2 text-xs font-bold text-gray-900">모집상태</div>
+          {/* Job Title */}
+          <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm flex flex-col justify-center min-h-[90px]">
+            <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+              직무명
+            </div>
+            <div className="text-[16px] font-semibold text-gray-900 break-words leading-tight">
+              {job.jobTitle || "-"}
+            </div>
+          </div>
+
+          {/* Status */}
+          <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm flex flex-col justify-center min-h-[90px]">
+            <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+              모집상태
+            </div>
             <div
-              className={`rounded-xl px-4 py-3.5 text-sm font-bold border flex-1 flex items-center justify-center min-h-[52px]
-                            ${!isClosed ? "bg-[#F9FAFB] text-gray-900 border-gray-100" : "bg-gray-100 text-gray-400 border-gray-200"}`}
+              className={`text-[15px] font-bold ${!isClosed ? "text-indigo-500" : "text-gray-400"}`}
             >
               {!isClosed ? "모집중" : "마감"}
             </div>
           </div>
-          <div className="flex flex-col">
-            <div className="mb-2 text-xs font-bold text-gray-900">
-              모집 기간
-            </div>
-            <div className="bg-[#F9FAFB] rounded-xl px-3 py-3.5 text-[11px] font-bold text-gray-900 border border-gray-100 flex-1 flex items-center justify-center min-h-[52px] text-center">
-              {startDate && endDate ? `${startDate} ~ ${endDate}` : "-"}
-            </div>
-          </div>
 
-          {/* Row 3: Main Tasks & Tech Stack */}
-          <div className="col-span-1 flex flex-col">
-            <div className="mb-2 text-xs font-bold text-gray-900">
-              주요 업무
+          {/* Period */}
+          <div className="bg-white rounded-[24px] p-6 border border-gray-100 shadow-sm flex flex-col justify-center min-h-[90px]">
+            <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+              모집기간
             </div>
-            <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed flex-1 flex flex-col gap-1.5 break-words">
-              {job.mainTasks && job.mainTasks.length > 0
-                ? job.mainTasks.map((task, index) => (
-                    <div key={index}>- {task}</div>
-                  ))
-                : "-"}
-            </div>
-          </div>
-          <div className="col-span-1 flex flex-col">
-            <div className="mb-2 text-xs font-bold text-gray-900">
-              필요기술스택
-            </div>
-            <div className="bg-[#F9FAFB] rounded-xl px-4 py-4 text-sm font-medium text-gray-900 border border-gray-100 leading-relaxed flex-1 flex flex-col gap-1.5 break-words">
-              {job.skills && job.skills.length > 0
-                ? job.skills.map((skill, index) => (
-                    <div key={index}>- {skill}</div>
-                  ))
-                : "-"}
+            <div className="text-[14px] font-semibold text-gray-600">
+              {startDate && endDate ? `${startDate} ~ ${endDate}` : "-"}
             </div>
           </div>
         </div>
 
+        {/* 3. Main Tasks & Tech Stack - Larger Bento Boxes */}
+        <div className="grid grid-cols-1 gap-4 animate-fade-in-up delay-200">
+          {/* Main Tasks */}
+          <section className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm">
+            <div className="text-[12px] font-bold text-gray-800 uppercase tracking-wider mb-6">
+              주요 업무
+            </div>
+            <div className="space-y-5">
+              {job.mainTasks && job.mainTasks.length > 0 ? (
+                job.mainTasks.map((task, index) => (
+                  <div key={index} className="flex gap-4 items-start group">
+                    <div className="mt-[10px] w-1 h-1 rounded-full bg-gray-300 group-hover:bg-indigo-400 transition-colors shrink-0" />
+                    <span className="text-[15px] font-medium text-gray-700 leading-relaxed">
+                      {task}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-400 italic">정보가 없습니다.</p>
+              )}
+            </div>
+          </section>
+
+          {/* Tech Stack */}
+          <section className="bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm">
+            <div className="text-[12px] font-bold text-gray-800 uppercase tracking-wider mb-6">
+              필요 기술 스택
+            </div>
+            <div className="flex flex-wrap gap-2.5">
+              {job.skills && job.skills.length > 0 ? (
+                job.skills.map((skill, index) => (
+                  <span
+                    key={index}
+                    className="px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-[13px] font-medium text-gray-600 hover:bg-white hover:border-gray-200 transition-all cursor-default"
+                  >
+                    {skill}
+                  </span>
+                ))
+              ) : (
+                <p className="text-sm text-gray-400 italic">정보가 없습니다.</p>
+              )}
+            </div>
+          </section>
+        </div>
+
         {/* 3. External Link Button (moved to bottom) */}
-        <div className="mb-28">
+        <div className="pt-8 pb-32">
           <a
             href={job.sourceUrl || "#"}
             onClick={(e) => {
               if (!job.sourceUrl) {
                 e.preventDefault();
-                toast.error("공고 원본 링크가 없습니다.");
+                toast.error("원본 링크를 찾을 수 없습니다.");
               }
             }}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full inline-flex items-center justify-center bg-[#101827] text-white font-bold px-6 py-4 rounded-xl text-sm hover:bg-[#1a263d] transition-all active:scale-[0.99]"
+            className="w-full inline-flex items-center justify-center bg-gray-900 text-white font-bold h-14 rounded-full text-sm hover:translate-y-[-2px] hover:shadow-lg transition-all active:scale-[0.98]"
           >
-            공고 바로가기
+            공고 원본 확인하기
           </a>
         </div>
       </div>

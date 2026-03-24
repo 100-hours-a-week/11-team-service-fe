@@ -15,7 +15,6 @@ import ScoreCheckModal from "../components/ScoreCheckModal";
 import UserMenu from "../components/UserMenu";
 import ApplyModal from "../components/ApplyModal";
 import EvaluationProgressModal from "../components/EvaluationProgressModal";
-import JoinConfirmModal from "../components/JoinConfirmModal";
 import AnalysisResultModal from "../components/AnalysisResultModal";
 import ScoreReport from "../components/ScoreReport";
 import RoomCard from "../components/chat/RoomCard";
@@ -38,7 +37,6 @@ const ChatRoomList = () => {
   const [loadingScore, setLoadingScore] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [showEvaluationModal, setShowEvaluationModal] = useState(false);
-  const [showJoinConfirmModal, setShowJoinConfirmModal] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [currentApplicationId, setCurrentApplicationId] = useState(null);
@@ -78,14 +76,25 @@ const ChatRoomList = () => {
   }, [id]);
 
   useEffect(() => {
-    let intervalId;
     if (isEvaluating) {
-      intervalId = setInterval(() => {
-        checkMyScore(true);
-      }, 3000);
+      const handleSseNotification = (event) => {
+        const { type, refId } = event.detail;
+
+        if (
+          type === "AI_EVAL_COMPLETE" &&
+          Number(refId) === Number(currentApplicationId)
+        ) {
+          checkMyScore(true);
+        }
+      };
+
+      window.addEventListener("scuad-notification", handleSseNotification);
+
+      return () => {
+        window.removeEventListener("scuad-notification", handleSseNotification);
+      };
     }
-    return () => clearInterval(intervalId);
-  }, [isEvaluating, activeTab]);
+  }, [isEvaluating, currentApplicationId, activeTab]);
 
   const checkMyScore = async (force = false) => {
     if (!force && myScore !== null && !isEvaluating)
@@ -97,14 +106,6 @@ const ChatRoomList = () => {
         `/api/v1/job-postings/${id}/my-application`,
       );
 
-      if (response.status === 202) {
-        setMyScore(0);
-        setAnalysisData(null);
-        setHasApplied(true);
-        setIsEvaluating(true);
-        return { score: 0, applied: true, isEvaluating: true };
-      }
-
       const data = response.data.data;
 
       if (!data) {
@@ -114,11 +115,24 @@ const ChatRoomList = () => {
         setIsEvaluating(false);
         return { score: null, applied: false, isEvaluating: false };
       } else {
-        setMyScore(data.overallScore || 0);
-        setAnalysisData(data);
         if (data.jobApplicationId) {
           setCurrentApplicationId(data.jobApplicationId);
         }
+
+        if (
+          data.status === "PROCESSING" ||
+          data.status === "PENDING" ||
+          response.status === 202
+        ) {
+          setMyScore(0);
+          setAnalysisData(null);
+          setHasApplied(true);
+          setIsEvaluating(true);
+          return { score: 0, applied: true, isEvaluating: true };
+        }
+
+        setMyScore(data.overallScore || 0);
+        setAnalysisData(data);
         setHasApplied(true);
         setIsEvaluating(false);
         if (isEvaluating && activeTab !== "SCORE") {
@@ -188,7 +202,7 @@ const ChatRoomList = () => {
     }
 
     setSelectedRoom(room);
-    setShowJoinConfirmModal(true);
+    handleConfirmJoin(room);
   };
 
   const handleCreateRoom = async () => {
@@ -207,28 +221,21 @@ const ChatRoomList = () => {
     navigate(`/chat/${room.chatRoomId}`);
   };
 
-  const handleConfirmJoin = async () => {
-    if (!selectedRoom) return;
+  const handleConfirmJoin = async (room) => {
+    const target = room || selectedRoom;
+    if (!target) return;
 
     try {
-      await client.post(
-        `/api/v1/chat-rooms/${selectedRoom.chatRoomId}/members`,
-      );
-      setShowJoinConfirmModal(false);
-      setSelectedRoom(null);
-      navigate(`/chat/${selectedRoom.chatRoomId}`);
+      await client.post(`/api/v1/chat-rooms/${target.chatRoomId}/members`);
+      navigate(`/chat/${target.chatRoomId}`);
     } catch (err) {
       console.error("Failed to join chat room:", err);
       const code = err.response?.data?.code;
       if (code === "CHAT_ROOM_ALREADY_JOINED") {
-        setShowJoinConfirmModal(false);
-        navigate(`/chat/${selectedRoom.chatRoomId}`);
+        navigate(`/chat/${target.chatRoomId}`);
         return;
       }
-      toast.error(err.response?.data?.message || "입장 신청에 실패했습니다.");
-      if (err.response?.status !== 401) {
-        setShowJoinConfirmModal(false);
-      }
+      toast.error(err.response?.data?.message || "입장에 실패했습니다.");
     }
   };
 
@@ -242,6 +249,28 @@ const ChatRoomList = () => {
   const handleRoomCreated = () => {
     fetchRooms();
   };
+
+  useEffect(() => {
+    const handleChatRoomUpdate = (event) => {
+      const { type, chatRoomId, currentParticipants } = event.detail;
+      setRooms((prev) =>
+        prev.map((room) => {
+          if (String(room.chatRoomId) !== String(chatRoomId)) return room;
+          if (type === "ROOM_CLOSED") {
+            return { ...room, status: "CLOSED" };
+          }
+          return { ...room, currentParticipants };
+        }),
+      );
+    };
+
+    window.addEventListener("scuad-chat-room-update", handleChatRoomUpdate);
+    return () =>
+      window.removeEventListener(
+        "scuad-chat-room-update",
+        handleChatRoomUpdate,
+      );
+  }, []);
 
   return (
     <div className="bg-white min-h-screen pb-safe flex flex-col relative">
@@ -423,16 +452,6 @@ const ChatRoomList = () => {
         onClose={() => {
           setShowEvaluationModal(false);
         }}
-      />
-
-      <JoinConfirmModal
-        isOpen={showJoinConfirmModal}
-        onClose={() => {
-          setShowJoinConfirmModal(false);
-          setSelectedRoom(null);
-        }}
-        onConfirm={handleConfirmJoin}
-        roomTitle={selectedRoom?.roomName}
       />
 
       <AnalysisResultModal

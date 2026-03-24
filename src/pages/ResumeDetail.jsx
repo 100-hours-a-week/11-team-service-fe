@@ -1,14 +1,18 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ChevronLeft, FileText, ChevronRight, Loader2 } from "lucide-react";
 import client from "../api/client";
 import DocumentUploadModal from "../components/DocumentUploadModal";
 import EvaluationProgressModal from "../components/EvaluationProgressModal";
 import AiAnalysisReportModal from "../components/AiAnalysisReportModal";
+import AlertModal from "../components/AlertModal";
+import toast from "react-hot-toast";
 
 const ResumeDetail = () => {
   const { applicationId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isErrorHandled = useRef(false);
 
   const [application, setApplication] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,9 +25,15 @@ const ResumeDetail = () => {
   const [showEvaluationModal, setShowEvaluationModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [analysisData, setAnalysisData] = useState(null);
+  const isRedirectingRef = useRef(false);
 
-  // Background Polling State
-  const pollingTimerRef = useRef(null);
+  // Alert State
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    message: "",
+    type: "info",
+    onClose: null,
+  });
 
   const fetchApplicationDetail = async (silent = false) => {
     try {
@@ -38,27 +48,51 @@ const ResumeDetail = () => {
         e.response &&
         (e.response.status === 403 || e.response.status === 404)
       ) {
-        alert("접근할 수 없는 지원서입니다.");
-        navigate(-1);
+        if (!isErrorHandled.current) {
+          isErrorHandled.current = true;
+          toast.error("접근할 수 없는 지원서입니다.", { id: "scuad-toast" });
+          navigate(-1);
+        }
+      } else {
+        if (!isErrorHandled.current) {
+          isErrorHandled.current = true;
+          toast.error("지원서 정보를 불러오는데 실패했습니다.", {
+            id: "scuad-toast",
+          });
+        }
       }
     } finally {
       if (!silent) setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchApplicationDetail();
-  }, [applicationId]);
+  const fetchEvaluationReport = async () => {
+    try {
+      setLoading(true);
+      const response = await client.get(
+        `/api/v1/applications/${applicationId}/analyses`,
+      );
+      if (response.status === 200 && response.data.data) {
+        setAnalysisData(response.data.data);
+        setShowReportModal(true);
+      }
+    } catch (e) {
+      console.error("Failed to fetch evaluation report", e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    return () => {
-      if (pollingTimerRef.current) clearTimeout(pollingTimerRef.current);
-    };
-  }, []);
+    fetchApplicationDetail();
+    if (searchParams.get("tab") === "report") {
+      fetchEvaluationReport();
+    }
+  }, [applicationId, searchParams]);
 
   const handleOpenDocument = (doc) => {
     if (!doc || !doc.isRegistered) {
-      alert("등록된 파일이 없습니다.");
+      toast.error("등록된 파일이 없습니다.");
       return;
     }
     navigate(
@@ -75,44 +109,30 @@ const ResumeDetail = () => {
     fetchApplicationDetail(true);
   };
 
-  const checkAnalysisStatus = async () => {
-    if (!applicationId) return;
-    try {
-      const response = await client.get(
-        `/api/v1/applications/${applicationId}/analyses`,
-      );
-      if (response.status === 200 && response.data.data) {
-        setShowEvaluationModal(false);
-        setAnalysisData(response.data.data);
-        setShowReportModal(true);
-      } else if (response.status === 202) {
-        pollingTimerRef.current = setTimeout(checkAnalysisStatus, 3000);
-      }
-    } catch (e) {
-      if (e.response?.status === 202) {
-        pollingTimerRef.current = setTimeout(checkAnalysisStatus, 3000);
-      } else {
-        console.error("Polling error", e);
-      }
-    }
-  };
-
   const handleRequestAnalysis = async () => {
     if (!application) return;
     try {
       setLoading(true);
+      isRedirectingRef.current = true; // 리다이렉트 중임을 표시
+
       await client.post(`/api/v1/applications/${applicationId}/analyses`, {
-        analysis_type: "ALL",
+        analysis_type: "EVALUATION",
       });
-      setShowEvaluationModal(true);
-      pollingTimerRef.current = setTimeout(checkAnalysisStatus, 3000);
+
+      // 재분석인 경우 혹은 상세 페이지에서는 바로 목록으로 이동 (사용자 요청)
+      toast.success("분석이 요청되었습니다. 잠시만 기다려주세요.");
+
+      // 알림을 보여준 뒤 조금 있다가 모달을 닫고 목록으로 이동
+      setTimeout(() => {
+        setShowReportModal(false);
+        navigate("/resume");
+      }, 1200);
     } catch (e) {
+      isRedirectingRef.current = false;
       setShowEvaluationModal(false);
-      if (e.response?.data?.message) {
-        alert(e.response.data.message);
-      } else {
-        alert("분석 요청 중 오류가 발생했습니다.");
-      }
+      toast.error(
+        e.response?.data?.message || "분석 요청 중 오류가 발생했습니다.",
+      );
     } finally {
       setLoading(false);
     }
@@ -152,7 +172,24 @@ const ResumeDetail = () => {
     );
   }
 
-  if (!application) return null;
+  if (!application) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
+        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+          <FileText className="w-8 h-8 text-gray-200" />
+        </div>
+        <p className="text-gray-500 font-medium">
+          지원서 정보를 불러올 수 없습니다.
+        </p>
+        <button
+          onClick={() => navigate(-1)}
+          className="mt-4 px-6 py-2 bg-[#101827] text-white rounded-lg text-sm font-bold"
+        >
+          돌아가기
+        </button>
+      </div>
+    );
+  }
 
   const statusLabel = getStatusLabel(application.jobStatus);
 
@@ -294,15 +331,37 @@ const ResumeDetail = () => {
       <EvaluationProgressModal
         isOpen={showEvaluationModal}
         onClose={() => setShowEvaluationModal(false)}
+        applicationId={applicationId}
+        onAnalysisComplete={handleAnalysisComplete}
       />
 
       <AiAnalysisReportModal
         isOpen={showReportModal}
         onClose={() => {
           setShowReportModal(false);
-          fetchApplicationDetail();
+          // 리다이렉트 중이 아닐 때만 기존 뒤로가기 로직 수행
+          if (
+            !isRedirectingRef.current &&
+            searchParams.get("tab") === "report"
+          ) {
+            navigate(-1);
+          } else if (!isRedirectingRef.current) {
+            fetchApplicationDetail();
+          }
         }}
         result={analysisData}
+        onReanalyze={handleRequestAnalysis}
+        zIndex={300}
+      />
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        onClose={() => {
+          if (alertConfig.onClose) alertConfig.onClose();
+          setAlertConfig((prev) => ({ ...prev, isOpen: false }));
+        }}
       />
     </div>
   );

@@ -1,103 +1,121 @@
-import { ChevronLeft } from "lucide-react";
+import {
+  ChevronLeft,
+  Quote,
+  Sparkles,
+  TrendingUp,
+  Target,
+  Zap,
+  Award,
+  Users,
+} from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const ScoreReport = ({ data, onRetry, onClose }) => {
   if (!data) return null;
 
+  const scoreIcons = {
+    "직무 적합성": <Target className="w-4 h-4 text-[#101827]" />,
+    "문화 적합성": <Users className="w-4 h-4 text-[#101827]" />,
+    "성장 가능성": <TrendingUp className="w-4 h-4 text-[#101827]" />,
+    "문제 해결 능력": <Zap className="w-4 h-4 text-[#101827]" />,
+  };
+
   return (
-    <div className="bg-white min-h-full flex flex-col animate-fade-in relative">
-      {/* Optional Header for Modal Mode */}
+    <div className="bg-white min-h-full flex flex-col animate-fade-in pb-10">
+      {/* Header */}
       {onClose && (
-        <div className="sticky top-0 bg-white z-10 border-b border-gray-100 px-4 h-14 flex items-center justify-between shadow-sm">
+        <div className="sticky top-0 bg-white z-30 border-b border-gray-100 px-4 h-14 flex items-center justify-between">
           <div className="flex items-center">
             <button onClick={onClose} className="p-2 -ml-2 mr-2">
               <ChevronLeft className="w-6 h-6 text-gray-900" />
             </button>
-            <h2 className="font-bold text-gray-900 text-lg">AI 분석 리포트</h2>
+            <h2 className="font-bold text-gray-900 text-lg">
+              AI 역량 분석 리포트
+            </h2>
           </div>
         </div>
       )}
 
-      <div className="p-6 pb-8 space-y-8">
-        {/* Score Header */}
-        <div className="flex flex-col items-center mt-6 mb-8">
-          <span className="text-lg font-bold text-gray-900 mb-3 block">
+      <div className="p-5 space-y-6">
+        {/* Total Score */}
+        {/* Total Score - Clean White Design */}
+        <div className="py-6 text-center">
+          <div className="text-lg font-black text-[#101827] mb-2 uppercase tracking-widest">
             종합 점수
-          </span>
-          <div className="relative flex items-end">
-            <span className="text-7xl font-black text-[#101827] tracking-tighter leading-none">
+          </div>
+          <div className="flex items-baseline justify-center gap-1">
+            <span className="text-7xl font-black text-[#101827] tracking-tighter">
               {data.overallScore || 0}
             </span>
-            <span className="text-2xl text-gray-400 font-bold mb-2 ml-2">
-              /100
-            </span>
+            <span className="text-xl text-gray-300 font-bold">/ 100</span>
           </div>
         </div>
 
-        {/* One Line Review - Clean Box Style */}
-        <div className="bg-[#F9FAFB] rounded-2xl p-6 border border-gray-100 flex justify-center text-center">
-          <p className="text-lg font-bold text-gray-900 leading-relaxed break-keep">
-            "{data.oneLineReview || "한 줄 평가는 분석 후 제공됩니다."}"
+        {/* One Line Review - Indigo Box Restored */}
+        <div className="bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100/50 text-center">
+          <p className="text-[15px] font-bold text-gray-900 leading-relaxed">
+            {data.oneLineReview?.replace(/^"|"$/g, "") || "평가 준비 중입니다."}
           </p>
         </div>
 
         {/* Competency Scores */}
         <div className="space-y-4">
-          <div className="px-1">
-            <h4 className="text-lg font-bold text-gray-900">역량 분석</h4>
-          </div>
-
-          <div className="bg-[#F9FAFB] rounded-2xl border border-gray-100 p-5 space-y-5">
+          <h4 className="text-sm font-bold text-gray-900 px-1 border-l-4 border-[#101827] ml-1 pl-2">
+            세부 역량 평가
+          </h4>
+          <div className="grid grid-cols-1 gap-3">
             {(data.comparisonScores || []).map((item, idx) => (
-              <div key={idx} className="group">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900 transition-colors flex-1 pr-3 break-words">
-                    {item.name}
-                  </span>
-                  <span className="text-sm font-extrabold text-[#101827] whitespace-nowrap">
-                    {item.score}
-                    <span className="text-gray-400 text-xs font-normal ml-0.5">
-                      /100
+              <div
+                key={idx}
+                className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
+              >
+                <div className="flex justify-between items-center mb-2.5">
+                  <div className="flex items-center gap-2">
+                    {scoreIcons[item.name]}
+                    <span className="text-[13px] font-bold text-gray-700">
+                      {item.name}
                     </span>
+                  </div>
+                  <span className="text-sm font-black text-gray-900">
+                    {item.score}
                   </span>
                 </div>
-                <div className="h-3 w-full bg-white rounded-full overflow-hidden ring-1 ring-gray-200">
+                <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#101827] rounded-full transition-all duration-1000 ease-out relative"
+                    className="h-full bg-[#101827] rounded-full"
                     style={{ width: `${item.score}%` }}
-                  ></div>
+                  />
                 </div>
               </div>
             ))}
-            {(!data.comparisonScores || data.comparisonScores.length === 0) && (
-              <div className="text-center text-gray-400 text-sm py-4">
-                상세 역량 점수가 없습니다.
-              </div>
-            )}
           </div>
         </div>
 
         {/* Detailed Feedback */}
         <div className="space-y-4">
-          <h4 className="text-lg font-bold text-gray-900 px-1">상세 피드백</h4>
-          <div className="bg-[#F9FAFB] rounded-2xl p-6 border border-gray-100">
-            <p className="text-sm text-gray-700 leading-7 whitespace-pre-wrap text-justify font-medium">
-              {data.feedbackDetail ||
-                data.aiSummary ||
-                "상세 피드백이 없습니다."}
-            </p>
+          <h4 className="text-sm font-bold text-gray-900 px-1 border-l-4 border-[#101827] ml-1 pl-2">
+            심층 분석 및 제언
+          </h4>
+          <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+            <div className="text-[14px] text-gray-700 markdown-content leading-relaxed whitespace-pre-wrap">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {data.feedbackDetail ||
+                  data.aiSummary ||
+                  "상세 내용이 없습니다."}
+              </ReactMarkdown>
+            </div>
           </div>
         </div>
 
-        {/* Retry Button Removed as requested */}
-
-        {/* Close Button for Modal Mode */}
+        {/* Close Button */}
         {onClose && (
-          <div className="pt-6">
+          <div className="pt-4">
             <button
               onClick={onClose}
-              className="w-full bg-[#101827] text-white font-bold py-5 rounded-2xl text-[15px] hover:bg-[#1a263d] transition-all active:scale-[0.98] shadow-lg shadow-gray-200"
+              className="w-full bg-[#101827] text-white font-bold py-4 rounded-xl text-sm"
             >
-              확인
+              닫기
             </button>
           </div>
         )}

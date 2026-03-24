@@ -69,6 +69,11 @@ export const getMemberPortfolio = (chatRoomId, chatRoomMemberId) =>
     `/api/v1/chat-rooms/${chatRoomId}/members/${chatRoomMemberId}/documents/portfolio`,
   );
 
+export const postMemberComparison = (chatRoomId, chatRoomMemberId) =>
+  client.post(
+    `/api/v1/chat-rooms/${chatRoomId}/members/${chatRoomMemberId}/comparison`,
+  );
+
 export const getMemberComparison = (chatRoomId, chatRoomMemberId) =>
   client.get(
     `/api/v1/chat-rooms/${chatRoomId}/members/${chatRoomMemberId}/comparison`,
