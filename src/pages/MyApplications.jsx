@@ -262,6 +262,7 @@ const MyApplications = () => {
             <div className="w-10 flex-shrink-0" />
             <UserMenu />
           </div>
+          <UserMenu />
         </div>
 
         {/* Search Bar: Unified Pixel-Perfect Alignment */}
